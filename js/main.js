@@ -280,6 +280,7 @@
         var greeting = agent.resumeGreeting() ||
           'Hi there! \uD83D\uDC4B I\u2019m the AI-PtP Assistant \u2014 I can chat about the services here or help you book a meeting. What\u2019s on your mind?';
         addMsg('bot', greeting);
+        history.push({ role: 'assistant', content: greeting });
       } catch (err) {
         setStatus('Failed to load');
         chatEls.progress.textContent = 'Loading failed: ' + (err && err.message ? err.message : 'unknown error');

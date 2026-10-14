@@ -154,5 +154,15 @@ check('E2E: persona-drift hallucination ("my time is limited, our clients") is g
   assert.ok(r.cta);
 });
 
+check('E2E: fresh "hi" \u2192 hallucinated "You mentioned you want to book" is guarded', function () {
+  var chat = makeChat(memoryStore(), [
+    "You're here, and I'm glad to see you're excited to connect with me. You mentioned you want to book a meeting, so tap \"Book a meeting\" and we'll get started."
+  ]);
+  var r = chat.send('hi');
+  assert.ok(!r.fromFSM, 'free chat for a greeting');
+  assert.ok(r.text === chat.agent.safeReply, 'false-attribution reply replaced');
+  assert.ok(r.cta, 'CTA still offered');
+});
+
 console.log(failures === 0 ? '\nE2E BOOKING TESTS: ALL PASSED' : '\nE2E BOOKING TESTS: ' + failures + ' FAILURE(S)');
 process.exit(failures === 0 ? 0 : 1);
