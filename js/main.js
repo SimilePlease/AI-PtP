@@ -205,6 +205,82 @@
 
   if (CRM_ENDPOINT) queueFlush();
 
+  /* ---------- About photo carousel (auto-scrolls, pauses on hover/hidden tab) ---------- */
+
+  (function () {
+    var carousel = document.getElementById('about-carousel');
+    var track = document.getElementById('about-track');
+    if (!carousel || !track) return;
+
+    var COUNT = parseInt(carousel.dataset.count || '0', 10);
+    if (!COUNT) return;
+
+    for (var i = 1; i <= COUNT; i++) {
+      var img = document.createElement('img');
+      img.src = 'assets/about-' + i + '.jpg';
+      img.alt = 'Parag Kudtarkar — photo ' + i;
+      img.loading = i === 1 ? 'eager' : 'lazy';
+      img.draggable = false;
+      track.appendChild(img);
+    }
+
+    var dots = document.getElementById('about-dots');
+    if (dots) { for (var d = 0; d < COUNT; d++) dots.appendChild(document.createElement('span')); }
+
+    var index = 0, timer = null, reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function goTo(n) {
+      index = (n + COUNT) % COUNT;
+      track.style.transform = 'translateX(-' + index * 100 + '%)';
+      if (dots) {
+        dots.querySelectorAll('span').forEach(function (sp, i) { sp.classList.toggle('active', i === index); });
+      }
+    }
+
+    function next() { goTo(index + 1); }
+
+    function play() {
+      if (reduce) return;
+      stop();
+      timer = setInterval(next, 4000);
+    }
+    function stop() { if (timer) { clearInterval(timer); timer = null; } }
+
+    goTo(0);
+    play();
+
+    carousel.addEventListener('mouseenter', stop);
+    carousel.addEventListener('mouseleave', play);
+    document.addEventListener('visibilitychange', function () { document.hidden ? stop() : play(); });
+
+    /* swipe */
+    var x0 = null;
+    carousel.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; stop(); }, { passive: true });
+    carousel.addEventListener('touchend', function (e) {
+      if (x0 === null) return;
+      var dx = e.changedTouches[0].clientX - x0;
+      if (Math.abs(dx) > 40) goTo(index + (dx < 0 ? 1 : -1));
+      x0 = null;
+      play();
+    }, { passive: true });
+
+    /* dots click */
+    if (dots) dots.addEventListener('click', function (e) {
+      var sp = e.target.closest('span'); if (!sp) return;
+      goTo(Array.prototype.indexOf.call(dots.children, sp));
+      play();
+    });
+
+    /* probe the first image; if photos aren't deployed yet, hide carousel + show monogram */
+    var probe = track.querySelector('img');
+    probe.addEventListener('error', function () {
+      carousel.classList.add('photo-missing');
+      carousel.style.display = 'none';
+      var ph = carousel.parentElement && carousel.parentElement.querySelector('.about-placeholder');
+      if (ph) ph.style.display = 'grid';
+    });
+  })();
+
   /* ---------- Wordmark animation ---------- */
 
   var wordmarks = document.querySelectorAll('.wordmark-anim');
