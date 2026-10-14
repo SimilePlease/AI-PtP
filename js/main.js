@@ -376,7 +376,7 @@
         }
         history.push({ role: 'assistant', content: reply });
 
-        if (/book a meeting|booking|calendar/i.test(reply)) attachBookingCta(bubble);
+        if (/book|booking|calendar|slot|schedul/i.test(reply)) attachBookingCta(bubble);
       } catch (err) {
         bubble.textContent = 'Ah, something glitched on my end just now. Mind trying again \u2014 or easier, book a meeting / drop an email and we\u2019ll talk properly?';
       }

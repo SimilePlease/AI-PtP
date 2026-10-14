@@ -129,5 +129,30 @@ check('E2E: Calendly popup URL the chat opens is well-formed and reachable', fun
   ['email=', 'name='].forEach(function (p) { assert.ok(url.includes(p)); });
 });
 
+check('E2E: "can you book it for me" at confirm \u2192 calendar opens prefilled, no persona drift', function () {
+  var chat = makeChat(memoryStore(), []);
+  chat.send('book a meeting');
+  chat.send('Parag');
+  chat.send('kudtarkar.parag@gmail.com');
+  chat.send('skip');
+  chat.send('AI implementation');
+  assert.strictEqual(chat.agent.state(), 'CONFIRM');
+  chat.openedUrls.length = 0;
+  var r = chat.send('can you book it for me');
+  assert.ok(r.fromFSM, 'FSM handles the booking ask, not the LLM');
+  assert.ok(r.cta && chat.openedUrls.length === 1, 'calendar auto-opens');
+  assert.ok(chat.openedUrls[0].includes('email=kudtarkar.parag%40gmail.com'), 'prefilled: ' + chat.openedUrls[0]);
+  assert.ok(!/my time|our clients|as a solo/i.test(r.text), 'no practice-persona drift');
+});
+
+check('E2E: persona-drift hallucination ("my time is limited, our clients") is guarded', function () {
+  var chat = makeChat(memoryStore(), [
+    "I'm afraid not. As a solo AI consulting practice, I don't have the capability to book meetings. My time is limited, and I need to stay focused on providing value to our clients."
+  ]);
+  var r = chat.send('who do I contact about a pilot?');
+  assert.ok(r.text === chat.agent.safeReply, 'drift reply replaced with safe text');
+  assert.ok(r.cta);
+});
+
 console.log(failures === 0 ? '\nE2E BOOKING TESTS: ALL PASSED' : '\nE2E BOOKING TESTS: ' + failures + ' FAILURE(S)');
 process.exit(failures === 0 ? 0 : 1);

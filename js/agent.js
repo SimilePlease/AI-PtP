@@ -80,7 +80,11 @@
     /\byou(?:\u2019|')?re\s+(?:booked|confirmed|scheduled)\b/i,
     /\bguaranteed?\b/i,
     /\b(?:USD|SGD|INR|EUR)\s*\d|\d+\s*(?:USD|SGD|INR|EUR)\b|[$\u20B9\u20AC\u00A3\u20A6]/,
-    /\bmy (?:calendar|diary|availability) shows\b/i
+    /\bmy (?:calendar|diary|availability) shows\b/i,
+    /\bmy time is (?:limited|short)\b/i,
+    /\bour clients\b|\bmy clients\b/i,
+    /\bas a (?:solo|one-person|independent) (?:AI )?(?:consult\w* )?(?:practice|business|consultant|company)\b/i,
+    /\bI need to stay focused\b/i
   ];
 
   var SAFE_REPLY = 'Just to be safe, let me put that plainly: I can\u2019t book or confirm anything myself. Tap "Book a meeting" \u2014 the calendar opens right here so you can pick a slot that suits you \u2014 or email parag@kudtarkar.life.';
@@ -165,7 +169,8 @@
       var lines = [];
       if (lead.name) lines.push('name: ' + lead.name);
       if (lead.email) lines.push('email: ' + lead.email);
-      if (lead.phone) lines.push('phone: ' + lead.phone);
+      if (lead.phone && lead.phone !== '(skipped)') lines.push('phone: ' + lead.phone);
+      if (lead.phone === '(skipped)') lines.push('phone: skipped, no problem');
       if (lead.topic) lines.push('focus: ' + lead.topic);
       return 'Perfect' + (lead.name ? ', ' + lead.name : '') + ' \u2014 here\u2019s what I have: ' + lines.join(' \u00b7 ') + '. Tap "Book a meeting" and the calendar opens with your details filled in \u2014 pick whatever slot suits you.';
     }
@@ -225,6 +230,12 @@
       var t = (text || '').trim();
 
       if (fsm.state === 'CONFIRM') {
+        /* "can you book it for me" \u2192 the one honest action: open the calendar prefilled */
+        if (BOOKING_RE.test(t) || /book it|do it for me/i.test(t)) {
+          fsm.turn++;
+          persist();
+          return { say: 'The booking\u2019s yours to make, ' + (lead.name || 'friend') + ' \u2014 I can\u2019t press the button for you, but the calendar is opening now with your details filled in. Pick a slot and you\u2019re done.', cta: true, openCal: true };
+        }
         fsm.state = 'IDLE';
         persist();
         return { pause: true };
