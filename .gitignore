@@ -1,0 +1,9 @@
+# Python venv (recreate with: python3 -m venv .venv)
+.venv/
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
