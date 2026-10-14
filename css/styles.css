@@ -1098,10 +1098,11 @@ ul, ol { padding: 0; margin: 0; list-style: none; }
 }
 
 /* Auto-scrolling profile carousel */
+/* about photos: square block; tall/odd images crop to fit, faces kept in frame */
 .about-carousel {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 1 / 1;
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow-lg);
@@ -1119,6 +1120,7 @@ ul, ol { padding: 0; margin: 0; list-style: none; }
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: 50% 22%;
   flex: 0 0 100%;
   user-select: none;
   -webkit-user-drag: none;
