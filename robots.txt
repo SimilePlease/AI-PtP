@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://simileplease.github.io/AI-PtP/sitemap.xml

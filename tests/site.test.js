@@ -117,7 +117,7 @@ for (const tok of ["--bg","--surface","--ink","--heading","--forest","--forest-d
 const ext = [...new Set([...src.matchAll(/(?:src|href)="(https?:[^"]+)"/g)].map(m => m[1].split("?")[0]))];
 console.log("\nexternal URLs referenced by the page:");
 ext.forEach(e => console.log("  " + e));
-const known = ["https://calendly.com/kudtarkar-parag", "https://fonts.googleapis.com", "https://fonts.gstatic.com", "https://js-na2.hsforms.net"];
+const known = ["https://calendly.com/kudtarkar-parag", "https://fonts.googleapis.com", "https://fonts.gstatic.com", "https://js-na2.hsforms.net", "https://simileplease.github.io"];
 check("external URLs are only known-good hosts", ext.every(u => known.some(k => u.startsWith(k))), ext.join(" | "));
 
 console.log(failures === 0 ? "\nSITE TESTS: ALL PASSED" : "\nSITE TESTS: " + failures + " FAILURE(S)");
