@@ -350,9 +350,20 @@
         addMsg('bot', 'Hi! \uD83D\uDC4B Lite mode here \u2014 ask me about the AI CoE: operating model, governance, platforms, delivery. Or book a 30-minute strategic discussion. What\u2019s on your mind?');
         return;
       }
-      if (!engine && !loadingStarted) startLoading();
-      else if (engine) chatEls.input.focus();
+      if (loadingStarted) { /* preloading in background — nothing to do */ }
+      else if (!engine) startLoading();
+      if (engine) chatEls.input.focus();
     });
+
+    /* Preload the assistant at site launch — starts after the page settles
+       (idle callback) so first paint and interaction stay fast. The ~300MB
+       model downloads once, then serves from cache on every visit.
+       Skipped for data-saver browsers; those load on first open instead. */
+    var saveData = navigator.connection && navigator.connection.saveData;
+    if (webgpuOk && !saveData) {
+      if ('requestIdleCallback' in window) requestIdleCallback(function () { if (!engine && !loadingStarted) startLoading(); }, { timeout: 5000 });
+      else setTimeout(function () { if (!engine && !loadingStarted) startLoading(); }, 3000);
+    }
 
     chatEls.close.addEventListener('click', closePanel);
 
@@ -366,14 +377,17 @@
       liteMode = true;
       setStatus('Lite mode');
       chatEls.progress.hidden = true; /* technical reasons stay in console only */
-      var bubble = addMsg('bot', 'The full brain didn\u2019t download on this network (it\u2019s ~300MB), so I\u2019m running in lite mode \u2014 quicker and simpler, but still useful. Ask me about the services, AI topics, or booking a meeting. Closing and reopening this chat retries the full download.');
+      console.info('[AI-PtP] falling back to lite mode:', reason);
       history = [{ role: 'system', content: agent.buildSystemPrompt('') }];
       setBusy(false);
-      chatEls.input.focus();
-      var g2 = agent.resumeGreeting() ||
-        'Hi there! \uD83D\uDC4B Explore AI CoE questions with me \u2014 operating model, governance, platforms, delivery \u2014 or book a 30-minute strategic discussion. What\u2019s on your mind?';
-      addMsg('bot', g2);
-      history.push({ role: 'assistant', content: g2 });
+      /* Only greet if the conversation is empty — never interrupt an ongoing chat */
+      if (!chatEls.msgs.children.length) {
+        if (!panel.hidden) chatEls.input.focus();
+        var g2 = agent.resumeGreeting() ||
+          'Hi there! \uD83D\uDC4B Explore AI CoE questions with me \u2014 operating model, governance, platforms, delivery \u2014 or book a 30-minute strategic discussion. What\u2019s on your mind?';
+        addMsg('bot', g2);
+        history.push({ role: 'assistant', content: g2 });
+      }
       loadingStarted = false;
     }
 
@@ -417,11 +431,13 @@
         setStatus('Ready');
         chatEls.progress.hidden = true;
         setBusy(false);
-        chatEls.input.focus();
-        var greeting = agent.resumeGreeting() ||
-          'Hi there! \uD83D\uDC4B Explore AI CoE questions with me \u2014 operating model, governance, platforms, delivery \u2014 or book a 30-minute strategic discussion. What\u2019s on your mind?';
-        addMsg('bot', greeting);
-        history.push({ role: 'assistant', content: greeting });
+        if (!panel.hidden) {
+          chatEls.input.focus();
+          var greeting = agent.resumeGreeting() ||
+            'Hi there! \uD83D\uDC4B Explore AI CoE questions with me \u2014 operating model, governance, platforms, delivery \u2014 or book a 30-minute strategic discussion. What\u2019s on your mind?';
+          addMsg('bot', greeting);
+          history.push({ role: 'assistant', content: greeting });
+        }
       } catch (err) {
         clearInterval(watchdog);
         console.warn('[AI-PtP] load failed:', err);
