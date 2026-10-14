@@ -75,16 +75,54 @@ function handleLead(body) {
   };
   var hubResult = pushToHubSpot(hub);
 
+  // 1. Email to the requester — Gemini-drafted when a key is configured,
+  //    otherwise a clean fixed confirmation so the reply always goes out.
   var subject = 'Your AI question' + (topic ? ' — ' + topic.slice(0, 60) : '') + ' (AI-PtP)';
-  var prompt = leadPrompt(name || 'there', topic || 'exploring AI for their business', source);
-  var draftOrSent = geminiToGmail(email, subject, prompt, name || 'there');
+  var requester;
+  try {
+    var prompt = leadPrompt(name || 'there', topic || 'exploring AI for their business', source);
+    requester = geminiToGmail(email, subject, prompt, name || 'there');
+  } catch (err) {
+    var fixed = 'Hi ' + (name || 'there') + ',' +
+      '\n\nThanks for reaching out via the website' + (topic ? ' about ' + topic : '') + '.' +
+      '\n\nI will come back to you personally with a proper answer — usually the same day.' +
+      '\nIf it is easier, book a 30-minute intro call directly: https://calendly.com/kudtarkar-parag/30min' + signature();
+    var opts = { htmlBody: '<p>' + fixed.replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>') + '</p>' };
+    if (cfg('AUTO_SEND') === 'true') { GmailApp.sendEmail(email, subject, fixed, opts); requester = { to: email, action: 'sent', mode: 'fixed' }; }
+    else { GmailApp.createDraft(email, subject, fixed, opts); requester = { to: email, action: 'drafted', mode: 'fixed' }; }
+  }
+
+  // 2. Email to the owner — full details of every lead, always sent.
+  var owner = notifyOwner({ name: name, email: email, phone: phone, topic: topic, source: source, hubspot: hubResult });
 
   return {
     ok: true,
     hubspot: hubResult,
-    email: draftOrSent,
+    email: requester,
+    ownerNotified: owner,
     mode: cfg('AUTO_SEND') === 'true' ? 'sent' : 'drafted'
   };
+}
+
+function notifyOwner(lead) {
+  var to = cfg('OWNER_EMAIL');
+  if (!to) return 'skipped (OWNER_EMAIL not set)';
+  var lines = [
+    'New enquiry via ' + lead.source,
+    '',
+    'Name: ' + (lead.name || '(not given)'),
+    'Email: ' + (lead.email || '(not given)'),
+    'Phone: ' + (lead.phone || '(not given)'),
+    'Interest: ' + (lead.topic || '(not given)'),
+    'HubSpot: ' + String(lead.hubspot || 'n/a'),
+    '',
+    'Reply to the enquirer: ' + lead.email,
+    'Book them in: https://calendly.com/kudtarkar-parag/30min'
+  ];
+  var body = lines.join('\n');
+  var subject = 'New lead — ' + (lead.name || lead.email) + (lead.topic ? ' · ' + String(lead.topic).slice(0, 50) : '');
+  GmailApp.sendEmail(to, subject, body);
+  return 'sent to ' + to;
 }
 
 /* ---------------- cold outreach to an SME ---------------- */

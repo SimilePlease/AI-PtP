@@ -319,10 +319,10 @@
       cta.target = '_blank';
       cta.rel = 'noopener';
       cta.textContent = 'Book a meeting';
-      cta.addEventListener('click', function (e) {
-        if (calendlyState === 'ready') cta.setAttribute('href', calendlyUrl('30min', true));
-        if (openCalendlyPopup(cta.href)) e.preventDefault();
-      });
+      /* Native navigation only: the in-page popup could init but fail to render,
+         and preventDefault on that path made the click feel dead. A real new tab
+         always works and carries the prefilled name/email. */
+      cta.setAttribute('href', calendlyUrl('30min'));
       bubble.appendChild(cta);
       chatEls.msgs.scrollTop = chatEls.msgs.scrollHeight;
     }
