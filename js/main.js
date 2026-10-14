@@ -365,8 +365,7 @@
     function failLoad(reason) {
       liteMode = true;
       setStatus('Lite mode');
-      chatEls.progress.hidden = false;
-      chatEls.progress.textContent = reason;
+      chatEls.progress.hidden = true; /* technical reasons stay in console only */
       var bubble = addMsg('bot', 'The full brain didn\u2019t download on this network (it\u2019s ~300MB), so I\u2019m running in lite mode \u2014 quicker and simpler, but still useful. Ask me about the services, AI topics, or booking a meeting. Closing and reopening this chat retries the full download.');
       history = [{ role: 'system', content: agent.buildSystemPrompt('') }];
       setBusy(false);
@@ -398,7 +397,7 @@
       var watchdog = setInterval(function () {
         if (Date.now() - lastMove > 30000) {
           clearInterval(watchdog);
-          if (!engine) { console.warn('[AI-PtP] model load stalled at ' + pct + '%'); failLoad('Stalled at ' + pct + '% \u2014 the model host may be blocked on this network.'); }
+          if (!engine) { console.warn('[AI-PtP] model load stalled at ' + pct + '%'); failLoad('stall'); }
         }
       }, 3000);
       try {
@@ -426,7 +425,7 @@
       } catch (err) {
         clearInterval(watchdog);
         console.warn('[AI-PtP] load failed:', err);
-        failLoad('Loading failed: ' + (err && err.message ? err.message : 'unknown error'));
+        failLoad('error');
       }
     }
 
