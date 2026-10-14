@@ -53,6 +53,43 @@
 
   var calHost = window.location.hostname || 'localhost';
 
+  /* ---------- Email/CRM automation (Apps Script endpoint; optional) ----------
+     Fill these two values from the Apps Script deployment to go live.
+     Draft-first: the endpoint files a Gmail draft; nothing sends without you. */
+  var CRM_ENDPOINT = '';   // e.g. 'https://script.google.com/mac/s/XXXX/exec'
+  var CRM_TOKEN = '';      // shared secret configured in Apps Script
+  var leadQueue = [];
+  try { leadQueue = JSON.parse(localStorage.getItem('aiptp-lead-queue-v1') || '[]'); } catch (e) { leadQueue = []; }
+
+  function queueFlush() {
+    if (!CRM_ENDPOINT || !leadQueue.length) return;
+    var batch = leadQueue.splice(0, leadQueue.length);
+    batch.forEach(function (item) {
+      fetch(CRM_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(item)
+      }).catch(function () { leadQueue.push(item); });
+    });
+    try { localStorage.setItem('aiptp-lead-queue-v1', JSON.stringify(leadQueue)); } catch (e) { /* private mode */ }
+  }
+
+  function submitLead(source) {
+    if (!agent) return;
+    var lead = agent.lead();
+    if (!lead.email) return;                       // nothing to submit without an email
+    if (!CRM_ENDPOINT) { window.__aiptpCRM = window.__aiptpCRM || []; window.__aiptpCRM.push(lead); return; }
+    leadQueue.push({
+      token: CRM_TOKEN,
+      name: lead.name, email: lead.email, phone: lead.phone,
+      topic: lead.topic, source: source
+    });
+    try { localStorage.setItem('aiptp-lead-queue-v1', JSON.stringify(leadQueue)); } catch (e) { /* private mode */ }
+    queueFlush();
+  }
+
+  window.addEventListener('online', queueFlush);
+
   function calendlyUrl(eventSlug, forPopup) {
     var lead = agent ? agent.lead() : { name: '', email: '' };
     var params = [
@@ -137,6 +174,8 @@
       if (openCalendlyPopup(a.href)) e.preventDefault();
     });
   });
+
+  if (CRM_ENDPOINT) queueFlush();
 
   /* ---------- Wordmark animation ---------- */
 
@@ -394,6 +433,7 @@
         history.push({ role: 'assistant', content: fsmOut.say });
         if (fsmOut.cta) attachBookingCta(fsmBubble);
         if (fsmOut.openCal) autoOpenBooking();
+        submitLead('website chat');
         return;
       }
 
