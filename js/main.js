@@ -258,7 +258,7 @@
 
   /* ---------- AI-PtP Assistant (agent-driven chat, WebLLM/WebGPU) ---------- */
 
-  var MODEL_ID = 'Llama-3.2-1B-Instruct-q4f16_1-MLC';
+  var MODEL_ID = 'Qwen2.5-0.5B-Instruct-q4f16_1-MLC';
 
   var fab = document.getElementById('chat-fab');
   var panel = document.getElementById('chat-panel');
@@ -367,7 +367,7 @@
       setStatus('Lite mode');
       chatEls.progress.hidden = false;
       chatEls.progress.textContent = reason;
-      var bubble = addMsg('bot', 'The full brain didn\u2019t download on this network (it\u2019s ~900MB), so I\u2019m running in lite mode \u2014 quicker and simpler, but still useful. Ask me about the services, AI topics, or booking a meeting. Closing and reopening this chat retries the full download.');
+      var bubble = addMsg('bot', 'The full brain didn\u2019t download on this network (it\u2019s ~300MB), so I\u2019m running in lite mode \u2014 quicker and simpler, but still useful. Ask me about the services, AI topics, or booking a meeting. Closing and reopening this chat retries the full download.');
       history = [{ role: 'system', content: agent.buildSystemPrompt('') }];
       setBusy(false);
       chatEls.input.focus();
@@ -409,7 +409,7 @@
           initProgressCallback: function (r) {
             var p = Math.round((r.progress || 0) * 100);
             if (p !== pct) { pct = p; lastMove = Date.now(); }
-            chatEls.progress.textContent = 'Loading the assistant\u2026 ' + p + '%' + (p === 0 ? ' (first load is ~900MB)' : '');
+            chatEls.progress.textContent = 'Loading the assistant\u2026 ' + p + '%' + (p === 0 ? ' (first load is ~300MB)' : '');
             if (p === 0 && Date.now() - lastMove > 30000) lastMove = Date.now();
           }
         });
