@@ -474,6 +474,12 @@
         a: 'Enquiries go to Parag directly and are used only to respond to you — no selling of data, no marketing lists. NDAs are welcome before anything sensitive is shared.' },
       { keys: ['speaking', 'speaker', 'keynote', 'advisory', 'board', 'event'],
         a: 'Yes — speaking, advisory and board-level AI guidance are all options. Choose \u201cSpeaking or advisory\u201d in the contact form, or mention it in your email to parag@kudtarkar.life.' },
+      { keys: ['start', 'get started', 'getting started', 'first step', 'begin', 'engage', 'hire', 'work with you', 'work together'],
+        a: 'Starting is simple: a confidential 30-minute discussion — tap "Book a meeting" or email parag@kudtarkar.life. No sales script, no obligation, and NDAs are welcome before anything sensitive is shared.' },
+      { keys: ['remote', 'on site', 'onsite', 'in person', 'time zone', 'time zones', 'travel'],
+        a: 'Both. Engagements run across regions and time zones — remotely, and on site where it matters. Delivery experience spans APAC, Europe and North America.' },
+      { keys: ['build', 'implement', 'hands-on', 'handson', 'only advise', 'deliver the solution', 'who builds'],
+        a: 'Both modes exist: the practice can advise and design, or lead delivery hands-on — strategy, governance, vendor selection, and production build oversight. The right mode depends on your team and context; we\u2019ll work it out in the first conversation.' },
       { keys: ['crm', 'integration', 'api', 'webhook'],
         a: 'Technical integrations are very much part of the work — though chat-based ones are beyond me for now. Email parag@kudtarkar.life or book a meeting and describe what you have in mind.' }
     ];
