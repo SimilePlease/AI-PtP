@@ -36,7 +36,7 @@ function makeChat(store, engineReplies) {
     transcript.push('visitor: ' + text);
     agent.observe(text);
     var fsmOut = null;
-    if (!agent.isActive() && agent.wantsBooking(text)) fsmOut = agent.startBooking();
+    if (!agent.isActive() && agent.wantsBooking(text)) fsmOut = agent.startBooking(text);
     else if (agent.isActive()) fsmOut = agent.turn(text);
 
     if (fsmOut && !fsmOut.pause) {

@@ -205,7 +205,7 @@
     function startBooking(text) {
       fsm.retries = 0;
       fsm.turn = 0;
-      var lead = TIME_RE.test(text || '')
+      var ack = TIME_RE.test(text || '')
         ? 'I can\u2019t hold slots myself, but let\u2019s get you booked properly \u2014 the calendar will show what\u2019s really free. '
         : '';
       var miss = missingSlot();
@@ -216,7 +216,7 @@
       }
       fsm.state = 'NEED_' + miss.toUpperCase();
       persist();
-      return { say: lead + questionFor(miss), cta: false, openCal: false };
+      return { say: ack + questionFor(miss), cta: false, openCal: false };
     }
 
     function turn(text) {
