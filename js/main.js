@@ -286,18 +286,51 @@
       if (e.key === 'Escape' && !panel.hidden) closePanel();
     });
 
+    var pct = -1;
+
+    function failLoad(reason) {
+      setStatus('Failed to load');
+      chatEls.progress.hidden = false;
+      chatEls.progress.textContent = reason;
+      var bubble = addMsg('bot', 'I couldn\u2019t finish loading \u2014 the model download seems blocked or too slow on this network. Closing and reopening this chat retries it. Meanwhile: email parag@kudtarkar.life or tap Book a meeting and I\u2019ll make it worth the wait.');
+      attachBookingCta(bubble);
+      loadingStarted = false;
+    }
+
+    function withTimeout(promise, ms, label) {
+      return Promise.race([
+        promise,
+        new Promise(function (_, reject) {
+          setTimeout(function () { reject(new Error(label + ' timed out')); }, ms);
+        })
+      ]);
+    }
+
     async function startLoading() {
       if (engine || loadingStarted) return;
       loadingStarted = true;
       chatEls.progress.hidden = false;
       setStatus('Loading\u2026');
+      pct = 0;
+      var lastMove = Date.now();
+      /* Watchdog: if the percentage freezes for 30s (or all-up >3min), fail gracefully. */
+      var watchdog = setInterval(function () {
+        if (Date.now() - lastMove > 30000) {
+          clearInterval(watchdog);
+          if (!engine) { console.warn('[AI-PtP] model load stalled at ' + pct + '%'); failLoad('Stalled at ' + pct + '% \u2014 the model host may be blocked on this network.'); }
+        }
+      }, 3000);
       try {
-        var webllm = await import('https://esm.run/@mlc-ai/web-llm');
+        var webllm = await withTimeout(import('https://esm.run/@mlc-ai/web-llm'), 30000, 'Assistant download');
         engine = await webllm.CreateMLCEngine(MODEL_ID, {
           initProgressCallback: function (r) {
-            chatEls.progress.textContent = 'Loading the assistant\u2026 ' + Math.round((r.progress || 0) * 100) + '%';
+            var p = Math.round((r.progress || 0) * 100);
+            if (p !== pct) { pct = p; lastMove = Date.now(); }
+            chatEls.progress.textContent = 'Loading the assistant\u2026 ' + p + '%' + (p === 0 ? ' (first load is ~900MB)' : '');
+            if (p === 0 && Date.now() - lastMove > 30000) lastMove = Date.now();
           }
         });
+        clearInterval(watchdog);
         history = [{ role: 'system', content: agent.buildSystemPrompt('') }];
         setStatus('Ready');
         chatEls.progress.hidden = true;
@@ -308,10 +341,9 @@
         addMsg('bot', greeting);
         history.push({ role: 'assistant', content: greeting });
       } catch (err) {
-        setStatus('Failed to load');
-        chatEls.progress.textContent = 'Loading failed: ' + (err && err.message ? err.message : 'unknown error');
-        addMsg('bot', 'Hmm, I couldn\u2019t load this time \u2014 likely a network hiccup. No worries: you can email parag@kudtarkar.life or book a meeting, and I\u2019ll be here next time.');
-        loadingStarted = false;
+        clearInterval(watchdog);
+        console.warn('[AI-PtP] load failed:', err);
+        failLoad('Loading failed: ' + (err && err.message ? err.message : 'unknown error'));
       }
     }
 
