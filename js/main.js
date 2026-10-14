@@ -571,7 +571,7 @@
 
       /* --- Lite mode: curated answer engine, no model needed --- */
       if (!engine) {
-        var lite = agent.answer(text);
+        var lite = agent.answer(text) || agent.answerSemantic(text);
         var liteText = lite || 'Good question \u2014 I want to give it a proper answer rather than a rushed one. Email parag@kudtarkar.life or book a meeting and you\u2019ll get a real one.';
         var liteBubble = addMsg('bot', liteText);
         history.push({ role: 'assistant', content: liteText });

@@ -434,6 +434,16 @@
       var facts = hits.length
         ? hits.map(function (i) { return FACT_BLOCKS[i].text; }).join(' ')
         : SUMMARY_LINE;
+      /* Semantic retrieval: catch paraphrases the keyword layer misses and feed
+         the closest FAQ answers as additional grounding facts. */
+      if (faqMatcher && latestUserText) {
+        var sem = faqMatcher.search(latestUserText, 2);
+        var extra = [];
+        sem.forEach(function (h) {
+          if (h.score >= 3.5 && extra.indexOf(h.entry.a) === -1 && facts.indexOf(h.entry.a.slice(0, 40)) === -1) extra.push(h.entry.a);
+        });
+        if (extra.length) facts = (hits.length ? facts + ' ' : '') + extra.join(' ');
+      }
       return CORE_PROMPT + ' SITE FACTS FOR THIS CHAT (your only specifics): ' + facts +
         (pausedNote ? ' CONTEXT: a guided booking is mid-flow (' + pausedNote + ' still needed) \u2014 the visitor stepped aside with this message. Answer briefly, then gently invite them back to finish booking.' : '');
     }
@@ -549,6 +559,20 @@
         a: 'Technical integrations are very much part of the work — though chat-based ones are beyond me for now. Email parag@kudtarkar.life or book a meeting and describe what you have in mind.' }
     ];
 
+    /* Semantic FAQ retrieval (TF-IDF/BM25 over the FAQ corpus) — used to ground
+       the LLM with the closest FAQ entries and to answer verbatim in lite mode.
+       Loaded from js/semantic-faq.js; degrades gracefully if missing. */
+    var Sem = (typeof SemanticFAQ !== 'undefined') ? SemanticFAQ
+            : (typeof require === 'function' ? (function () { try { return require('./semantic-faq.js').SemanticFAQ; } catch (e) { return null; } })() : null);
+    var faqMatcher = null;
+    if (Sem && Sem.build) {
+      faqMatcher = Sem.build(ANSWERS.map(function (item) {
+        return { q: (item.keys || []).join(' '), a: item.a, keys: item.keys };
+      }));
+    }
+
+
+
     function answer(text) {
       var t = ' ' + (text || '').toLowerCase() + ' ';
       var best = null, bestScore = 0;
@@ -578,6 +602,11 @@
       resumeGreeting: resumeGreeting,
       templatedFree: templatedFree,
       answer: answer,
+      answerSemantic: function (text) {
+        if (!faqMatcher) return null;
+        var hit = faqMatcher.best(text, 3.5);
+        return hit ? hit.entry.a : null;
+      },
       answersCount: ANSWERS.length,
       guardReply: guardReply,
       safeReply: SAFE_REPLY,
