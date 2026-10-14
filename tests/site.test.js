@@ -97,7 +97,7 @@ check("no other real email addresses", emails.every(e => e.toLowerCase() === "pa
 check("no generic 'welcome to the website' phrasing", !/welcome to the (website|site)/i.test(body));
 check("popup URLs are clean (no embed_type=Inline — silent no-op bug)", mainJs.includes("calendlyUrl('30min', true)") && mainJs.includes("if (!forPopup)") && mainJs.includes("verrified") === false);
 check("popup failure verifies overlay and never dead-ends", mainJs.includes("calendly-overlay") && mainJs.includes("calendlyState = 'failed'"));
-check("booking CTA is a real link (not a JS-only button)", src.includes('<a class="btn btn-accent book-option"') && src.includes('target="_blank"') && mainJs.includes("createElement('a')"));
+check("chat booking CTA is a real link (not a JS-only button)", mainJs.includes("createElement('a')") && mainJs.includes("cta.target = '_blank'"));
 check("chat CTA falls back to native navigation", mainJs.includes("cta.target = '_blank'") && mainJs.includes("openCalendlyPopup"));
 check("SME use-case cards are collapsible <details> with <summary> headers",
   (src.match(/<details class="use-case-card">/g) || []).length === 9 &&

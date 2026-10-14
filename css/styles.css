@@ -1604,7 +1604,6 @@ html.js .reveal.in {
 
 .chat-cta:hover { background: var(--lime-deep); transform: translateY(-1px); }
 .chat-cta { text-decoration: none; }
-a.book-option { text-decoration: none; }
 
 .chat-foot { padding: 0 16px; }
 
@@ -1706,14 +1705,6 @@ a.book-option { text-decoration: none; }
   gap: 10px;
 }
 
-.book-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.book-option { flex: none; }
 
 .rai-pillars {
   display: grid;
