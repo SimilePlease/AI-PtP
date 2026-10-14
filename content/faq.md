@@ -18,16 +18,16 @@ When you edit an answer here, mirror the change in `js/agent.js` (both `ANSWERS`
 
 ## The practice
 
-**Q: What services does AI-PtP offer?**
-A: AI-PtP is an AI strategy and delivery practice. That covers finding the right AI use cases, designing and leading AI Centres of Excellence, planning AI portfolios across industries, product innovation, and taking systems to production — engineered and responsibly deployed.
+**Q: What services does Orbit offer?**
+A: Orbit is an AI strategy and delivery practice. That covers finding the right AI use cases, designing and leading AI Centres of Excellence, planning AI portfolios across industries, product innovation, and taking systems to production — engineered and responsibly deployed.
 
-**Q: Who is behind AI-PtP?**
+**Q: Who is behind Orbit?**
 A: The practice is led by Parag Kudtarkar, a senior technology and transformation executive with more than 22 years of experience. The About section has the full background and a photo carousel.
 
 **Q: What experience does Parag have?**
 A: More than 22 years translating business strategy into enterprise-scale digital, technology, data, cloud and AI transformation programmes across healthcare, telecommunications and regulated sectors throughout APAC. He led a multimillion-dollar enterprise transformation across four geographies through a multi-partner delivery model and delivered five production platforms.
 
-**Q: What makes AI-PtP different from bigger consultancies?**
+**Q: What makes Orbit different from bigger consultancies?**
 A: You work directly with the person who has done the work — built an AI CoE from greenfield, scaled an AI engineering organisation across four geographies, and taken five clinical AI platforms to regulatory-approved production. No partner hands it to a junior team afterwards.
 
 **Q: Do you sell AI tools or software licences?**
@@ -68,7 +68,7 @@ A: Both. Engagements run across regions and time zones — remotely, and on site
 A: Both modes exist. The practice can advise and design, or lead delivery hands-on — strategy, governance, vendor selection, and production build oversight. The right mode depends on your team and context.
 
 **Q: Is Parag available for speaking or advisory roles?**
-A: Yes — speaking, advisory and board-level AI guidance are options. Choose "Speaking or advisory" in the contact form or mention it in your email.
+A: Yes — speaking, advisory and board-level AI guidance are options. You can use the Calendly to book his time.
 
 ## Capability
 
