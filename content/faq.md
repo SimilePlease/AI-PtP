@@ -16,7 +16,99 @@ When you edit an answer here, mirror the change in `js/agent.js` (both `ANSWERS`
 
 ---
 
-## The practice
+## Frequently Asked Questions
+
+**Q1: What does an AI consultancy do?**
+A: An AI consultancy helps organisations identify valuable AI opportunities, build the capability to deliver them, and put solutions into controlled production use.
+
+**Q2: Do we need an AI strategy before starting projects?**
+A: Yes. A clear strategy connects AI investment to business priorities, defines the operating model, and prevents disconnected pilots from consuming budget without creating value.
+
+**Q3: Can you help us decide where AI will add value?**
+A: Yes. The work starts with business goals, workflows, data readiness, cost pressures, risks and customer needs to identify and prioritise viable opportunities.
+
+**Q4: Do all business problems require AI?**
+A: No. Some problems are better addressed through process improvement, workflow redesign, data quality work or standard software. The right intervention matters more than applying AI everywhere.
+
+**Q5: What is an AI Centre of Excellence?**
+A: An AI Centre of Excellence is an enterprise capability that connects strategy, use-case prioritisation, people, data, platforms, governance and delivery so AI can move reliably into production.
+
+**Q6: Do we need a centralised AI team?**
+A: Not necessarily. Many organisations benefit from a federated model: shared specialist expertise and governance, combined with business-unit ownership of priorities, adoption and outcomes.
+
+**Q7: Can you help establish an AI Centre of Excellence from scratch?**
+A: Yes. This can include the mandate, sponsorship model, operating structure, roles, intake process, governance, skills framework, platform foundations and delivery roadmap.
+
+**Q8: How do you prioritise AI use cases?**
+A: Opportunities are assessed against business value, feasibility, data readiness, integration needs, regulatory exposure, delivery complexity, total cost of ownership and adoption potential.
+
+**Q9: What is the difference between a pilot and production AI?**
+A: A pilot tests whether an idea has potential. Production AI requires secure integration, defined ownership, monitoring, evaluation, governance, support processes and evidence of value over time.
+
+**Q10: Can you help move existing pilots into production?**
+A: Yes. The focus is on identifying what is missing: data and architecture foundations, security, model evaluation, workflow integration, governance, operating ownership or a sustainable funding model.
+
+**Q11: How do you measure value from AI?**
+A: Measures are defined before delivery and may include revenue, cost-to-serve, productivity, quality, speed, risk reduction, customer experience, clinical outcomes or employee adoption.
+
+**Q12: What is responsible AI in practice?**
+A: Responsible AI means putting governance, security, privacy, human oversight, evaluation, auditability and monitoring into the delivery lifecycle rather than treating them as a final compliance exercise.
+
+**Q13: Can AI be used in regulated industries?**
+A: Yes, provided the use case, data, controls, accountability and deployment model are appropriate for the regulatory environment and risk profile.
+
+**Q14: Which governance frameworks are relevant?**
+A: The appropriate framework depends on the organisation and jurisdiction. Relevant areas may include NIST AI RMF, ISO 42001, the EU AI Act, GDPR, PDPA, HIPAA, FDA SaMD and financial-services guidance such as MAS TRM and FEAT.
+
+**Q15: How do you address data privacy and security?**
+A: The approach covers data classification, access controls, model and prompt handling, secure integration, privacy-by-design, supplier due diligence, threat assessment and monitoring after release.
+
+**Q16: What is agentic AI, and where is it useful?**
+A: Agentic AI uses software agents to plan, retrieve information, use approved tools and complete multi-step tasks with defined controls. It can be valuable in knowledge-heavy, workflow-driven environments when accountability and oversight are designed in from the outset.
+
+**Q17: Can you help with sovereign AI?**
+A: Yes. Sovereign AI considerations include where data, models and workloads are hosted; who controls them; applicable jurisdictions; security requirements; and the level of independence required from external providers.
+
+**Q18: Do we need to build our own AI platform?**
+A: Usually not from the outset. The right decision depends on strategic needs, data sensitivity, integration requirements, capability maturity, commercial constraints and the platforms already in place.
+
+**Q19: Can you work with our existing technology partners?**
+A: Yes. Effective transformation often requires alignment across internal teams, specialist vendors, cloud providers, systems integrators and strategic partners.
+
+**Q20: What industries do you work across?**
+A: Experience includes healthcare and MedTech, financial services, telecommunications, maritime and shipping, as well as growth businesses evaluating practical AI and automation opportunities.
+
+**Q21: Can you support clinical AI and medical-device innovation?**
+A: Yes. Relevant work includes clinical AI, remote monitoring, computer vision, wearable and IoT solutions, regulated delivery and integration with clinical workflows.
+
+**Q22: Can you support financial-services AI programmes?**
+A: Yes. This includes AI strategy, operating-model design, AI portfolio planning, governance, knowledge and document intelligence, advisor support and controlled deployment in regulated environments.
+
+**Q23: Can smaller businesses engage your practice?**
+A: Yes. Smaller organisations can begin with a focused AI readiness review, workflow assessment or a well-scoped opportunity that establishes value before larger investment.
+
+**Q24: What does a typical engagement look like?**
+A: Engagements may range from an executive strategy workshop or AI readiness assessment to CoE design, portfolio prioritisation, governance design, product innovation or delivery leadership.
+
+**Q25: How long does an AI strategy engagement take?**
+A: The duration depends on organisational scale, stakeholder availability, existing capability and the number of opportunities under review. A focused assessment can begin quickly; enterprise operating-model work requires deeper engagement.
+
+**Q26: Do you provide implementation support?**
+A: Yes. Support can extend from strategy and architecture through to prototype design, supplier alignment, programme leadership, production delivery and outcome measurement.
+
+**Q27: Do you replace internal teams?**
+A: No. The aim is to strengthen internal capability, establish clear ownership and help teams make better decisions, deliver effectively and sustain outcomes after the engagement.
+
+**Q28: Can you work across regions and time zones?**
+A: Yes. Engagements run across APAC, Europe and North America, remotely and on site where it adds value.
+
+**Q29: How do we begin?**
+A: Start with a short discussion about your priorities, current capability, constraints and desired outcomes. From there, the right first engagement can be defined.
+
+**Q30: What should we prepare before an initial conversation?**
+A: A clear problem statement is useful, but not required. It helps to know the strategic objective, major workflow or customer challenge, relevant stakeholders, available data, constraints and decision timeline.
+
+## Practice specifics (identity, contact, booking)
 
 **Q: What services does Orbit offer?**
 A: Orbit is an AI strategy and delivery practice. That covers finding the right AI use cases, designing and leading AI Centres of Excellence, planning AI portfolios across industries, product innovation, and taking systems to production — engineered and responsibly deployed.
@@ -33,7 +125,7 @@ A: You work directly with the person who has done the work — built an AI CoE f
 **Q: Do you sell AI tools or software licences?**
 A: No. The practice is advisory and delivery leadership — helping you choose, build, and govern the right systems. It never resells tools or takes commissions on software.
 
-## Industries and clients
+## More practice specifics
 
 **Q: Which industries do you work with?**
 A: Healthcare & MedTech, financial services & wealth management, telecommunications, maritime & shipping, and growth businesses/SMEs. The same practical treatment, scaled to fit.
