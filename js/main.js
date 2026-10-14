@@ -215,6 +215,8 @@
     var COUNT = parseInt(carousel.dataset.count || '0', 10);
     if (!COUNT) return;
 
+    carousel.classList.add('has-photos'); /* un-hides the carousel (CSS keeps it display:none by default) */
+
     for (var i = 1; i <= COUNT; i++) {
       var img = document.createElement('img');
       img.src = 'assets/about-' + i + '.jpg';
