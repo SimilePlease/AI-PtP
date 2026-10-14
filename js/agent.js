@@ -71,6 +71,13 @@
     { keys: ['responsible', 'ethic', 'nist', 'iso', 'eu ai act', 'gdpr', 'mas', 'feat', 'samd', 'hsa', 'hipaa', 'pdpa', 'regulation', 'compliance', 'safety'], text: 'Responsible-AI familiarity: NIST AI RMF, ISO 42001, EU AI Act, GDPR, MAS TRM, MAS FEAT, FDA SaMD, HSA, HIPAA, PDPA \u2014 familiarity, not certifications.' },
     { keys: ['security', 'secure', 'adversarial', 'prompt injection', 'jailbreak', 'attack', 'threat'], text: 'AI security: secure model and prompt handling, data protection, access controls, adversarial-input awareness (prompt injection, jailbreaks), and security review built into evaluation and deployment.' },
     { keys: ['governance', 'oversight', 'audit', 'accountab', 'policy'], text: 'AI governance: ownership, policies, intake and prioritisation gates, risk assessment, human oversight, audit trails, and production monitoring.' },
+    { keys: ['founder', 'who is behind', 'parag', 'kudtarkar', 'background', 'experience', 'who runs'], text: 'Led by Parag Kudtarkar: 22+ years in digital, data, cloud and AI transformation across healthcare, telecom and regulated sectors in APAC; led a multimillion-dollar enterprise transformation across four geographies; built an AI CoE from greenfield; scaled an AI engineering organisation (70 people) across four geographies; delivered five production platforms.' },
+    { keys: ['nda', 'confidential', 'data safe', 'privacy policy'], text: 'Initial discussions are confidential by default; NDAs welcome. Enquiries are used only to respond to the enquirer — no data selling, no marketing lists.' },
+    { keys: ['how long', 'duration', 'timeline', 'cost', 'price', 'pricing', 'fee'], text: 'Engagement length and fees depend on the shape of the work — scoped after a first 30-minute conversation. Strategy reviews can be weeks; CoE builds and production programmes run longer.' },
+    { keys: ['training', 'literacy', 'workshop', 'enablement'], text: 'AI literacy and team enablement are part of CoE work: roles, skills frameworks, literacy programmes, focused team workshops.' },
+    { keys: ['speaking', 'speaker', 'keynote', 'advisory', 'board'], text: 'Speaking, advisory and board-level AI guidance are available — choose "Speaking or advisory" in the contact form.' },
+    { keys: ['remote', 'on site', 'onsite', 'travel', 'time zone'], text: 'Engagements run remotely and on site where required, across APAC, Europe and North America time zones.' },
+    { keys: ['start', 'get started', 'first step', 'engage', 'hire'], text: 'Starting is a confidential 30-minute discussion — book a meeting or email parag@kudtarkar.life. No sales script, no obligation.' },
     { keys: ['ethic', 'bias', 'fairness', 'transparen', 'explainab', 'privacy'], text: 'AI ethics: fairness and bias awareness, transparency, explainability, privacy by design, and honest communication about what a system can and cannot do.' }
   ];
 
@@ -449,6 +456,24 @@
         a: 'Pilots fail in production when nobody plans for integration, people, and oversight. This practice exists to close that gap — from first use case to deployed, measured system.' },
       { keys: ['strategy', 'use case', 'use-case', 'prioriti', 'roadmap', 'business value', 'roi', 'tco', 'total cost'],
         a: 'AI strategy here means finding where AI may help, choosing the right approach (AI, process design, or plain software), prioritising with discipline, and assessing total cost of ownership — value first, fashion never.' },
+      { keys: ['who is behind', 'founder', 'who runs', 'parag', 'kudtarkar', 'about the founder', 'who are you working'],
+        a: 'AI-PtP is led by Parag Kudtarkar — a senior technology and transformation executive with more than 22 years of experience across healthcare, telecommunications and regulated sectors in APAC. He led a multimillion-dollar enterprise transformation across four geographies and delivered five production platforms. The About section has the full story.' },
+      { keys: ['different', 'why you', 'why choose', 'big consultancy', 'big firm', 'vs'],
+        a: 'You work directly with the person who has done the work — built an AI CoE from greenfield, scaled an AI engineering organisation across four geographies, and taken five clinical AI platforms to regulatory-approved production. No hand-offs to junior teams.' },
+      { keys: ['sell', 'tools', 'licence', 'license', 'resell', 'commission', 'vendor'],
+        a: 'No tool sales or software licences here. The practice is advisory and delivery leadership — helping you choose, build and govern the right systems, with no commissions on anything.' },
+      { keys: ['nda', 'confidential', 'confidentiality'],
+        a: 'Yes — initial discussions are confidential by default, and NDAs are welcome before anything sensitive is shared.' },
+      { keys: ['how long', 'duration', 'timeline', 'how fast', 'how quickly', 'weeks', 'months'],
+        a: 'It depends on the shape of the work — a strategy review can be a few weeks; a CoE build or production programme runs longer. Book a meeting and you\u2019ll get a scoped, specific answer.' },
+      { keys: ['first conversation', 'first meeting', 'what happens', 'intro call', 'first call', 'initial discussion'],
+        a: 'A 30-minute discussion of your goals, context and timelines — enough to see whether AI is the right lever and what a sensible first step looks like. No sales script, no obligation.' },
+      { keys: ['training', 'literacy', 'workshop', 'enablement', 'upskill'],
+        a: 'AI literacy and team enablement are part of the CoE work — roles, skills frameworks and literacy programmes. For a focused team workshop, raise it in the first conversation.' },
+      { keys: ['data safe', 'my data', 'privacy policy', 'use my', 'share my'],
+        a: 'Enquiries go to Parag directly and are used only to respond to you — no selling of data, no marketing lists. NDAs are welcome before anything sensitive is shared.' },
+      { keys: ['speaking', 'speaker', 'keynote', 'advisory', 'board', 'event'],
+        a: 'Yes — speaking, advisory and board-level AI guidance are all options. Choose \u201cSpeaking or advisory\u201d in the contact form, or mention it in your email to parag@kudtarkar.life.' },
       { keys: ['crm', 'integration', 'api', 'webhook'],
         a: 'Technical integrations are very much part of the work — though chat-based ones are beyond me for now. Email parag@kudtarkar.life or book a meeting and describe what you have in mind.' }
     ];
