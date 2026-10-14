@@ -170,7 +170,7 @@ check('guard blocks unsafe claims and passes warm honest replies', function () {
 check('prompt names the assistant and forbids generic greetings', function () {
   var a = fresh();
   var p = a.buildSystemPrompt('hi');
-  assert.ok(p.indexOf('AI-PtP Assistant') !== -1);
+  assert.ok(p.indexOf('Orbit') !== -1);
   assert.ok(p.indexOf('Welcome to the website') !== -1); // named as a forbidden pattern
   assert.ok(p.indexOf('Never greet') !== -1);
 });

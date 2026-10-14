@@ -347,7 +347,7 @@
         history = [{ role: 'system', content: agent.buildSystemPrompt('') }];
         setBusy(false);
         chatEls.input.focus();
-        addMsg('bot', 'Hi! \uD83D\uDC4B Let\u2019s start your AI journey \u2014 ask me about the AI CoE: operating model, governance, platforms, delivery. Or book a 30-minute strategic discussion. What\u2019s on your mind?');
+        addMsg('bot', 'Hi! \uD83D\uDC4B I\u2019m Orbit \u2014 let\u2019s start your AI journey. Ask me about the AI CoE: operating model, governance, platforms, delivery. Or book a 30-minute strategic discussion. What\u2019s on your mind?');
         return;
       }
       if (loadingStarted) { /* preloading in background — nothing to do */ }
@@ -384,7 +384,7 @@
       if (!chatEls.msgs.children.length) {
         if (!panel.hidden) chatEls.input.focus();
         var g2 = agent.resumeGreeting() ||
-          'Hi there! \uD83D\uDC4B Let\u2019s start your AI journey \u2014 ask me about the AI CoE: operating model, governance, platforms, delivery. Or book a 30-minute strategic discussion. What\u2019s on your mind?';
+          'Hi there! \uD83D\uDC4B I\u2019m Orbit \u2014 let\u2019s start your AI journey. Ask me about the AI CoE: operating model, governance, platforms, delivery. Or book a 30-minute strategic discussion. What\u2019s on your mind?';
         addMsg('bot', g2);
         history.push({ role: 'assistant', content: g2 });
       }
@@ -434,7 +434,7 @@
         if (!panel.hidden) {
           chatEls.input.focus();
           var greeting = agent.resumeGreeting() ||
-            'Hi there! \uD83D\uDC4B Let\u2019s start your AI journey \u2014 ask me about the AI CoE: operating model, governance, platforms, delivery. Or book a 30-minute strategic discussion. What\u2019s on your mind?';
+            'Hi there! \uD83D\uDC4B I\u2019m Orbit \u2014 let\u2019s start your AI journey. Ask me about the AI CoE: operating model, governance, platforms, delivery. Or book a 30-minute strategic discussion. What\u2019s on your mind?';
           addMsg('bot', greeting);
           history.push({ role: 'assistant', content: greeting });
         }

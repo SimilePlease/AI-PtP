@@ -215,7 +215,7 @@ check('guard: 20 hallucinated/unsafe engine outputs all blocked', function () {
 check('guard: 15 legitimate replies pass through untouched', function () {
   var a = AIAgent.createAgent(memoryStore());
   var good = [
-    'Hey! I\u2019m the AI-PtP Assistant \u2014 what brings you here today?',
+    'Hey! I\u2019m Orbit \u2014 what brings you here today?',
     'I can\u2019t hold slots myself, but tap Book a meeting \u2014 the calendar shows what\u2019s really free.',
     'Agentic AI, in short: systems that plan and take multi-step actions with tools.',
     'AI governance means clear ownership, policies, and checkpoints for AI in production.',
@@ -347,7 +347,7 @@ check('small talk: ' + 'hi/hello/hey/namaste/emoji-only' + ' all get templated p
     .forEach(function (g) {
       var t = a.templatedFree(g);
       assert.ok(t, 'no template for "' + g + '"');
-      assert.ok(t.indexOf('AI-PtP') !== -1 || t.indexOf('Welcome back') !== -1, 'no persona in: ' + t);
+      assert.ok(t.indexOf('Orbit') !== -1 || t.indexOf('Welcome back') !== -1, 'no persona in: ' + t);
       assert.ok(!/no specific message|just a/i.test(t), 'meta-talk leaked: ' + t);
     });
   ['how are you?', "how's it going?", "what\u2019s up"].forEach(function (g) {

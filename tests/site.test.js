@@ -102,7 +102,7 @@ check("chat CTA falls back to native navigation", mainJs.includes("cta.target = 
 check("SME use-case cards are collapsible <details> with <summary> headers",
   (src.match(/<details class="use-case-card">/g) || []).length === 9 &&
   (src.match(/<details class="use-case-card">[\s\S]*?<summary>[\s\S]*?<h3>/g) || []).length === 9);
-check("assistant named AI-PtP in prompt", agentJs.includes("AI-PtP Assistant") && agentJs.includes("Never greet"));
+check("assistant named Orbit in prompt", agentJs.includes("Orbit") && agentJs.includes("Never greet"));
 check("AI questions in scope (anti-deflection rule)", agentJs.includes("AI QUESTIONS ARE IN SCOPE"));
 check("anti-hallucination rule present", agentJs.includes("no invented statistics") && agentJs.includes("say so honestly"));
 
