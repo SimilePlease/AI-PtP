@@ -58,7 +58,7 @@ for (const [name, jsSrc] of [["main.js", mainJs], ["agent.js", agentJs]]) {
 
 const classRefs = [...mainJs.matchAll(/querySelector(?:All)?\('\.([a-z-]+)/g)].map(m => m[1]);
 const htmlClasses = new Set([...src.matchAll(/class="([^"]+)"/g)].flatMap(m => m[1].split(/\s+/)));
-const runtimeClasses = new Set(["chat-cta", "reveal", "in", "expanded", "collapsing"]);
+const runtimeClasses = new Set(["chat-cta", "reveal", "in", "expanded", "collapsing", "calendly-overlay", "calendly-popup"]);
 const missingClasses = classRefs.filter(c => !htmlClasses.has(c) && !runtimeClasses.has(c));
 check("main.js: every queried class exists in HTML", missingClasses.length === 0, missingClasses.join(", "));
 
@@ -95,6 +95,8 @@ check("contact email correct", (body.match(/parag@kudtarkar\.life/g) || []).leng
 const emails = [...body.matchAll(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi)].map(m => m[0]).filter(e => !/you@|name@|email@|company\.com|example\./i.test(e));
 check("no other real email addresses", emails.every(e => e.toLowerCase() === "parag@kudtarkar.life"), emails.join(", "));
 check("no generic 'welcome to the website' phrasing", !/welcome to the (website|site)/i.test(body));
+check("popup URLs are clean (no embed_type=Inline — silent no-op bug)", mainJs.includes("calendlyUrl('30min', true)") && mainJs.includes("if (!forPopup)") && mainJs.includes("verrified") === false);
+check("popup failure verifies overlay and never dead-ends", mainJs.includes("calendly-overlay") && mainJs.includes("calendlyState = 'failed'"));
 check("booking CTA is a real link (not a JS-only button)", src.includes('<a class="btn btn-accent book-option"') && src.includes('target="_blank"') && mainJs.includes("createElement('a')"));
 check("chat CTA falls back to native navigation", mainJs.includes("cta.target = '_blank'") && mainJs.includes("openCalendlyPopup"));
 check("assistant named AI-PtP in prompt", agentJs.includes("AI-PtP Assistant") && agentJs.includes("Never greet"));

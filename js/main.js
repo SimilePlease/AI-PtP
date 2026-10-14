@@ -53,16 +53,18 @@
 
   var calHost = window.location.hostname || 'localhost';
 
-  function calendlyUrl(eventSlug) {
+  function calendlyUrl(eventSlug, forPopup) {
     var lead = agent ? agent.lead() : { name: '', email: '' };
     var params = [
-      'embed_domain=' + encodeURIComponent(calHost),
-      'embed_type=Inline',
       'hide_gdpr_banner=1',
       'background_color=0C211A',
       'text_color=F4F1E8',
       'primary_color=A9C23F'
     ];
+    if (!forPopup) {
+      params.unshift('embed_domain=' + encodeURIComponent(calHost));
+      params.splice(1, 0, 'embed_type=Inline');
+    }
     if (lead.email) params.push('email=' + encodeURIComponent(lead.email));
     if (lead.name) params.push('name=' + encodeURIComponent(lead.name));
     return 'https://calendly.com/kudtarkar-parag/' + (eventSlug || '30min') + '?' + params.join('&');
@@ -85,29 +87,44 @@
      auto-open path. Clicked CTAs are real <a> links, so they always work. */
   function openCalendlyPopup(url) {
     ensureCalendlyScript();
-    if (window.Calendly && window.Calendly.initPopupWidget) {
-      try {
-        window.Calendly.initPopupWidget({ url: url });
-        return true;
-      } catch (err) { /* fall through */ }
+    if (calendlyState !== 'ready' || !(window.Calendly && window.Calendly.initPopupWidget)) return false;
+    try {
+      window.Calendly.initPopupWidget({ url: url });
+    } catch (err) {
+      calendlyState = 'failed';
+      return false;
     }
+    /* Verify the overlay really rendered; a silent no-op must never dead-end a click. */
+    setTimeout(function () {
+      var overlay = document.querySelector('.calendly-overlay, .calendly-popup, iframe[src*="calendly.com"]');
+      if (!overlay) {
+        calendlyState = 'failed';
+        window.open(url, '_blank', 'noopener');
+      }
+    }, 600);
+    return true;
+  }
+
+  var calFrame = document.getElementById('calendly-frame');
+  if (calFrame && !calFrame.getAttribute('src')) {
+    calFrame.src = calendlyUrl('30min', false);
+  }
+
+  /* Auto-open (no click gesture): wait for the script, then popup. */
+  function autoOpenBooking() {
+    var url = calendlyUrl('30min', true);
+    ensureCalendlyScript();
+    if (openCalendlyPopup(url)) return;
     var tries = 0;
     var timer = setInterval(function () {
       tries++;
-      if (window.Calendly && window.Calendly.initPopupWidget) {
+      if (openCalendlyPopup(url)) {
         clearInterval(timer);
-        try { window.Calendly.initPopupWidget({ url: url }); } catch (err) { window.open(url, '_blank', 'noopener'); }
       } else if (calendlyState === 'failed' || tries > 16) {
         clearInterval(timer);
         window.open(url, '_blank', 'noopener');
       }
     }, 250);
-    return false;
-  }
-
-  var calFrame = document.getElementById('calendly-frame');
-  if (calFrame && !calFrame.getAttribute('src')) {
-    calFrame.src = calendlyUrl('30min');
   }
 
   /* Contact-section booking buttons: real links first, popup nicety second. */
@@ -116,7 +133,7 @@
     a.setAttribute('target', '_blank');
     a.setAttribute('rel', 'noopener');
     a.addEventListener('click', function (e) {
-      a.setAttribute('href', calendlyUrl(a.getAttribute('data-event') || '30min'));
+      a.setAttribute('href', calendlyUrl(a.getAttribute('data-event') || '30min', true));
       if (openCalendlyPopup(a.href)) e.preventDefault();
     });
   });
@@ -235,7 +252,7 @@
       cta.rel = 'noopener';
       cta.textContent = 'Book a meeting';
       cta.addEventListener('click', function (e) {
-        cta.setAttribute('href', calendlyUrl('30min'));
+        if (calendlyState === 'ready') cta.setAttribute('href', calendlyUrl('30min', true));
         if (openCalendlyPopup(cta.href)) e.preventDefault();
       });
       bubble.appendChild(cta);
@@ -330,7 +347,7 @@
         var fsmBubble = addMsg('bot', fsmOut.say);
         history.push({ role: 'assistant', content: fsmOut.say });
         if (fsmOut.cta) attachBookingCta(fsmBubble);
-        if (fsmOut.openCal) openCalendlyPopup(calendlyUrl('30min'));
+        if (fsmOut.openCal) autoOpenBooking();
         return;
       }
 
@@ -372,7 +389,7 @@
           if (!call) break;
           var result = agent.executeTool(call);
           if (result && result.action === 'open_booking') {
-            openCalendlyPopup(calendlyUrl('30min'));
+            autoOpenBooking();
             reply = result.message || 'The calendar is open \u2014 pick whatever suits you.';
             bubble.textContent = reply;
             break;
