@@ -341,13 +341,13 @@
 
       if (!webgpuOk) {
         liteMode = true;
-        setStatus('Lite mode');
+        setStatus('Ready');
         chatEls.unsupported.hidden = true;
         chatEls.progress.hidden = true;
         history = [{ role: 'system', content: agent.buildSystemPrompt('') }];
         setBusy(false);
         chatEls.input.focus();
-        addMsg('bot', 'Hi! \uD83D\uDC4B Lite mode here \u2014 ask me about the AI CoE: operating model, governance, platforms, delivery. Or book a 30-minute strategic discussion. What\u2019s on your mind?');
+        addMsg('bot', 'Hi! \uD83D\uDC4B Explore AI CoE questions with me \u2014 operating model, governance, platforms, delivery \u2014 or book a 30-minute strategic discussion. What\u2019s on your mind?');
         return;
       }
       if (loadingStarted) { /* preloading in background — nothing to do */ }
@@ -375,7 +375,7 @@
 
     function failLoad(reason) {
       liteMode = true;
-      setStatus('Lite mode');
+      setStatus('Ready');
       chatEls.progress.hidden = true; /* technical reasons stay in console only */
       console.info('[AI-PtP] falling back to lite mode:', reason);
       history = [{ role: 'system', content: agent.buildSystemPrompt('') }];
@@ -494,7 +494,7 @@
       /* --- Lite mode: curated answer engine, no model needed --- */
       if (!engine) {
         var lite = agent.answer(text);
-        var liteText = lite || 'I want to give you a proper answer to that, and this isn\u2019t one I can do well in lite mode. Email parag@kudtarkar.life or book a meeting \u2014 you\u2019ll get a real one there.';
+        var liteText = lite || 'Good question \u2014 I want to give it a proper answer rather than a rushed one. Email parag@kudtarkar.life or book a meeting and you\u2019ll get a real one.';
         var liteBubble = addMsg('bot', liteText);
         history.push({ role: 'assistant', content: liteText });
         if (/book/i.test(liteText)) attachBookingCta(liteBubble);
