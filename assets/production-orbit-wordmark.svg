@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 280" role="img" aria-labelledby="title">
+  <title id="title">AI Pilot to Production — Production Orbit horizontal wordmark</title>
+  <g transform="translate(118 140)" fill="none" stroke-linecap="round">
+    <circle r="88" stroke="#D9D6CC" stroke-width="2"/><circle r="64" stroke="#B9C878" stroke-width="7"/><circle r="37" stroke="#D9D6CC" stroke-width="2"/>
+    <path d="M-86 15C-47 29-34 19 0 0S52-27 86-12" stroke="#A9C23F" stroke-width="4"/>
+    <circle r="16" fill="#0C3027" stroke="none"/><circle r="6" fill="#F4F1E8" stroke="none"/><circle cx="-86" cy="15" r="8" fill="#0C3027" stroke="none"/><circle cx="86" cy="-12" r="8" fill="#A9C23F" stroke="none"/>
+  </g>
+  <g fill="#0C3027"><text x="260" y="124" font-family="Georgia, serif" font-size="65" font-weight="700">AI Pilot to Production</text><text x="264" y="174" font-family="Arial, sans-serif" font-size="18" letter-spacing="4" fill="#527467">AI STRATEGY · CoE LEADERSHIP · PRODUCTION INNOVATION</text></g>
+</svg>

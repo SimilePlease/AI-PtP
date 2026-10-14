@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" role="img" aria-labelledby="title">
+  <title id="title">AI Pilot to Production — Production Orbit dark logo</title>
+  <rect width="1200" height="700" fill="#0C3027"/>
+  <g transform="translate(180 350)" fill="none" stroke-linecap="round">
+    <circle r="132" stroke="#527467" stroke-width="2"/><circle r="95" stroke="#B9C878" stroke-width="8"/><circle r="56" stroke="#527467" stroke-width="2"/>
+    <path d="M-129 23C-71 43-52 28 0 0S79-41 130-18" stroke="#A9C23F" stroke-width="4"/>
+    <circle r="22" fill="#F4F1E8" stroke="none"/><circle r="8" fill="#0C3027" stroke="none"/>
+    <circle cx="-129" cy="23" r="11" fill="#F4F1E8" stroke="none"/><circle cx="130" cy="-18" r="11" fill="#A9C23F" stroke="none"/>
+    <circle cy="-132" r="7" fill="#B9C878" stroke="none"/><circle cx="93" cy="93" r="7" fill="#B9C878" stroke="none"/><circle cx="-93" cy="93" r="7" fill="#B9C878" stroke="none"/>
+  </g>
+  <g fill="#F4F1E8"><text x="400" y="306" font-family="Georgia, serif" font-size="62" font-weight="700">AI Pilot</text><text x="400" y="374" font-family="Georgia, serif" font-size="62" font-weight="700">to Production</text><rect x="404" y="410" width="56" height="6" rx="3" fill="#A9C23F"/><text x="400" y="462" font-family="Arial, sans-serif" font-size="19" letter-spacing="5" fill="#B9C878">STRATEGY · CAPABILITY · DELIVERY</text></g>
+</svg>

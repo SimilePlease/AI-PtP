@@ -258,6 +258,9 @@ ul, ol { padding: 0; margin: 0; list-style: none; }
 }
 
 .wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-family: var(--font-display);
   font-size: 1.25rem;
   font-weight: 600;
@@ -1007,6 +1010,20 @@ ul, ol { padding: 0; margin: 0; list-style: none; }
   font-family: var(--font-display);
   font-weight: 600;
   color: var(--heading);
+}
+
+.wordmark-mark {
+  width: 34px;
+  height: 34px;
+  flex: none;
+}
+
+.footer-logo { display: inline-block; line-height: 0; }
+.footer-logo img { height: 72px; width: auto; display: block; }
+
+@media (max-width: 640px) {
+  .wordmark-mark { width: 28px; height: 28px; }
+  .footer-logo img { height: 58px; }
 }
 
 /* Proof strip — track record directly after the hero */
