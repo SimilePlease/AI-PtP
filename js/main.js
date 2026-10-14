@@ -41,10 +41,7 @@
       var message = (form.elements.message.value || '').trim();
       var subject = 'Website enquiry: ' + topic + (name ? ' — ' + name : '');
       var body = 'Name: ' + name + '\nEmail: ' + email + '\nTopic: ' + topic + '\n\n' + message + '\n';
-      var hint = document.querySelector('.form-hint');
-      postHubSpot({ name: name, email: email, phone: '', topic: topic }, 'contact form').then(function () {
-        if (hint) hint.textContent = 'Saved — your enquiry is with Parag. Your email app is opening with the message prepared.';
-      }).catch(function () {
+      postHubSpot({ name: name, email: email, phone: '', topic: topic }, 'contact form').catch(function () {
         window.location.href = 'mailto:parag@kudtarkar.life' +
           '?subject=' + encodeURIComponent(subject) +
           '&body=' + encodeURIComponent(body);
