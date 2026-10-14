@@ -341,5 +341,29 @@ check('conversation battery: 12 real-topic questions all produce grounded prompt
   });
 });
 
+check('small talk: ' + 'hi/hello/hey/namaste/emoji-only' + ' all get templated persona replies, never LLM meta-talk', function () {
+  var a = AIAgent.createAgent(memoryStore());
+  ['hi', 'hello', 'hey there', 'Hello!', 'namaste \uD83D\uDE4F', '\uD83D\uDE00', 'good morning', 'yo', 'sup', 'HELLO?!']
+    .forEach(function (g) {
+      var t = a.templatedFree(g);
+      assert.ok(t, 'no template for "' + g + '"');
+      assert.ok(t.indexOf('AI-PtP') !== -1 || t.indexOf('Welcome back') !== -1, 'no persona in: ' + t);
+      assert.ok(!/no specific message|just a/i.test(t), 'meta-talk leaked: ' + t);
+    });
+  ['how are you?', "how's it going?", "what\u2019s up"].forEach(function (g) {
+    assert.ok(a.templatedFree(g), 'no template for "' + g + '"');
+  });
+});
+
+check('small talk: thanks / bye templated; real questions stay null (LLM handles)', function () {
+  var a = AIAgent.createAgent(memoryStore());
+  assert.ok(a.templatedFree('thanks!'));
+  assert.ok(a.templatedFree('bye'));
+  assert.strictEqual(a.templatedFree('what is agentic AI?'), null);
+  assert.strictEqual(a.templatedFree('book a meeting'), null, 'booking must route to FSM, not templates');
+  assert.strictEqual(a.templatedFree('hi, I want to book a meeting'), null, 'greeting+booking routes to FSM');
+  assert.strictEqual(a.templatedFree('hi what is a CoE?'), null, 'greeting+question routes to LLM');
+});
+
 console.log(failures === 0 ? '\nSTRESS TESTS: ALL PASSED' : '\nSTRESS TESTS: ' + failures + ' FAILURE(S)');
 process.exit(failures === 0 ? 0 : 1);

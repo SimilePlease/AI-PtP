@@ -158,6 +158,25 @@
     /* ---------- router ---------- */
 
     var AVAIL_RE = /\b(free|available|work|works|good|suit|suits|open)\b/i;
+    var GREETING_RE = /^\s*(?:h+i+|h+e+y+|h+e+l+o+|y+o+|s+u+p+|greetings|good\s+(?:morning|afternoon|evening|day)|namaste|howdy)[!,.\u2026]*\s*(?:there|friend|folks|assistant|ptp|team)?\s*[!\u2026.?]*$$/iu;
+    var HOW_ARE_YOU_RE = /^\s*(?:how\s+(?:are|r)\s+(?:you|u)|how\u2019s it going|how's it going|whats up|what\u2019s up|what\u2019s\u00a0up|wassup|what do you do|who are you)\b[!,.\u2026?]*\s*$/i;
+    var THANKS_RE = /^\s*(?:thanks|thank you|thank\u00a0you|thx|ty|cheers|much appreciated)[!,.\u2026]*\s*(?:so much|a lot|a million)?\s*[!\u2026.]*$/i;
+    var BYE_RE = /^\s*(?:bye|goodbye|good\u00a0bye|see\u00a0ya|see you|cheers|take care|later)[!,.\u2026]*\s*[!\u2026.]*$/i;
+
+    var GREETINGS = [
+      'Hey! Great to see you \u2014 I\u2019m the AI-PtP Assistant. What brings you here today?',
+      'Hi there! I\u2019m the AI-PtP Assistant \u2014 happy to chat about AI strategy, the practice, or booking a meeting. What\u2019s on your mind?'
+    ];
+    var HOW_ARE_YOU = [
+      'Doing well, thanks for asking! I\u2019m the AI-PtP Assistant \u2014 ready to chat about AI or get a meeting on the calendar. What can I do for you?'
+    ];
+    var THANKS = [
+      'You\u2019re very welcome! Anything else I can help with \u2014 AI questions, services, or booking a meeting?',
+      'Anytime! Shout if you want to dig into anything else.'
+    ];
+    var BYES = [
+      'Take care! If a meeting would help, tap \u201cBook a meeting\u201d anytime \u2014 or email parag@kudtarkar.life.'
+    ];
 
     function wantsBooking(text) {
       var t = text || '';
@@ -311,6 +330,20 @@
       return null;
     }
 
+    function templatedFree(text) {
+      var t = (text || '').trim();
+      if (!t) return null;
+      var emojiOnly = /^\s*\p{Extended_Pictographic}+\s*$/u.test(t);
+      if (!emojiOnly) t = t.replace(/\p{Extended_Pictographic}/gu, '').replace(/[\u200D\uFE0F]/g, '').trim();
+      if (emojiOnly || GREETING_RE.test(t) || HOW_ARE_YOU_RE.test(t)) {
+        if (lead.name) return 'Welcome back, ' + lead.name + '! Good to see you \u2014 what\u2019s on your mind?';
+        return pick(GREETINGS.concat(HOW_ARE_YOU), fsm.turn);
+      }
+      if (THANKS_RE.test(t)) return pick(THANKS, fsm.turn);
+      if (BYE_RE.test(t)) return pick(BYES, fsm.turn);
+      return null;
+    }
+
     /* ---------- guard ---------- */
 
     function guardReply(reply) {
@@ -399,6 +432,7 @@
       turn: turn,
       resetFlow: resetFlow,
       resumeGreeting: resumeGreeting,
+      templatedFree: templatedFree,
       guardReply: guardReply,
       safeReply: SAFE_REPLY,
       parseToolCall: parseToolCall,

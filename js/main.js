@@ -325,6 +325,15 @@
         return;
       }
 
+      /* --- Small talk: greetings/thanks/bye get deterministic replies --- */
+      var canned = agent.templatedFree(text);
+      if (canned) {
+        var cannedBubble = addMsg('bot', canned);
+        history.push({ role: 'assistant', content: canned });
+        if (/book/i.test(canned)) attachBookingCta(cannedBubble);
+        return;
+      }
+
       /* --- LLM path --- */
       generating = true;
       setBusy(true);
