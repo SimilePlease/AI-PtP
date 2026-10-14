@@ -12,7 +12,9 @@ AI writes, you review in Gmail, one tap sends.
    | `TOKEN` | invent a long random string (this is the shared secret) |
 | `OWNER_EMAIL` | Where every new lead is emailed with full details (e.g. `parag@kudtarkar.life`). Set this to receive instant notifications. |
 | `AUTO_SEND` | `true` = emails go out immediately; blank/`false` = saved as Gmail drafts for your review. |
-| `GEMINI_KEY` | Optional. Without it, enquirers still get a fixed confirmation email and you still get the owner notification. |
+| `GROK_KEY` | Optional. xAI API key (from console.x.ai) — used for the AI-drafted reply emails. Preferred over Gemini when both are set. |
+| `GROK_MODEL` | Optional. Defaults to `grok-4-fast`. |
+| `GEMINI_KEY` | Optional fallback if no Grok key. Without either, enquirers still get a fixed confirmation email and you still get the owner notification. |
    | `GEMINI_KEY` | https://aistudio.google.com/apikey → *Get API key* (free) |
    | `SENDER_NAME` | e.g. `Parag — AI-PtP` |
    | `PORTAL_ID` | HubSpot → Settings → *Account* → portal number (optional) |

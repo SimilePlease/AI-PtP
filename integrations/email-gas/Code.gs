@@ -173,12 +173,46 @@ function coldPrompt(contactName, company, industry, notes) {
 
 /* ---------------- plumbing ---------------- */
 
-function geminiDraft(prompt) {
+/* Drafting provider: xAI Grok (OpenAI-compatible) when GROK_KEY is set,
+   otherwise Google Gemini when GEMINI_KEY is set. Either may be absent —
+   callers must handle a thrown error (a fixed-text email is sent instead). */
+function draftText(prompt) {
+  var grok = cfg('GROK_KEY');
+  if (grok) return grokDraft(prompt, grok);
+  var gem = cfg('GEMINI_KEY');
+  if (gem) return geminiDraft(prompt, gem);
+  throw new Error('no LLM key configured (GROK_KEY or GEMINI_KEY)');
+}
+
+function grokDraft(prompt, key) {
+  var payload = {
+    model: cfg('GROK_MODEL') || 'grok-4-fast' ,
+    messages: [{ role: 'user', content: prompt }],
+    temperature: 0.4,
+    max_tokens: 400
+  };
+  var res = UrlFetchApp.fetch('https://api.x.ai/v1/chat/completions', {
+    method: 'post',
+    contentType: 'application/json',
+    headers: { Authorization: 'Bearer ' + key },
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  });
+  var code = res.getResponseCode();
+  var text = res.getContentText();
+  if (code !== 200) throw new Error('Grok ' + code + ': ' + text.slice(0, 200));
+  var data = JSON.parse(text);
+  var out = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+  if (!out) throw new Error('Grok returned no text');
+  return String(out).trim();
+}
+
+function geminiDraft(prompt, key) {
   var payload = {
     contents: [{ parts: [{ text: prompt }] }],
     generationConfig: { temperature: 0.4, maxOutputTokens: 400 }
   };
-  var res = UrlFetchApp.fetch(GEMINI_URL + cfg('GEMINI_KEY'), {
+  var res = UrlFetchApp.fetch(GEMINI_URL + key, {
     method: 'post',
     contentType: 'application/json',
     payload: JSON.stringify(payload),
@@ -205,7 +239,7 @@ function signature() {
 }
 
 function geminiToGmail(to, fallbackSubject, prompt, name) {
-  var drafted = splitSubject(geminiDraft(prompt), fallbackSubject);
+  var drafted = splitSubject(draftText(prompt), fallbackSubject);
   var body = drafted.body + signature();
   var opts = { htmlBody: '<p>' + body.replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>') + '</p>' };
   if (cfg('AUTO_SEND') === 'true') {
