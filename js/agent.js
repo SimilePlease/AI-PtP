@@ -416,6 +416,54 @@
         (pausedNote ? ' CONTEXT: a guided booking is mid-flow (' + pausedNote + ' still needed) \u2014 the visitor stepped aside with this message. Answer briefly, then gently invite them back to finish booking.' : '');
     }
 
+    /* ---------- answer engine (works with or without the LLM) ---------- */
+
+    var ANSWERS = [
+      { keys: ['service', 'offer', 'help with', 'what do you do', 'what can you do', 'practice', 'consultancy', 'consulting'],
+        a: 'This is AI-PtP — an AI strategy and delivery practice: finding the right AI use cases, designing AI Centres of Excellence, guiding responsible adoption, and taking pilots to production. Which of those is closest to what you need?' },
+      { keys: ['industry', 'industries', 'sector', 'healthcare', 'medtech', 'finance', 'financial', 'wealth', 'telecom', 'telecommunications', 'maritime', 'shipping', 'sme', 'smes', 'small business'],
+        a: 'The practice works across healthcare & MedTech, financial services & wealth management, telecommunications, maritime & shipping, and SMEs — smaller businesses get the same practical treatment, scaled to fit.' },
+      { keys: ['coe', 'centre of excellence', 'center of excellence', 'operating model', 'mlops', 'llmops'],
+        a: 'An AI Centre of Excellence is a central capability that lets AI actually ship: operating model, talent, platforms, governance, and MLOps/LLMOps. The site\u2019s featured section covers how it\u2019s designed and led. Want the deep dive? Book a meeting.' },
+      { keys: ['approach', 'delivery', 'process', 'methodology', 'how do you work', 'steps', 'discover'],
+        a: 'Five steps: Discover, Prioritize, Organize, Design and build, Measure and improve. Evidence-led, no theatre — and cost improvements are assessed and measured in context.' },
+      { keys: ['responsible', 'ethic', 'ethics', 'bias', 'fairness', 'transparen', 'explainab', 'privacy'],
+        a: 'Responsible AI here rests on three pillars: security (protecting models, data, and inputs), governance (ownership, policies, oversight, audit trails), and ethics (fairness, transparency, privacy by design). Framework familiarity includes NIST AI RMF, ISO 42001, the EU AI Act, and GDPR.' },
+      { keys: ['security', 'secure', 'prompt injection', 'jailbreak', 'adversarial', 'threat'],
+        a: 'AI security means protecting the model and its data: secure prompt handling, access controls, awareness of adversarial inputs like prompt injection, and security review built into evaluation and deployment. It\u2019s one of the three responsible-AI pillars on this site.' },
+      { keys: ['governance', 'oversight', 'audit', 'accountab', 'policy', 'regulation', 'compliance', 'eu ai act', 'nist', 'iso 42001', 'gdpr', 'mas', 'feat', 'hipaa', 'pdpa'],
+        a: 'AI governance is about clear ownership and checkpoints: intake gates, risk assessment, human oversight, audit trails, and production monitoring. Frameworks worth knowing: NIST AI RMF, ISO 42001, EU AI Act, GDPR, MAS TRM & FEAT.' },
+      { keys: ['innovation', 'wearable', 'iot', 'computer vision', 'portfolio', 'projects'],
+        a: 'Beyond consulting, the practice has hands-on innovation work in AI, wearables, IoT, and computer vision — with a project portfolio ranging from deployed clinical AI platforms to strategy blueprints.' },
+      { keys: ['cost', 'price', 'pricing', 'how much', 'fee', 'rate', 'charge'],
+        a: 'It depends on the shape of the work, so I won\u2019t throw out a number here. The honest path: tap \u201cBook a meeting\u201d or email parag@kudtarkar.life and you\u2019ll get a scoped, specific answer.' },
+      { keys: ['contact', 'email', 'reach', 'touch', 'phone', 'call you', 'speak', 'where are you based', 'location', 'singapore'],
+        a: 'Easy: email parag@kudtarkar.life, use the contact form on this page, or tap \u201cBook a meeting\u201d to grab a slot directly. Based in Singapore, working globally.' },
+      { keys: ['agentic ai', 'agentic', 'agent', 'workflow automation'],
+        a: 'Agentic AI: systems that plan and take multi-step actions toward a goal — calling tools, checking results, and adapting — instead of answering one prompt at a time. Done well, it automates real workflows; the craft is choosing the right workflows and governing them. Happy to explore yours — book a meeting.' },
+      { keys: ['llm', 'large language model', 'how do llms work', 'transformer', 'gpt'],
+        a: 'In brief: an LLM is a neural network trained on vast text to predict what comes next — which, at scale, produces general language ability. Useful, probabilistic, and worth governing carefully. Want to talk about applying one safely? Book a meeting.' },
+      { keys: ['who are you', 'what are you', 'your name', 'ai-ptp assistant', 'are you a bot', 'are you human', 'are you ai'],
+        a: 'I\u2019m the AI-PtP Assistant — here to answer questions about this practice and help you book a meeting. What would you like to know?' },
+      { keys: ['pilot', 'production', 'poc', 'proof of concept', 'prototype', 'deploy'],
+        a: 'Pilots fail in production when nobody plans for integration, people, and oversight. This practice exists to close that gap — from first use case to deployed, measured system.' },
+      { keys: ['strategy', 'use case', 'use-case', 'prioriti', 'roadmap', 'business value', 'roi', 'tco', 'total cost'],
+        a: 'AI strategy here means finding where AI may help, choosing the right approach (AI, process design, or plain software), prioritizing with discipline, and assessing total cost of ownership — value first, fashion never.' },
+      { keys: ['crm', 'integration', 'api', 'webhook'],
+        a: 'Technical integrations are very much part of the work — though chat-based ones are beyond me for now. Email parag@kudtarkar.life or book a meeting and describe what you have in mind.' }
+    ];
+
+    function answer(text) {
+      var t = ' ' + (text || '').toLowerCase() + ' ';
+      var best = null, bestScore = 0;
+      ANSWERS.forEach(function (item) {
+        var score = 0;
+        item.keys.forEach(function (k) { if (t.indexOf(k) !== -1) score += k.length; });
+        if (score > bestScore) { bestScore = score; best = item; }
+      });
+      return best ? best.a : null;
+    }
+
     /* ---------- exports ---------- */
 
     function leadSnapshot() {
@@ -433,6 +481,8 @@
       resetFlow: resetFlow,
       resumeGreeting: resumeGreeting,
       templatedFree: templatedFree,
+      answer: answer,
+      answersCount: ANSWERS.length,
       guardReply: guardReply,
       safeReply: SAFE_REPLY,
       parseToolCall: parseToolCall,

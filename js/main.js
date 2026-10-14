@@ -211,14 +211,15 @@
     var engine = null;
     var generating = false;
     var loadingStarted = false;
+    var liteMode = false;
     var history = [];
     var webgpuOk = typeof navigator !== 'undefined' && !!navigator.gpu;
 
     function setStatus(text) { chatEls.status.textContent = text; }
 
     function setBusy(busy) {
-      chatEls.input.disabled = busy || !engine;
-      chatEls.send.disabled = busy || !engine;
+      chatEls.input.disabled = busy || (!engine && !liteMode);
+      chatEls.send.disabled = busy || (!engine && !liteMode);
     }
 
     function escapeHtml(s) {
@@ -272,8 +273,14 @@
       if (!opening) return;
 
       if (!webgpuOk) {
-        setStatus('Unavailable');
-        chatEls.unsupported.hidden = false;
+        liteMode = true;
+        setStatus('Lite mode');
+        chatEls.unsupported.hidden = true;
+        chatEls.progress.hidden = true;
+        history = [{ role: 'system', content: agent.buildSystemPrompt('') }];
+        setBusy(false);
+        chatEls.input.focus();
+        addMsg('bot', 'Hi! \uD83D\uDC4B I\u2019m the AI-PtP Assistant, running in lite mode on this browser \u2014 happy to answer questions about the practice or help you book a meeting. What\u2019s on your mind?');
         return;
       }
       if (!engine && !loadingStarted) startLoading();
@@ -289,11 +296,18 @@
     var pct = -1;
 
     function failLoad(reason) {
-      setStatus('Failed to load');
+      liteMode = true;
+      setStatus('Lite mode');
       chatEls.progress.hidden = false;
       chatEls.progress.textContent = reason;
-      var bubble = addMsg('bot', 'I couldn\u2019t finish loading \u2014 the model download seems blocked or too slow on this network. Closing and reopening this chat retries it. Meanwhile: email parag@kudtarkar.life or tap Book a meeting and I\u2019ll make it worth the wait.');
-      attachBookingCta(bubble);
+      var bubble = addMsg('bot', 'The full brain didn\u2019t download on this network (it\u2019s ~900MB), so I\u2019m running in lite mode \u2014 quicker and simpler, but still useful. Ask me about the services, AI topics, or booking a meeting. Closing and reopening this chat retries the full download.');
+      history = [{ role: 'system', content: agent.buildSystemPrompt('') }];
+      setBusy(false);
+      chatEls.input.focus();
+      var g2 = agent.resumeGreeting() ||
+        'Hi there! \uD83D\uDC4B I\u2019m the AI-PtP Assistant \u2014 I can chat about the services here or help you book a meeting. What\u2019s on your mind?';
+      addMsg('bot', g2);
+      history.push({ role: 'assistant', content: g2 });
       loadingStarted = false;
     }
 
@@ -360,7 +374,7 @@
     chatEls.form.addEventListener('submit', async function (e) {
       e.preventDefault();
       var text = chatEls.input.value.trim();
-      if (!text || !engine || generating) return;
+      if (!text || (!engine && !liteMode) || generating) return;
       chatEls.input.value = '';
 
       addMsg('user', text);
@@ -389,6 +403,16 @@
         var cannedBubble = addMsg('bot', canned);
         history.push({ role: 'assistant', content: canned });
         if (/book/i.test(canned)) attachBookingCta(cannedBubble);
+        return;
+      }
+
+      /* --- Lite mode: curated answer engine, no model needed --- */
+      if (!engine) {
+        var lite = agent.answer(text);
+        var liteText = lite || 'I want to give you a proper answer to that, and this isn\u2019t one I can do well in lite mode. Email parag@kudtarkar.life or book a meeting \u2014 you\u2019ll get a real one there.';
+        var liteBubble = addMsg('bot', liteText);
+        history.push({ role: 'assistant', content: liteText });
+        if (/book/i.test(liteText)) attachBookingCta(liteBubble);
         return;
       }
 

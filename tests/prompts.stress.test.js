@@ -365,5 +365,42 @@ check('small talk: thanks / bye templated; real questions stay null (LLM handles
   assert.strictEqual(a.templatedFree('hi what is a CoE?'), null, 'greeting+question routes to LLM');
 });
 
+check('answer engine: ' + '16 site/AI topics answered without any model', function () {
+  var a = AIAgent.createAgent(memoryStore());
+  var questions = [
+    'what services do you offer?', 'which industries do you cover?',
+    'what is a CoE?', "what\u2019s your delivery approach?", 'what about responsible AI?',
+    'what is AI security?', 'how does AI governance work?', 'tell me about your portfolio',
+    'how much does it cost?', 'how can I contact you?', 'what is agentic AI?',
+    'how do LLMs work?', 'who are you?', 'pilot to production?',
+    'how do we prioritize AI use cases?', 'do you do integrations?'
+  ];
+  questions.forEach(function (q) {
+    var ans = a.answer(q);
+    assert.ok(ans && ans.length > 40, 'no answer for: ' + q);
+    assert.ok(a.guardReply(ans), 'engine produced unsafe text for: ' + q);
+  });
+});
+
+check('answer engine: unknown topic returns null (honest fallback), no invented facts', function () {
+  var a = AIAgent.createAgent(memoryStore());
+  assert.strictEqual(a.answer('who won the 1998 world cup final?'), null);
+  assert.strictEqual(a.answer('\uD83D\uDE00'), null);
+  assert.strictEqual(a.answer('xkcd random string zzz'), null);
+});
+
+check('lite-mode conversation: greeting, answer, booking flow, confirm + prefill URL', function () {
+  var a = AIAgent.createAgent(memoryStore());
+  assert.ok(a.templatedFree('hi'));
+  assert.ok(a.answer('what services do you offer?'));
+  var st = a.startBooking('book a meeting');
+  assert.strictEqual(a.state(), 'NEED_NAME');
+  a.turn('Parag'); a.turn('kudtarkar.parag@gmail.com'); a.turn('skip'); a.turn('AI implementation');
+  assert.strictEqual(a.state(), 'CONFIRM');
+  var snap = a.lead();
+  assert.strictEqual(snap.email, 'kudtarkar.parag@gmail.com');
+  assert.strictEqual(snap.phone, '(skipped)');
+});
+
 console.log(failures === 0 ? '\nSTRESS TESTS: ALL PASSED' : '\nSTRESS TESTS: ' + failures + ' FAILURE(S)');
 process.exit(failures === 0 ? 0 : 1);
