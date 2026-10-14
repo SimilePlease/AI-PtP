@@ -1618,3 +1618,76 @@ html.js .reveal.in {
   .chat-panel { right: 16px; bottom: 84px; }
   .chat-fab { right: 16px; bottom: 20px; }
 }
+
+/* ---------- Restored-markup support (classes present in HTML without rules) ---------- */
+
+.nav-toggle-label {
+  font: 600 0.72rem var(--font-body);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--heading);
+}
+
+.hero-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.hero-copy h1 { margin: 0; }
+.hero-copy .eyebrow { margin: 0; }
+.hero-copy .hero-support { margin: 0; }
+.hero-copy .hero-intro { margin: 0; }
+
+.hv-node--small { opacity: 0.75; }
+
+.section-head--dark h2 { color: var(--cream); }
+.section-head--dark .lede { color: #D8E0D4; }
+.section-head--dark .eyebrow { color: var(--lime); }
+.section-head--dark .eyebrow-num { color: var(--lime-soft); }
+
+.coe-help {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.coe-help .check-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.book-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.book-option { flex: none; }
+
+.rai-pillars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 28px;
+}
+
+.rai-pillar {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rai-pillar .subhead { margin: 0; }
+.rai-pillar p { margin: 0; color: var(--muted); font-size: 0.95rem; line-height: 1.6; }
+
+@media (max-width: 860px) {
+  .rai-pillars { grid-template-columns: 1fr; }
+}

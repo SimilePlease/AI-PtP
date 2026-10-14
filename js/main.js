@@ -311,7 +311,7 @@
       /* --- Router: deterministic booking FSM first --- */
       var fsmOut = null;
       if (!agent.isActive() && agent.wantsBooking(text)) {
-        fsmOut = agent.startBooking();
+        fsmOut = agent.startBooking(text);
       } else if (agent.isActive()) {
         fsmOut = agent.turn(text);
       }

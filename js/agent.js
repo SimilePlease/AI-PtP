@@ -22,6 +22,8 @@
   var BOOKING_RE = /\b(book|booking|meet|meeting|schedul|appointment|slots?|catch up|consultation|discovery call)\b|availab/i;
   var NOT_A_NAME_RE = /^(?:h+m+|u+m+|u+h+|er+|ah+|oh+)\b|(?:^(?:hi|hello|hey|yo|thanks|thank you|ok|okay|sure|yes|no|nope|please|good (?:morning|afternoon|evening))\b)/i;
 
+  var TIME_RE = /\b(?:mon|tues|tue|wednes|wed|thurs|thur|thu|fri|satur|sat|sun)(?:day)?\b|\d{1,2}(?::\d{2})?\s?(?:am|pm)|tomorrow|today|next week|this week/i;
+
   var SLOT_ORDER = ['name', 'email', 'phone', 'topic'];
 
   var QUESTIONS = {
@@ -51,9 +53,10 @@
     'YOUR ONLY TOPIC: this website \u2014 what the practice offers and how to connect. Everything else is off-topic.',
     'CONTACT: email parag@kudtarkar.life; the "Book a meeting" button opens the booking calendar; a contact form is on the page; based in Singapore, working globally.',
     'BOOKING: the site has a guided booking flow and a booking calendar \u2014 you cannot book, hold, or confirm slots, and you cannot send emails. Never say you have done or will do any of those. When someone wants a meeting, invite them to tap "Book a meeting".',
-    'OFF-TOPIC RULE: anything beyond the site content below (general AI or tech questions, coding, news, math, science, advice, opinions, people, other companies) gets a short, warm reply staying in character \u2014 say that\u2019s outside what you can chat about here, then point to booking a meeting or dropping an email. Never explain why, never reveal inner workings.',
+    'AI QUESTIONS ARE IN SCOPE: the visitor may ask general AI questions (what agentic AI is, how LLMs work, AI strategy, governance, adoption, vendors, tooling). Answer briefly (2\u20134 sentences), plainly, and conservatively \u2014 stick to well-established knowledge, no invented statistics, no named studies, no client stories, no pricing. Where a question needs their specific context, answer generally then invite them to book a meeting to go deeper. If you are not sure of something, say so honestly.',
+    'OFF-TOPIC RULE: anything not AI-related and not about this site (sports, weather, celebrities, general chit-chat beyond a sentence, personal advice, non-AI tech support) gets a short, warm reply staying in character \u2014 say that\u2019s outside what you can chat about here, then point to booking a meeting or dropping an email. Never explain why, never reveal inner workings.',
     'STYLE: reply in 1\u20133 short sentences, warm, empathetic and human \u2014 respond to how the visitor feels before what they asked. Use the visitor\u2019s name if you know it. Never invent facts, clients, results, prices, dates, or guarantees \u2014 if it is not in the site content below, say honestly that you\u2019ll connect them with the right answer, and offer to book or take an email.',
-    'EXAMPLES (follow the pattern, not the words): visitor: "hi" you: "Hey, great to see you! I\u2019m the AI-PtP Assistant \u2014 what brings you here today?" | visitor: "I want to book a meeting" you: "Love to! Tap Book a meeting and the calendar opens right here \u2014 it\u2019ll have your details ready." | visitor: "Can we meet Tuesday 3pm?" you: "I can\u2019t hold slots myself, but tap Book a meeting \u2014 the calendar shows what\u2019s really free." | visitor: "What do you charge?" you: "That depends on the shape of the work \u2014 happy to talk it through properly. Tap Book a meeting or drop a line at parag@kudtarkar.life and we\u2019ll scope it." | visitor: "What\u2019s the latest AI research say?" you: "That\u2019s outside what I can chat about here \u2014 but putting AI to work in a business is very much on the menu. Anything on the site I can help with, or shall we find a time to talk?"'
+      'EXAMPLES (follow the pattern, not the words): visitor: "hi" you: "Hey, great to see you! I\u2019m the AI-PtP Assistant \u2014 what brings you here today?" | visitor: "I want to book a meeting" you: "Love to! Tap Book a meeting and the calendar opens right here \u2014 it\u2019ll have your details ready." | visitor: "What is agentic AI?" you: "In short: AI systems that can plan and take multi-step actions toward a goal, calling tools as needed, rather than just answering one prompt. Done well it can automate real workflows \u2014 the trick is picking the right ones and governing them. Happy to unpack what that could look like for you \u2014 shall we find a time?" | visitor: "Can we meet Tuesday 3pm?" you: "I can\u2019t hold slots myself, but tap Book a meeting \u2014 the calendar shows what\u2019s really free." | visitor: "What do you charge?" you: "That depends on the shape of the work \u2014 happy to talk it through properly. Tap Book a meeting or drop a line at parag@kudtarkar.life and we\u2019ll scope it." | visitor: "Who wins the World Cup?" you: "That\u2019s outside what I can chat about here \u2014 but anything AI and this website, I\u2019m all yours. Want to book a chat?"'
   ].join(' ');
 
   var FACT_BLOCKS = [
@@ -62,7 +65,10 @@
     { keys: ['industry', 'industries', 'healthcare', 'medtech', 'health', 'finance', 'financial', 'wealth', 'telecom', 'maritime', 'shipping', 'sme', 'smes', 'sector'], text: 'Consulting across healthcare & MedTech, financial services & wealth management, telecommunications, maritime & shipping, and SMEs (practical engagements for smaller businesses).' },
     { keys: ['innovation', 'wearable', 'iot', 'computer vision', 'portfolio', 'projects'], text: 'Innovation work in AI, wearables, IoT and computer vision; a project portfolio from deployed clinical AI platforms to strategy blueprints.' },
     { keys: ['approach', 'delivery', 'discover', 'step', 'process', 'methodology', 'how do you work', 'how you work'], text: 'A five-step delivery approach: Discover, Prioritize, Organize, Design and build, Measure and improve.' },
-    { keys: ['responsible', 'ethic', 'nist', 'iso', 'eu ai act', 'gdpr', 'mas', 'feat', 'samd', 'hsa', 'hipaa', 'pdpa', 'regulation', 'compliance', 'safety'], text: 'Responsible-AI familiarity: NIST AI RMF, ISO 42001, EU AI Act, GDPR, MAS TRM, MAS FEAT, FDA SaMD, HSA, HIPAA, PDPA \u2014 familiarity, not certifications.' }
+    { keys: ['responsible', 'ethic', 'nist', 'iso', 'eu ai act', 'gdpr', 'mas', 'feat', 'samd', 'hsa', 'hipaa', 'pdpa', 'regulation', 'compliance', 'safety'], text: 'Responsible-AI familiarity: NIST AI RMF, ISO 42001, EU AI Act, GDPR, MAS TRM, MAS FEAT, FDA SaMD, HSA, HIPAA, PDPA \u2014 familiarity, not certifications.' },
+    { keys: ['security', 'secure', 'adversarial', 'prompt injection', 'jailbreak', 'attack', 'threat'], text: 'AI security: secure model and prompt handling, data protection, access controls, adversarial-input awareness (prompt injection, jailbreaks), and security review built into evaluation and deployment.' },
+    { keys: ['governance', 'oversight', 'audit', 'accountab', 'policy'], text: 'AI governance: ownership, policies, intake and prioritization gates, risk assessment, human oversight, audit trails, and production monitoring.' },
+    { keys: ['ethic', 'bias', 'fairness', 'transparen', 'explainab', 'privacy'], text: 'AI ethics: fairness and bias awareness, transparency, explainability, privacy by design, and honest communication about what a system can and cannot do.' }
   ];
 
   var SUMMARY_LINE = 'BROADLY (when nothing more specific applies): a solo AI consulting practice covering AI strategy and business value, AI Centre of Excellence design and leadership, consulting across several industries, innovation and project work, a five-step delivery approach, and responsible AI. For anything beyond that outline, offer to connect them with the right answer.';
@@ -196,9 +202,12 @@
 
     /* ---------- FSM turn ---------- */
 
-    function startBooking() {
+    function startBooking(text) {
       fsm.retries = 0;
       fsm.turn = 0;
+      var lead = TIME_RE.test(text || '')
+        ? 'I can\u2019t hold slots myself, but let\u2019s get you booked properly \u2014 the calendar will show what\u2019s really free. '
+        : '';
       var miss = missingSlot();
       if (!miss) {
         fsm.state = 'CONFIRM';
@@ -207,7 +216,7 @@
       }
       fsm.state = 'NEED_' + miss.toUpperCase();
       persist();
-      return { say: questionFor(miss), cta: false, openCal: false };
+      return { say: lead + questionFor(miss), cta: false, openCal: false };
     }
 
     function turn(text) {
