@@ -1002,6 +1002,49 @@ ul, ol { padding: 0; margin: 0; list-style: none; }
   color: var(--muted);
 }
 
+.rai-strap {
+  margin-top: 14px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--heading);
+}
+
+/* Proof strip — track record directly after the hero */
+.proof-strip {
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.proof-inner {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(24px, 4vw, 48px);
+  padding: clamp(24px, 3.5vw, 36px) 0;
+}
+
+.proof-figure {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.12rem;
+  color: var(--heading);
+}
+
+.proof-item p:not(.proof-figure) {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 860px) {
+  .proof-inner { grid-template-columns: 1fr; gap: 18px; }
+}
+
+/* Deprioritised innovation items (prototypes & concepts) */
+.innovation-item--secondary { opacity: 0.72; }
+.innovation-item--secondary p { font-size: 0.95rem; }
+
 .framework-tags {
   display: flex;
   flex-wrap: wrap;

@@ -347,7 +347,7 @@
         history = [{ role: 'system', content: agent.buildSystemPrompt('') }];
         setBusy(false);
         chatEls.input.focus();
-        addMsg('bot', 'Hi! \uD83D\uDC4B I\u2019m the AI-PtP Assistant, running in lite mode on this browser \u2014 happy to answer questions about the practice or help you book a meeting. What\u2019s on your mind?');
+        addMsg('bot', 'Hi! \uD83D\uDC4B Lite mode here \u2014 ask me about the AI CoE: operating model, governance, platforms, delivery. Or book a 30-minute strategic discussion. What\u2019s on your mind?');
         return;
       }
       if (!engine && !loadingStarted) startLoading();
@@ -372,7 +372,7 @@
       setBusy(false);
       chatEls.input.focus();
       var g2 = agent.resumeGreeting() ||
-        'Hi there! \uD83D\uDC4B I\u2019m the AI-PtP Assistant \u2014 I can chat about the services here or help you book a meeting. What\u2019s on your mind?';
+        'Hi there! \uD83D\uDC4B Explore AI CoE questions with me \u2014 operating model, governance, platforms, delivery \u2014 or book a 30-minute strategic discussion. What\u2019s on your mind?';
       addMsg('bot', g2);
       history.push({ role: 'assistant', content: g2 });
       loadingStarted = false;
@@ -420,7 +420,7 @@
         setBusy(false);
         chatEls.input.focus();
         var greeting = agent.resumeGreeting() ||
-          'Hi there! \uD83D\uDC4B I\u2019m the AI-PtP Assistant \u2014 I can chat about the services here or help you book a meeting. What\u2019s on your mind?';
+          'Hi there! \uD83D\uDC4B Explore AI CoE questions with me \u2014 operating model, governance, platforms, delivery \u2014 or book a 30-minute strategic discussion. What\u2019s on your mind?';
         addMsg('bot', greeting);
         history.push({ role: 'assistant', content: greeting });
       } catch (err) {
