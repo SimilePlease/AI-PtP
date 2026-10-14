@@ -1,6 +1,6 @@
 /* Orbit semantic FAQ matcher.
  *
- * TF-IDF + cosine similarity over the FAQ corpus, computed in-browser at load.
+ * BM25 ranking over the FAQ corpus, computed in-browser at load.
  * No server, no network calls, deterministic — the retrieval half of RAG:
  * the best-matching FAQ entry grounds the LLM (full mode) or replies verbatim (lite).
  *
@@ -15,10 +15,12 @@
  * - Tokeniser: lowercase, split on non-letters, drop stopwords, light suffix-stemming
  *   (s/es/ies/ing/ed) so "prioritise/prioritising/prioritised" and
  *   "consultancy/consultancies" collapse to the same stem.
- * - IDF: smoothed log(N / df) so rare terms (sovereign, nda, federated) dominate.
+ * - IDF: smoothed log(1 + (N - df + 0.5)/(df + 0.5)) so rare terms (sovereign, nda,
+ *   federated) dominate.
  * - Query terms absent from the corpus contribute 0 — unknown phrasing simply
  *   matches nothing rather than hallucinating a match.
- * - Threshold 0.35 cosine: high-precision. Below it we prefer honesty over guesswork.
+ * - Thresholds are BM25 score floors (agent.js uses 3.5): high-precision.
+ *   Below threshold we prefer honesty over guesswork.
  */
 
 (function (factory) {
@@ -51,7 +53,6 @@
     confidential:['nda','confidentiality','discreet'],
     privacy:['privacy','confidential','data','protection','safe','secure','security'],
     secure:['secure','security','safe','safety','protect','protected'],
-    protected:['secure','security','safe','privacy'],
     safe:['secure','security','safe','privacy','protected'],
     data:['data','information','info'],
     partner:['partner','partners','vendor','vendors','supplier','suppliers','integrator','integrators','provider','providers'],
@@ -64,7 +65,7 @@
     pilot:['pilot','pilots','poc','proof','concept','prototype','experiment','trial'],
     production:['production','live','deployed','deployment','scale','scaling','rollout'],
     live:['live','production','deployed'],
-    prioritise:['prioritise','prioritise','prioritize','rank','ranking','assess','assessment','evaluate','evaluation','choose','select','sequencing'],
+    prioritise:['prioritise','prioritize','rank','ranking','assess','assessment','evaluate','evaluation','choose','select','sequencing'],
     measure:['measure','measuring','metric','metrics','kpi','value','roi','outcome','outcomes'],
     strategy:['strategy','strategic','plan','planning','roadmap','direction'],
     plan:['plan','planning','strategy','strategic','roadmap'],
@@ -89,10 +90,8 @@
     train:['train','training','teach','coach','upskill','literacy'],
     current:['current','existing','present','today'],
     protect:['protect','protected','protecting','safeguard'],
-    suppliers:['supplier','suppliers','vendor','vendors','partner','partners','integrator','integrators'],
-    use:['use','using','apply','apply','leverage'],
-    company:['company','organisation','organisation','business','firm'],
-    where:['where','place','area','opportunit']
+    use:['use','using','apply','leverage'],
+    company:['company','organisation','business','firm']
   };
 
   function tokenize(text) {
@@ -123,22 +122,11 @@
   }
 
   /* --- vector helpers --- */
-  function l2(vec) {
-    var sum = 0;
-    for (var k in vec) sum += vec[k] * vec[k];
-    return Math.sqrt(sum);
-  }
-
-  function cosine(a, b, la, lb) {
-    var dot = 0, small = la <= lb ? a : b, big = la <= lb ? b : a;
-    for (var k in small) if (big[k]) dot += a[k] * b[k] * (big === a ? 1 : 1);
-    return la && lb ? dot / (la * lb) : 0;
-  }
 
   function build(entries) {
     entries = entries || [];
     var N = entries.length;
-    var docs = [];               /* [{ tf:{w:count}, len, terms:[] }] */
+    var docs = [];               /* [{ tf:{w:count}, len }] */
     var docFreq = {};            /* w -> df */
     var totalLen = 0;
 
@@ -158,7 +146,6 @@
       addTerms(e.q, 2);
       addTerms(e.a, 1);
       addTerms((e.keys || []).join(' '), 1.5);
-      Object.keys(tf).forEach(function (w) { len += tf[w]; });
       Object.keys(tf).forEach(function (w) { docFreq[w] = (docFreq[w] || 0) + 1; });
       docs.push({ tf: tf, len: len });
       totalLen += len;

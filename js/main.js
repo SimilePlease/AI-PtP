@@ -41,11 +41,10 @@
       var message = (form.elements.message.value || '').trim();
       var subject = 'Website enquiry: ' + topic + (name ? ' — ' + name : '');
       var body = 'Name: ' + name + '\nEmail: ' + email + '\nTopic: ' + topic + '\n\n' + message + '\n';
-      postHubSpot({ name: name, email: email, phone: '', topic: topic }, 'contact form').catch(function () {
-        window.location.href = 'mailto:parag@kudtarkar.life' +
-          '?subject=' + encodeURIComponent(subject) +
-          '&body=' + encodeURIComponent(body);
-      });
+      /* HubSpot records the enquiry; the mailto below always opens a prepared
+         draft so it also reaches the inbox directly. */
+      postHubSpot({ name: name, email: email, phone: '', topic: topic }, 'contact form')
+        .catch(function () { /* HubSpot unreachable — the mailto below still carries the enquiry */ });
       window.location.href = 'mailto:parag@kudtarkar.life' +
         '?subject=' + encodeURIComponent(subject) +
         '&body=' + encodeURIComponent(body);
@@ -422,10 +421,16 @@
         setStatus('Ready');
         chatEls.unsupported.hidden = true;
         chatEls.progress.hidden = true;
-        history = [{ role: 'system', content: agent.buildSystemPrompt('') }];
         setBusy(false);
         chatEls.input.focus();
-        addMsg('bot', 'Hi! \uD83D\uDC4B I\u2019m Orbit \u2014 let\u2019s start your AI journey. Ask me about the AI CoE: operating model, governance, platforms, delivery. Or book a 30-minute strategic discussion. What\u2019s on your mind?');
+        /* Initialise once — re-greeting on every reopen would duplicate the
+           bubble and wipe an ongoing lite-mode conversation's history. */
+        if (!chatEls.msgs.children.length) {
+          history = [{ role: 'system', content: agent.buildSystemPrompt('') }];
+          var liteGreeting = 'Hi! \uD83D\uDC4B I\u2019m Orbit \u2014 let\u2019s start your AI journey. Ask me about the AI CoE: operating model, governance, platforms, delivery. Or book a 30-minute strategic discussion. What\u2019s on your mind?';
+          addMsg('bot', liteGreeting);
+          history.push({ role: 'assistant', content: liteGreeting });
+        }
         return;
       }
       if (loadingStarted) { /* preloading in background — nothing to do */ }
@@ -451,7 +456,11 @@
 
     var pct = -1;
 
-    function failLoad(reason) {
+    /* `pending`: the load promise is still in flight (stall watchdog fired) —
+       keep loadingStarted so a panel reopen doesn't launch a SECOND engine
+       while the first may still resolve. Hard failures clear it so the
+       visitor can retry by reopening the chat. */
+    function failLoad(reason, pending) {
       liteMode = true;
       setStatus('Ready');
       chatEls.progress.hidden = true; /* technical reasons stay in console only */
@@ -466,7 +475,7 @@
         addMsg('bot', g2);
         history.push({ role: 'assistant', content: g2 });
       }
-      loadingStarted = false;
+      loadingStarted = !!pending;
     }
 
     function withTimeout(promise, ms, label) {
@@ -489,7 +498,7 @@
       var watchdog = setInterval(function () {
         if (Date.now() - lastMove > 30000) {
           clearInterval(watchdog);
-          if (!engine) { console.warn('[AI-PtP] model load stalled at ' + pct + '%'); failLoad('stall'); }
+          if (!engine) { console.warn('[AI-PtP] model load stalled at ' + pct + '%'); failLoad('stall', true); }
         }
       }, 3000);
       try {
@@ -501,7 +510,6 @@
             var p = Math.round((r.progress || 0) * 100);
             if (p !== pct) { pct = p; lastMove = Date.now(); }
             chatEls.progress.textContent = 'Loading the assistant\u2026 ' + p + '%' + (p === 0 ? ' (first load is ~300MB)' : '');
-            if (p === 0 && Date.now() - lastMove > 30000) lastMove = Date.now();
           }
         });
         clearInterval(watchdog);
@@ -511,10 +519,13 @@
         setBusy(false);
         if (!panel.hidden) {
           chatEls.input.focus();
-          var greeting = agent.resumeGreeting() ||
-            'Hi there! \uD83D\uDC4B I\u2019m Orbit \u2014 let\u2019s start your AI journey. Ask me about the AI CoE: operating model, governance, platforms, delivery. Or book a 30-minute strategic discussion. What\u2019s on your mind?';
-          addMsg('bot', greeting);
-          history.push({ role: 'assistant', content: greeting });
+          /* Don't re-greet if a lite-mode fallback already greeted mid-load. */
+          if (!chatEls.msgs.children.length) {
+            var greeting = agent.resumeGreeting() ||
+              'Hi there! \uD83D\uDC4B I\u2019m Orbit \u2014 let\u2019s start your AI journey. Ask me about the AI CoE: operating model, governance, platforms, delivery. Or book a 30-minute strategic discussion. What\u2019s on your mind?';
+            addMsg('bot', greeting);
+            history.push({ role: 'assistant', content: greeting });
+          }
         }
       } catch (err) {
         clearInterval(watchdog);

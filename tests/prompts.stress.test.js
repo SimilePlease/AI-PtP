@@ -139,6 +139,15 @@ check('phone slot: formats parsed; skip words honored; junk re-asked', function 
     a.startBooking(); a.turn('Bo Chen'); a.turn('bo@chen.example'); a.turn(p);
     assert.notStrictEqual(a.lead().phone, p, 'captured bogus phone "' + p + '"');
   });
+  var dates = ['2023-2024', '2026-10-14', '14.10.2026', '2026.10.14', '2026 - 2027'];
+  dates.forEach(function (p) {
+    var a = AIAgent.createAgent(memoryStore());
+    a.startBooking(); a.turn('Bo Chen'); a.turn('bo@chen.example'); a.turn(p);
+    assert.strictEqual(a.lead().phone, '', 'captured date "' + p + '" as a phone number');
+    var b = AIAgent.createAgent(memoryStore());
+    b.observe('we ran the pilot in ' + p + ' and it worked');
+    assert.strictEqual(b.lead().phone, '', 'observe() captured date "' + p + '" as a phone number');
+  });
 });
 
 check('topic slot: short junk re-asked; long input truncated to 140', function () {
@@ -400,6 +409,16 @@ check('lite-mode conversation: greeting, answer, booking flow, confirm + prefill
   var snap = a.lead();
   assert.strictEqual(snap.email, 'kudtarkar.parag@gmail.com');
   assert.strictEqual(snap.phone, '(skipped)');
+});
+
+check('small-talk layer never intercepts capability questions ("what do you do", "who are you")', function () {
+  var a = AIAgent.createAgent(memoryStore());
+  assert.strictEqual(a.templatedFree('what do you do'), null, '"what do you do" must reach the answer engine/LLM');
+  assert.strictEqual(a.templatedFree('who are you'), null, '"who are you" must reach the answer engine/LLM');
+  assert.ok(/AI-PtP|practice/i.test(a.answer('what do you do')), 'services answer for "what do you do"');
+  assert.ok(/Orbit/i.test(a.answer('who are you')), 'identity answer for "who are you"');
+  assert.ok(a.templatedFree('how are you'), 'genuine small talk still templated');
+  assert.strictEqual(a.wantsBooking('who are you'), false, 'identity question never starts booking');
 });
 
 console.log(failures === 0 ? '\nSTRESS TESTS: ALL PASSED' : '\nSTRESS TESTS: ' + failures + ' FAILURE(S)');

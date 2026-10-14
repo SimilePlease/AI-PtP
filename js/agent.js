@@ -16,6 +16,15 @@
 
   var EMAIL_RE = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i;
   var PHONE_RE = /\(?\+?\d[\d\s().-]{6,}\d\)?/;
+  /* The phone regex also bites on dates typed in passing ("we ran the pilot in
+     2023-2024", "since 14.10.2026") — reject date-shaped captures instead of
+     storing them as a phone number. Day-first dates keep 1-2 digit day/month
+     groups so dotted phone formats (555.123.4567) stay valid. */
+  function looksLikeDate(s) {
+    return /^\d{4}(\s*[-\u2013\u2014/.]\s*\d{1,2}){2}$/.test(s) ||          /* 2026-10-14 */
+           /^\d{1,2}\s*[-\u2013\u2014/.]\s*\d{1,2}\s*[-\u2013\u2014/.]\s*\d{4}$/.test(s) || /* 14.10.2026 */
+           /^\d{4}\s*[-\u2013\u2014]\s*\d{4}$/.test(s);                      /* 2023-2024 */
+  }
   var NAME_PHRASE_RE = /(?:my name is|i am|i'm|i\u2019m|this is|it's|it\u2019s)\s+(\p{L}[\p{L}'\u2019\- ]{1,39})/iu;
   var BARE_NAME_RE = /^\p{L}[\p{L}'\u2019\- ]{1,39}$/u;
   var SKIP_RE = /^\s*(skip|none|no|nope|later|not now|prefer not|n\/a|na)\b/i;
@@ -163,7 +172,7 @@
       if (!lead.phone || lead.phone === '(skipped)') {
         if (!SKIP_RE.test(t)) {
           var p = t.match(PHONE_RE);
-          if (p) { lead.phone = p[0].trim(); changed.push('phone'); }
+          if (p && !looksLikeDate(p[0].trim())) { lead.phone = p[0].trim(); changed.push('phone'); }
         }
       }
       if (!lead.name) {
@@ -181,7 +190,7 @@
 
     var AVAIL_RE = /\b(free|available|work|works|good|suit|suits|open)\b/i;
     var GREETING_RE = /^\s*(?:h+i+|h+e+y+|h+e+l+o+|y+o+|s+u+p+|greetings|good\s+(?:morning|afternoon|evening|day)|namaste|howdy)[!,.\u2026]*\s*(?:there|friend|folks|assistant|ptp|team)?\s*[!\u2026.?]*$$/iu;
-    var HOW_ARE_YOU_RE = /^\s*(?:how\s+(?:are|r)\s+(?:you|u)|how\u2019s it going|how's it going|whats up|what\u2019s up|what\u2019s\u00a0up|wassup|what do you do|who are you)\b[!,.\u2026?]*\s*$/i;
+    var HOW_ARE_YOU_RE = /^\s*(?:how\s+(?:are|r)\s+(?:you|u)|how\u2019s it going|how's it going|whats up|what\u2019s up|what\u2019s\u00a0up|wassup)\b[!,.\u2026?]*\s*$/i;
     var THANKS_RE = /^\s*(?:thanks|thank you|thank\u00a0you|thx|ty|cheers|much appreciated)[!,.\u2026]*\s*(?:so much|a lot|a million)?\s*[!\u2026.]*$/i;
     var BYE_RE = /^\s*(?:bye|goodbye|good\u00a0bye|see\u00a0ya|see you|cheers|take care|later)[!,.\u2026]*\s*[!\u2026.]*$/i;
 
@@ -244,7 +253,7 @@
       if (slot === 'phone') {
         if (SKIP_RE.test(t)) return '(skipped)';
         var p = t.match(PHONE_RE);
-        return p ? p[0].trim() : null;
+        return (p && !looksLikeDate(p[0].trim())) ? p[0].trim() : null;
       }
       if (slot === 'name') {
         if (NOT_A_NAME_RE.test(t) || FILLER_RE.test(t) || BOOKING_RE.test(t)) return null;
