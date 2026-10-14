@@ -95,6 +95,8 @@ check("contact email correct", (body.match(/parag@kudtarkar\.life/g) || []).leng
 const emails = [...body.matchAll(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi)].map(m => m[0]).filter(e => !/you@|name@|email@|company\.com|example\./i.test(e));
 check("no other real email addresses", emails.every(e => e.toLowerCase() === "parag@kudtarkar.life"), emails.join(", "));
 check("no generic 'welcome to the website' phrasing", !/welcome to the (website|site)/i.test(body));
+check("booking CTA is a real link (not a JS-only button)", src.includes('<a class="btn btn-accent book-option"') && src.includes('target="_blank"') && mainJs.includes("createElement('a')"));
+check("chat CTA falls back to native navigation", mainJs.includes("cta.target = '_blank'") && mainJs.includes("openCalendlyPopup"));
 check("assistant named AI-PtP in prompt", agentJs.includes("AI-PtP Assistant") && agentJs.includes("Never greet"));
 check("AI questions in scope (anti-deflection rule)", agentJs.includes("AI QUESTIONS ARE IN SCOPE"));
 check("anti-hallucination rule present", agentJs.includes("no invented statistics") && agentJs.includes("say so honestly"));

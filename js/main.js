@@ -1,9 +1,3 @@
-/*
- * AI-PtP site script.
- * Sections: nav, year, contact form, Calendly iframe + booking popup,
- * wordmark animation, scroll reveals, and the agent-driven chat assistant.
- * The assistant's brain (booking FSM, lead store, guard, tools) lives in js/agent.js.
- */
 (function () {
   'use strict';
 
@@ -87,23 +81,28 @@
     document.body.appendChild(s);
   }
 
+  /* In-page Calendly modal when the script is ready; the poll is only for the
+     auto-open path. Clicked CTAs are real <a> links, so they always work. */
   function openCalendlyPopup(url) {
     ensureCalendlyScript();
     if (window.Calendly && window.Calendly.initPopupWidget) {
-      window.Calendly.initPopupWidget({ url: url });
-      return;
+      try {
+        window.Calendly.initPopupWidget({ url: url });
+        return true;
+      } catch (err) { /* fall through */ }
     }
     var tries = 0;
     var timer = setInterval(function () {
       tries++;
       if (window.Calendly && window.Calendly.initPopupWidget) {
         clearInterval(timer);
-        window.Calendly.initPopupWidget({ url: url });
+        try { window.Calendly.initPopupWidget({ url: url }); } catch (err) { window.open(url, '_blank', 'noopener'); }
       } else if (calendlyState === 'failed' || tries > 16) {
         clearInterval(timer);
         window.open(url, '_blank', 'noopener');
       }
     }, 250);
+    return false;
   }
 
   var calFrame = document.getElementById('calendly-frame');
@@ -111,9 +110,14 @@
     calFrame.src = calendlyUrl('30min');
   }
 
-  document.querySelectorAll('.book-option').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      openCalendlyPopup(calendlyUrl(btn.getAttribute('data-event') || '30min'));
+  /* Contact-section booking buttons: real links first, popup nicety second. */
+  document.querySelectorAll('a.book-option').forEach(function (a) {
+    a.setAttribute('href', calendlyUrl(a.getAttribute('data-event') || '30min'));
+    a.setAttribute('target', '_blank');
+    a.setAttribute('rel', 'noopener');
+    a.addEventListener('click', function (e) {
+      a.setAttribute('href', calendlyUrl(a.getAttribute('data-event') || '30min'));
+      if (openCalendlyPopup(a.href)) e.preventDefault();
     });
   });
 
@@ -220,14 +224,19 @@
       return b;
     }
 
+    /* Chat CTA is a real link: native new-tab navigation always works,
+       with the in-page Calendly modal used when its script is ready. */
     function attachBookingCta(bubble) {
       if (!bubble || bubble.querySelector('.chat-cta')) return;
-      var cta = document.createElement('button');
+      var cta = document.createElement('a');
       cta.className = 'chat-cta';
-      cta.type = 'button';
+      cta.href = calendlyUrl('30min');
+      cta.target = '_blank';
+      cta.rel = 'noopener';
       cta.textContent = 'Book a meeting';
-      cta.addEventListener('click', function () {
-        openCalendlyPopup(calendlyUrl('30min'));
+      cta.addEventListener('click', function (e) {
+        cta.setAttribute('href', calendlyUrl('30min'));
+        if (openCalendlyPopup(cta.href)) e.preventDefault();
       });
       bubble.appendChild(cta);
       chatEls.msgs.scrollTop = chatEls.msgs.scrollHeight;
@@ -396,6 +405,6 @@
     });
 
     /* Preload the Calendly widget so popups open instantly on user gesture. */
-    if (webgpuOk) ensureCalendlyScript();
+    ensureCalendlyScript();
   }
 })();

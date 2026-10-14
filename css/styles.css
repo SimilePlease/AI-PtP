@@ -1551,6 +1551,8 @@ html.js .reveal.in {
 }
 
 .chat-cta:hover { background: var(--lime-deep); transform: translateY(-1px); }
+.chat-cta { text-decoration: none; }
+a.book-option { text-decoration: none; }
 
 .chat-foot { padding: 0 16px; }
 
