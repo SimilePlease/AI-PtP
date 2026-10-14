@@ -173,15 +173,48 @@ function coldPrompt(contactName, company, industry, notes) {
 
 /* ---------------- plumbing ---------------- */
 
-/* Drafting provider: xAI Grok (OpenAI-compatible) when GROK_KEY is set,
-   otherwise Google Gemini when GEMINI_KEY is set. Either may be absent —
-   callers must handle a thrown error (a fixed-text email is sent instead). */
+/* Drafting provider — set ONE property, LLM_API_KEY. The provider is
+   auto-detected from the key prefix:
+     gsk_…  → Groq Cloud   (llama-3.3-70b-versatile, OpenAI-compatible)
+     xai-…  → xAI Grok     (grok-4-fast, OpenAI-compatible)
+     AIza…  → Google Gemini (gemini-2.0-flash)
+   Legacy properties GROK_KEY / GEMINI_KEY still work. If nothing is set,
+   callers fall back to a fixed-text email — the pipeline never breaks. */
 function draftText(prompt) {
+  var key = cfg('LLM_API_KEY');
+  if (key) {
+    if (key.indexOf('gsk_') === 0) return groqCloudDraft(prompt, key);
+    if (key.indexOf('xai-') === 0) return grokDraft(prompt, key);
+    if (key.indexOf('AIza') === 0) return geminiDraft(prompt, key);
+  }
   var grok = cfg('GROK_KEY');
   if (grok) return grokDraft(prompt, grok);
   var gem = cfg('GEMINI_KEY');
   if (gem) return geminiDraft(prompt, gem);
-  throw new Error('no LLM key configured (GROK_KEY or GEMINI_KEY)');
+  throw new Error('no LLM key configured (LLM_API_KEY)');
+}
+
+function groqCloudDraft(prompt, key) {
+  var payload = {
+    model: cfg('LLM_MODEL') || 'llama-3.3-70b-versatile',
+    messages: [{ role: 'user', content: prompt }],
+    temperature: 0.4,
+    max_tokens: 400
+  };
+  var res = UrlFetchApp.fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'post',
+    contentType: 'application/json',
+    headers: { Authorization: 'Bearer ' + key },
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  });
+  var code = res.getResponseCode();
+  var text = res.getContentText();
+  if (code !== 200) throw new Error('Groq ' + code + ': ' + text.slice(0, 200));
+  var data = JSON.parse(text);
+  var out = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+  if (!out) throw new Error('Groq returned no text');
+  return String(out).trim();
 }
 
 function grokDraft(prompt, key) {
