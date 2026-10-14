@@ -406,7 +406,9 @@
       }, 3000);
       try {
         var webllm = await withTimeout(import('https://esm.run/@mlc-ai/web-llm'), 30000, 'Assistant download');
+        try { caches.open('aiptp-webllm-v1').then(function (c) { c.add('https://esm.run/@mlc-ai/web-llm'); }); } catch (e) { /* best effort */ }
         engine = await webllm.CreateMLCEngine(MODEL_ID, {
+          appConfig: webllm.prebuiltAppConfig,
           initProgressCallback: function (r) {
             var p = Math.round((r.progress || 0) * 100);
             if (p !== pct) { pct = p; lastMove = Date.now(); }
