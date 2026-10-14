@@ -855,6 +855,58 @@ ul, ol { padding: 0; margin: 0; list-style: none; }
 .use-case-card .badge { align-self: flex-start; }
 .use-case-card h3 { font-size: 1.2rem; margin: 0; }
 
+/* Collapsible cards (<details>): summary is the header row, body reveals on open */
+.use-case-card summary {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: flex-start;
+  cursor: pointer;
+  list-style: none;
+  position: relative;
+  padding-right: 34px;
+}
+
+.use-case-card summary::-webkit-details-marker { display: none; }
+
+.use-case-card summary::after {
+  content: '+';
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 400 1.1rem/1 var(--font-body);
+  color: var(--moss);
+  background: var(--bg);
+  transition: transform 0.25s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.use-case-card[open] summary::after {
+  content: '\u2212';
+  background: var(--forest);
+  color: var(--cream);
+  transform: rotate(180deg);
+}
+
+.use-case-card summary:hover h3 { color: var(--moss); }
+.use-case-card summary:hover::after { background: var(--lime-soft); border-color: var(--lime-deep); }
+
+.use-case-card summary:focus-visible {
+  outline: 2px solid var(--lime-deep);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .use-case-card summary::after { transition: none; }
+}
+
 .use-case-card p {
   font-size: 0.95rem;
   color: var(--muted);

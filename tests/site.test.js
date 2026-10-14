@@ -99,6 +99,9 @@ check("popup URLs are clean (no embed_type=Inline — silent no-op bug)", mainJs
 check("popup failure verifies overlay and never dead-ends", mainJs.includes("calendly-overlay") && mainJs.includes("calendlyState = 'failed'"));
 check("booking CTA is a real link (not a JS-only button)", src.includes('<a class="btn btn-accent book-option"') && src.includes('target="_blank"') && mainJs.includes("createElement('a')"));
 check("chat CTA falls back to native navigation", mainJs.includes("cta.target = '_blank'") && mainJs.includes("openCalendlyPopup"));
+check("SME use-case cards are collapsible <details> with <summary> headers",
+  (src.match(/<details class="use-case-card">/g) || []).length === 9 &&
+  (src.match(/<details class="use-case-card">[\s\S]*?<summary>[\s\S]*?<h3>/g) || []).length === 9);
 check("assistant named AI-PtP in prompt", agentJs.includes("AI-PtP Assistant") && agentJs.includes("Never greet"));
 check("AI questions in scope (anti-deflection rule)", agentJs.includes("AI QUESTIONS ARE IN SCOPE"));
 check("anti-hallucination rule present", agentJs.includes("no invented statistics") && agentJs.includes("say so honestly"));
