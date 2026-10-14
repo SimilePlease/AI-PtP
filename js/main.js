@@ -41,6 +41,14 @@
       var message = (form.elements.message.value || '').trim();
       var subject = 'Website enquiry: ' + topic + (name ? ' — ' + name : '');
       var body = 'Name: ' + name + '\nEmail: ' + email + '\nTopic: ' + topic + '\n\n' + message + '\n';
+      var hint = document.querySelector('.form-hint');
+      postHubSpot({ name: name, email: email, phone: '', topic: topic }, 'contact form').then(function () {
+        if (hint) hint.textContent = 'Saved — your enquiry is with Parag. Your email app is opening with the message prepared.';
+      }).catch(function () {
+        window.location.href = 'mailto:parag@kudtarkar.life' +
+          '?subject=' + encodeURIComponent(subject) +
+          '&body=' + encodeURIComponent(body);
+      });
       window.location.href = 'mailto:parag@kudtarkar.life' +
         '?subject=' + encodeURIComponent(subject) +
         '&body=' + encodeURIComponent(body);
@@ -53,23 +61,49 @@
 
   var calHost = window.location.hostname || 'localhost';
 
-  /* ---------- Email/CRM automation (Apps Script endpoint; optional) ----------
-     Fill these two values from the Apps Script deployment to go live.
-     Draft-first: the endpoint files a Gmail draft; nothing sends without you. */
-  var CRM_ENDPOINT = '';   // e.g. 'https://script.google.com/mac/s/XXXX/exec'
+  /* ---------- HubSpot CRM (live) + optional Apps Script email drafts ---------- */
+  var HS_PORTAL = '247689473';
+  var HS_FORM = '5e367cdc-1882-4693-ba29-cd5787601626';
+  var CRM_ENDPOINT = '';   // Apps Script /exec URL — enables AI email drafts when set
   var CRM_TOKEN = '';      // shared secret configured in Apps Script
   var leadQueue = [];
   try { leadQueue = JSON.parse(localStorage.getItem('aiptp-lead-queue-v1') || '[]'); } catch (e) { leadQueue = []; }
 
+  function hubspotPayload(lead, source) {
+    var parts = (lead.name || '').split(/\s+/);
+    var fields = [
+      { name: 'firstname', value: parts[0] || '' },
+      { name: 'lastname', value: parts.slice(1).join(' ') || '(chat)' },
+      { name: 'email', value: lead.email },
+      { name: 'message', value: (lead.topic || 'Chat enquiry') + ' [via ' + source + (lead.phone && lead.phone !== '(skipped)' ? ' · phone: ' + lead.phone : ' · phone: not provided') + ']' }
+    ];
+    if (lead.phone && lead.phone !== '(skipped)') fields.splice(3, 0, { name: 'phone', value: lead.phone });
+    return { fields: fields, context: { pageName: 'AI-PtP ' + source } };
+  }
+
+  function postHubSpot(lead, source) {
+    return fetch('https://api.hsforms.com/submissions/v3/integration/submit/' + HS_PORTAL + '/' + HS_FORM, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(hubspotPayload(lead, source))
+    }).then(function (r) {
+      if (!r.ok) throw new Error('HubSpot HTTP ' + r.status);
+      return true;
+    });
+  }
+
   function queueFlush() {
-    if (!CRM_ENDPOINT || !leadQueue.length) return;
+    if (!leadQueue.length) return;
     var batch = leadQueue.splice(0, leadQueue.length);
     batch.forEach(function (item) {
-      fetch(CRM_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(item)
-      }).catch(function () { leadQueue.push(item); });
+      postHubSpot(item.lead, item.source).catch(function () { leadQueue.push(item); });
+      if (CRM_ENDPOINT) {
+        fetch(CRM_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ token: CRM_TOKEN, name: item.lead.name, email: item.lead.email, phone: item.lead.phone, topic: item.lead.topic, source: item.source })
+        }).catch(function () { /* CRM optional; contact already stored */ });
+      }
     });
     try { localStorage.setItem('aiptp-lead-queue-v1', JSON.stringify(leadQueue)); } catch (e) { /* private mode */ }
   }
@@ -78,12 +112,9 @@
     if (!agent) return;
     var lead = agent.lead();
     if (!lead.email) return;                       // nothing to submit without an email
-    if (!CRM_ENDPOINT) { window.__aiptpCRM = window.__aiptpCRM || []; window.__aiptpCRM.push(lead); return; }
-    leadQueue.push({
-      token: CRM_TOKEN,
-      name: lead.name, email: lead.email, phone: lead.phone,
-      topic: lead.topic, source: source
-    });
+    var last = leadQueue.length && leadQueue[leadQueue.length - 1];
+    if (last && last.lead.email === lead.email && last.lead.name === lead.name) return; // no duplicate spam
+    leadQueue.push({ lead: { name: lead.name, email: lead.email, phone: lead.phone, topic: lead.topic }, source: source });
     try { localStorage.setItem('aiptp-lead-queue-v1', JSON.stringify(leadQueue)); } catch (e) { /* private mode */ }
     queueFlush();
   }
