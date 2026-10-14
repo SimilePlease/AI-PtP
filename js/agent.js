@@ -15,12 +15,14 @@
   'use strict';
 
   var EMAIL_RE = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i;
-  var PHONE_RE = /\+?\d[\d\s().-]{7,}\d/;
-  var NAME_PHRASE_RE = /(?:my name is|i am|i'm|i\u2019m|this is|it's|it\u2019s)\s+([a-z][a-z'\u2019\- ]{1,39})/i;
-  var BARE_NAME_RE = /^[a-z][a-z'\u2019\- ]{1,39}$/i;
+  var PHONE_RE = /\(?\+?\d[\d\s().-]{6,}\d\)?/;
+  var NAME_PHRASE_RE = /(?:my name is|i am|i'm|i\u2019m|this is|it's|it\u2019s)\s+(\p{L}[\p{L}'\u2019\- ]{1,39})/iu;
+  var BARE_NAME_RE = /^\p{L}[\p{L}'\u2019\- ]{1,39}$/u;
   var SKIP_RE = /^\s*(skip|none|no|nope|later|not now|prefer not|n\/a|na)\b/i;
-  var BOOKING_RE = /\b(book|booking|meet|meeting|schedul|appointment|slots?|catch up|consultation|discovery call)\b|availab/i;
+  var BOOKING_RE = /\b(book|booking|meet|meeting|schedul\w*|appointment|slots?|catch up|consultation|discovery call|calls?)\b|availab/i;
   var NOT_A_NAME_RE = /^(?:h+m+|u+m+|u+h+|er+|ah+|oh+)\b|(?:^(?:hi|hello|hey|yo|thanks|thank you|ok|okay|sure|yes|no|nope|please|good (?:morning|afternoon|evening))\b)/i;
+  var NAME_STOPWORD_RE = /\b(ceo|cto|cmo|cfo|coo|founder|owner|director|manager|engineer|of|from|at|working|interested|looking|planning|trying|here|going|calling)\b/i;
+  var FILLER_RE = /^(?:h+a+)+$|^(?:h?e+h?a*)+$|\b(?:lol|lmao|rofl|wow|omg|cool|nice|great|good|bad|weird|boring|funny)\b/i;
 
   var TIME_RE = /\b(?:mon|tues|tue|wednes|wed|thurs|thur|thu|fri|satur|sat|sun)(?:day)?\b|\d{1,2}(?::\d{2})?\s?(?:am|pm)|tomorrow|today|next week|this week/i;
 
@@ -86,6 +88,7 @@
     /\bour clients\b|\bmy clients\b/i,
     /\bas a (?:solo|one-person|independent) (?:AI )?(?:consult\w* )?(?:practice|business|consultant|company)\b/i,
     /\bI need to stay focused\b/i,
+    /\blet me (?:book|schedule|confirm|send|email|notify|follow up)/i,
     /\byou (?:mentioned|said)\b[^.?!]{0,80}\b(?:book|booking|meeting|slot|schedul)/i
   ];
 
@@ -143,7 +146,10 @@
       }
       if (!lead.name) {
         var n = t.match(NAME_PHRASE_RE);
-        if (n) { lead.name = titleCase(n[1].trim()); changed.push('name'); }
+        if (n) {
+          var cand = n[1].trim().replace(/^(?:the|a)\s+/i, '');
+          if (cand.split(/\s+/).length <= 4 && !NAME_STOPWORD_RE.test(cand)) { lead.name = titleCase(cand); changed.push('name'); }
+        }
       }
       if (changed.length) persist();
       return changed;
@@ -151,7 +157,13 @@
 
     /* ---------- router ---------- */
 
-    function wantsBooking(text) { return BOOKING_RE.test(text || ''); }
+    var AVAIL_RE = /\b(free|available|work|works|good|suit|suits|open)\b/i;
+
+    function wantsBooking(text) {
+      var t = text || '';
+      if (BOOKING_RE.test(t)) return true;
+      return TIME_RE.test(t) && AVAIL_RE.test(t);
+    }
 
     function isActive() { return fsm.state !== 'IDLE'; }
 
@@ -194,14 +206,19 @@
         return p ? p[0].trim() : null;
       }
       if (slot === 'name') {
-        if (NOT_A_NAME_RE.test(t)) return null;
+        if (NOT_A_NAME_RE.test(t) || FILLER_RE.test(t) || BOOKING_RE.test(t)) return null;
         var n = t.match(NAME_PHRASE_RE);
-        if (n) return titleCase(n[1].trim());
-        if (BARE_NAME_RE.test(t) && t.split(/\s+/).length <= 3 && !SKIP_RE.test(t)) return titleCase(t);
+        if (n) {
+          var cand = n[1].trim().replace(/^(?:the|a)\s+/i, '');
+          if (cand.split(/\s+/).length <= 4 && !NAME_STOPWORD_RE.test(cand)) return titleCase(cand);
+          return null;
+        }
+        if (BARE_NAME_RE.test(t) && !FILLER_RE.test(t) && t.split(/\s+/).length <= 3 && !SKIP_RE.test(t)) return titleCase(t);
         return null;
       }
       if (slot === 'topic') {
-        if (t.length >= 3) return t.slice(0, 140);
+        var stripped = t.replace(/[^\p{L}\p{N}]/gu, '');
+        if (stripped.length >= 3) return t.slice(0, 140);
         return null;
       }
       return null;

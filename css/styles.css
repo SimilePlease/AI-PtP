@@ -1568,13 +1568,6 @@ html.js .reveal.in {
 
 .chat-unsupported a { color: var(--lime); }
 
-.chat-fineprint {
-  margin: 0;
-  padding: 0 16px 10px;
-  font-size: 0.7rem;
-  color: #7E8F7E;
-}
-
 .chat-input {
   display: flex;
   gap: 8px;
