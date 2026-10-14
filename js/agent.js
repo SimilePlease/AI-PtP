@@ -63,14 +63,14 @@
   ].join(' ');
 
   var FACT_BLOCKS = [
-    { keys: ['strategy', 'value', 'use case', 'use-case', 'prioriti', 'roadmap', 'governance', 'cost', 'ownership', 'business case'], text: 'AI strategy and business value: finding suitable AI use cases, prioritization, total cost of ownership, roadmaps, governance.' },
+    { keys: ['strategy', 'value', 'use case', 'use-case', 'prioriti', 'roadmap', 'governance', 'cost', 'ownership', 'business case'], text: 'AI strategy and business value: finding suitable AI use cases, prioritisation, total cost of ownership, roadmaps, governance.' },
     { keys: ['coe', 'centre', 'center', 'excellence', 'operating model', 'talent', 'platform', 'mlops', 'llmops'], text: 'AI Centre of Excellence (CoE) design and leadership: operating model, talent, platforms, responsible AI, MLOps/LLMOps.' },
     { keys: ['industry', 'industries', 'healthcare', 'medtech', 'health', 'finance', 'financial', 'wealth', 'telecom', 'maritime', 'shipping', 'sme', 'smes', 'sector'], text: 'Consulting across healthcare & MedTech, financial services & wealth management, telecommunications, maritime & shipping, and SMEs (practical engagements for smaller businesses).' },
     { keys: ['innovation', 'wearable', 'iot', 'computer vision', 'portfolio', 'projects'], text: 'Innovation work in AI, wearables, IoT and computer vision; a project portfolio from deployed clinical AI platforms to strategy blueprints.' },
-    { keys: ['approach', 'delivery', 'discover', 'step', 'process', 'methodology', 'how do you work', 'how you work'], text: 'A five-step delivery approach: Discover, Prioritize, Organize, Design and build, Measure and improve.' },
+    { keys: ['approach', 'delivery', 'discover', 'step', 'process', 'methodology', 'how do you work', 'how you work'], text: 'A five-step delivery approach: Discover, Prioritise, Organise, Design and build, Measure and improve.' },
     { keys: ['responsible', 'ethic', 'nist', 'iso', 'eu ai act', 'gdpr', 'mas', 'feat', 'samd', 'hsa', 'hipaa', 'pdpa', 'regulation', 'compliance', 'safety'], text: 'Responsible-AI familiarity: NIST AI RMF, ISO 42001, EU AI Act, GDPR, MAS TRM, MAS FEAT, FDA SaMD, HSA, HIPAA, PDPA \u2014 familiarity, not certifications.' },
     { keys: ['security', 'secure', 'adversarial', 'prompt injection', 'jailbreak', 'attack', 'threat'], text: 'AI security: secure model and prompt handling, data protection, access controls, adversarial-input awareness (prompt injection, jailbreaks), and security review built into evaluation and deployment.' },
-    { keys: ['governance', 'oversight', 'audit', 'accountab', 'policy'], text: 'AI governance: ownership, policies, intake and prioritization gates, risk assessment, human oversight, audit trails, and production monitoring.' },
+    { keys: ['governance', 'oversight', 'audit', 'accountab', 'policy'], text: 'AI governance: ownership, policies, intake and prioritisation gates, risk assessment, human oversight, audit trails, and production monitoring.' },
     { keys: ['ethic', 'bias', 'fairness', 'transparen', 'explainab', 'privacy'], text: 'AI ethics: fairness and bias awareness, transparency, explainability, privacy by design, and honest communication about what a system can and cannot do.' }
   ];
 
@@ -426,7 +426,7 @@
       { keys: ['coe', 'centre of excellence', 'center of excellence', 'operating model', 'mlops', 'llmops'],
         a: 'An AI Centre of Excellence is a central capability that lets AI actually ship: operating model, talent, platforms, governance, and MLOps/LLMOps. The site\u2019s featured section covers how it\u2019s designed and led. Want the deep dive? Book a meeting.' },
       { keys: ['approach', 'delivery', 'process', 'methodology', 'how do you work', 'steps', 'discover'],
-        a: 'Five steps: Discover, Prioritize, Organize, Design and build, Measure and improve. Evidence-led, no theatre — and cost improvements are assessed and measured in context.' },
+        a: 'Five steps: Discover, Prioritise, Organise, Design and build, Measure and improve. Evidence-led, no theatre — and cost improvements are assessed and measured in context.' },
       { keys: ['responsible', 'ethic', 'ethics', 'bias', 'fairness', 'transparen', 'explainab', 'privacy'],
         a: 'Responsible AI here rests on three pillars: security (protecting models, data, and inputs), governance (ownership, policies, oversight, audit trails), and ethics (fairness, transparency, privacy by design). Framework familiarity includes NIST AI RMF, ISO 42001, the EU AI Act, and GDPR.' },
       { keys: ['security', 'secure', 'prompt injection', 'jailbreak', 'adversarial', 'threat'],
@@ -448,7 +448,7 @@
       { keys: ['pilot', 'production', 'poc', 'proof of concept', 'prototype', 'deploy'],
         a: 'Pilots fail in production when nobody plans for integration, people, and oversight. This practice exists to close that gap — from first use case to deployed, measured system.' },
       { keys: ['strategy', 'use case', 'use-case', 'prioriti', 'roadmap', 'business value', 'roi', 'tco', 'total cost'],
-        a: 'AI strategy here means finding where AI may help, choosing the right approach (AI, process design, or plain software), prioritizing with discipline, and assessing total cost of ownership — value first, fashion never.' },
+        a: 'AI strategy here means finding where AI may help, choosing the right approach (AI, process design, or plain software), prioritising with discipline, and assessing total cost of ownership — value first, fashion never.' },
       { keys: ['crm', 'integration', 'api', 'webhook'],
         a: 'Technical integrations are very much part of the work — though chat-based ones are beyond me for now. Email parag@kudtarkar.life or book a meeting and describe what you have in mind.' }
     ];
