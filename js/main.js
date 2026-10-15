@@ -590,8 +590,10 @@
         return;
       }
 
-      /* --- Small talk: greetings/thanks/bye get deterministic replies --- */
-      var canned = agent.templatedFree(text);
+      /* --- Small talk: with the model loaded, greetings/thanks/bye go to the
+         LLM for natural, varied replies. Templates remain only as the
+         lite-mode fallback, where no model exists to ask. --- */
+      var canned = liteMode ? agent.templatedFree(text) : null;
       if (canned) {
         var cannedBubble = addMsg('bot', canned);
         history.push({ role: 'assistant', content: canned });
