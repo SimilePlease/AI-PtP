@@ -12,6 +12,11 @@ Start at: https://business.google.com/create → "Add your business".
 |---|---|---|
 | **A (recommended)** | `Parag Kudtarkar — AI Strategy & Delivery` | Matches the domain (kudtarkar.life) and email; personal name builds trust for a solo practice |
 | B | `AI Pilot to Production` | The public wordmark already on the site — maximum brand consistency |
+| **C (chosen)** | `Orbit - AI Consultancy` — **live on GBP since 2026-10-15** | Short, memorable, matches the assistant brand |
+
+> **Decision: Option C is live.** The site is aligned: footer shows
+> "Orbit — AI Consultancy · AI Pilot to Production · Singapore" and the JSON-LD
+> `alternateName` includes "Orbit — AI Consultancy" so GBP ↔ website signals match.
 
 Whichever you pick, tell me and I'll align the site's JSON-LD `name` to it exactly
 (consistency between GBP and the website strengthens both).
