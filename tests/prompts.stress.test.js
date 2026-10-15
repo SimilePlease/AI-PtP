@@ -415,7 +415,7 @@ check('small-talk layer never intercepts capability questions ("what do you do",
   var a = AIAgent.createAgent(memoryStore());
   assert.strictEqual(a.templatedFree('what do you do'), null, '"what do you do" must reach the answer engine/LLM');
   assert.strictEqual(a.templatedFree('who are you'), null, '"who are you" must reach the answer engine/LLM');
-  assert.ok(/AI-PtP|practice/i.test(a.answer('what do you do')), 'services answer for "what do you do"');
+  assert.ok(/Parag|practice/i.test(a.answer('what do you do')), 'services answer for "what do you do"');
   assert.ok(/Orbit/i.test(a.answer('who are you')), 'identity answer for "who are you"');
   assert.ok(a.templatedFree('how are you'), 'genuine small talk still templated');
   assert.strictEqual(a.wantsBooking('who are you'), false, 'identity question never starts booking');

@@ -80,7 +80,7 @@
       { name: 'message', value: (lead.topic || 'Chat enquiry') + ' [via ' + source + (lead.phone && lead.phone !== '(skipped)' ? ' · phone: ' + lead.phone : ' · phone: not provided') + ']' }
     ];
     if (lead.phone && lead.phone !== '(skipped)') fields.splice(3, 0, { name: 'phone', value: lead.phone });
-    return { fields: fields, context: { pageName: 'AI-PtP ' + source } };
+    return { fields: fields, context: { pageName: 'Orbit chat · ' + source } };
   }
 
   function postHubSpot(lead, source) {
@@ -312,7 +312,7 @@
     wordmarks.forEach(function (wm) {
       var label = wm.querySelector('.wordmark-text');
       if (!label) return;
-      var shortText = wm.getAttribute('data-short') || 'AI-PtP';
+      var shortText = wm.getAttribute('data-short') || 'Orbit';
       var fullText = wm.getAttribute('data-full') || shortText;
 
       function cycle() {

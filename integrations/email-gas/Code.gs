@@ -1,5 +1,5 @@
 /**
- * AI-PtP email automation — Google Apps Script (free with any Gmail account).
+ * Email automation — Google Apps Script (free with any Gmail account).
  *
  * What it does (all free):
  *   POST { token, name, email, phone, topic, source }   → chat/lead capture:
@@ -17,7 +17,7 @@
  *   FORM_GUID    — HubSpot form guid (fields: firstname, lastname, email, phone, message)
  *   GEMINI_KEY   — Google AI Studio API key (free tier)
  *   AUTO_SEND    — 'true' → send immediately; omit → drafts only (default, recommended)
- *   SENDER_NAME  — signature name, e.g. 'Parag — AI-PtP'
+ *   SENDER_NAME  — signature name, e.g. 'Parag — AI Pilot to Production'
  *
  * Deploy: Deploy → New deployment → Web app → Execute as: Me → Access: Anyone.
  * Put the /exec URL + token into the site config (see README).
@@ -77,7 +77,7 @@ function handleLead(body) {
 
   // 1. Email to the requester — Gemini-drafted when a key is configured,
   //    otherwise a clean fixed confirmation so the reply always goes out.
-  var subject = 'Your AI question' + (topic ? ' — ' + topic.slice(0, 60) : '') + ' (AI-PtP)';
+  var subject = 'Your AI question' + (topic ? ' — ' + topic.slice(0, 60) : '') + ' (AI Pilot to Production)';
   var requester;
   try {
     var prompt = leadPrompt(name || 'there', topic || 'exploring AI for their business', source);
@@ -145,21 +145,21 @@ function handleCold(body) {
 
 function persona() {
   return [
-    'You write short first-touch business emails for a solo AI consulting practice, "AI-PtP" (AI - Pilot to Production), based in Singapore, working globally.',
+    'You write short first-touch business emails for the AI consulting practice of Parag Kudtarkar, "AI Pilot to Production", based in Singapore, working globally.',
     'Voice: evidence-led, plain, warm, zero hype. British/Singaporean business English.',
     'Hard rules:',
     '- Under 120 words. 3 short paragraphs max. No bullet lists.',
     '- Never invent facts, client names, results, case studies, metrics, or prices.',
     '- No "I hope this finds you well" cliches. Open with the recipient, not yourself.',
     '- One clear, small ask: a 30-minute intro call (link goes in the signature, do not paste URLs).',
-    '- Sign off as "' + (cfg('SENDER_NAME') || 'Parag — AI-PtP') + '" (an AI strategy & delivery practice).',
+    '- Sign off as "' + (cfg('SENDER_NAME') || 'Parag — AI Pilot to Production') + '" (an AI strategy & delivery practice).',
     '- Subject line: return on its own first line, prefixed "Subject: ".'
   ].join('\n');
 }
 
 function leadPrompt(name, topic, source) {
   return persona() +
-    '\n\nContext: ' + name + ' just ' + source + ' on the AI-PtP website and is interested in: ' + topic + '.' +
+    '\n\nContext: ' + name + ' just ' + source + ' on the AI Pilot to Production website and is interested in: ' + topic + '.' +
     '\nWrite a same-day reply: acknowledge their interest specifically, add one useful, safe, general insight about the topic (no invented facts), then propose the 30-minute intro call.';
 }
 
@@ -268,7 +268,7 @@ function splitSubject(text, fallback) {
 }
 
 function signature() {
-  return '\n\n—\n' + (cfg('SENDER_NAME') || 'Parag — AI-PtP') + '\nAI strategy & delivery · Singapore · global\nBook directly: https://calendly.com/kudtarkar-parag\nPrefer not to hear from me? Reply "no thanks" and that\u2019s the last you will.';
+  return '\n\n—\n' + (cfg('SENDER_NAME') || 'Parag — AI Pilot to Production') + '\nAI strategy & delivery · Singapore · global\nBook directly: https://calendly.com/kudtarkar-parag\nPrefer not to hear from me? Reply "no thanks" and that\u2019s the last you will.';
 }
 
 function geminiToGmail(to, fallbackSubject, prompt, name) {
@@ -296,7 +296,7 @@ function pushToHubSpot(hub) {
   var res = UrlFetchApp.fetch(HUBSPOT_FORMS + portal + '/' + guid, {
     method: 'post',
     contentType: 'application/json',
-    payload: JSON.stringify({ fields: fields, context: { pageName: 'AI-PtP chat assistant' } }),
+    payload: JSON.stringify({ fields: fields, context: { pageName: 'Orbit chat assistant' } }),
     muteHttpExceptions: true
   });
   return 'HTTP ' + res.getResponseCode();

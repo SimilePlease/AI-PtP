@@ -57,7 +57,7 @@
   };
 
   var CORE_PROMPT = [
-    'You are Orbit, the assistant on the AI-PtP consulting website. You chat casually and warmly \u2014 like a helpful colleague, not a corporate bot. Small touches of personality are welcome; light emojis (at most one per message) are fine.',
+    'You are Orbit, the assistant on Parag Kudtarkar\u2019s AI consulting website. You chat casually and warmly \u2014 like a helpful colleague, not a corporate bot. Small touches of personality are welcome; light emojis (at most one per message) are fine.',
     'NAME: you are Orbit. When greeting someone for the first time, introduce yourself by that name ("Hi, I\u2019m Orbit"). Never greet with generic lines like "Welcome to the website" and never call yourself a site assistant.',
     'SHOW WARMTH, DON\u2019T NAME IT: never describe yourself as friendly, helpful, empathetic, kind, or caring \u2014 those words about yourself are off-limits. Be that way instead: acknowledge what the visitor said, reflect their concern or excitement, then help.',
     'IDENTITY: never mention or hint at being a language model, AI model, bot, or anything running in a browser. If asked what you are, say you\u2019re Orbit and carry on.',
@@ -461,7 +461,7 @@
 
     var ANSWERS = [
       { keys: ['service', 'offer', 'help with', 'what do you do', 'what can you do', 'practice', 'consultancy', 'consulting'],
-        a: 'This is AI-PtP — an AI strategy and delivery practice: finding the right AI use cases, designing AI Centres of Excellence, guiding responsible adoption, and taking pilots to production. Which of those is closest to what you need?' },
+        a: 'This is Parag Kudtarkar\u2019s AI strategy and delivery practice: finding the right AI use cases, designing AI Centres of Excellence, guiding responsible adoption, and taking pilots to production. Which of those is closest to what you need?' },
       { keys: ['industry', 'industries', 'sector', 'healthcare', 'medtech', 'finance', 'financial', 'wealth', 'telecom', 'telecommunications', 'maritime', 'shipping', 'sme', 'smes', 'small business'],
         a: 'The practice works across healthcare & MedTech, financial services & wealth management, telecommunications, maritime & shipping, and SMEs — smaller businesses get the same practical treatment, scaled to fit.' },
       { keys: ['coe', 'centre of excellence', 'center of excellence', 'operating model', 'mlops', 'llmops'],
@@ -491,7 +491,7 @@
       { keys: ['strategy', 'use case', 'use-case', 'prioriti', 'roadmap', 'business value', 'roi', 'tco', 'total cost'],
         a: 'AI strategy here means finding where AI may help, choosing the right approach (AI, process design, or plain software), prioritising with discipline, and assessing total cost of ownership — value first, fashion never.' },
       { keys: ['who is behind', 'founder', 'who runs', 'parag', 'kudtarkar', 'about the founder', 'who are you working'],
-        a: 'AI-PtP is led by Parag Kudtarkar — a senior technology and transformation executive with more than 22 years of experience across healthcare, telecommunications and regulated sectors in APAC. He led a multimillion-dollar enterprise transformation across four geographies and delivered five production platforms. The About section has the full story.' },
+        a: 'The practice is led by Parag Kudtarkar — a senior technology and transformation executive with more than 22 years of experience across healthcare, telecommunications and regulated sectors in APAC. He led a multimillion-dollar enterprise transformation across four geographies and delivered five production platforms. The About section has the full story.' },
       { keys: ['different', 'why you', 'why choose', 'big consultancy', 'big firm', 'vs'],
         a: 'You work directly with the person who has done the work — built an AI CoE from greenfield, scaled an AI engineering organisation across four geographies, and taken five clinical AI platforms to regulatory-approved production. No hand-offs to junior teams.' },
       { keys: ['sell', 'tools', 'licence', 'license', 'resell', 'commission', 'vendor'],

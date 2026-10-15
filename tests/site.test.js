@@ -87,6 +87,9 @@ for (const id of ["chat-fab","chat-panel","chat-status","chat-close","chat-msgs"
 /* ---------- content constraints ---------- */
 
 const body = src.replace(/<script[\s\S]*?<\/script>/g, "");
+check("internal name AI-PtP never shown on the site (URLs excluded)", !body.replace(/https?:\/\/[^\s"']+/g, "").includes("AI-PtP"));
+check("internal name AI-PtP never used in the chat agent", !agentJs.includes("AI-PtP"));
+check("CSP meta tag present and allows the known-good hosts", /http-equiv="Content-Security-Policy"/.test(src) && /script-src[^"]*googletagmanager/.test(src));
 check("no phone numbers", !/\+65|9\d{3}\s?\d{4}|\(\d{3}\)\s?\d{3}-\d{4}/.test(body));
 check("no currency amounts", !/[$\u20B9\u20AC\u00A3]|\b(USD|SGD|INR|EUR)\s*\d/i.test(body));
 check("no guarantee language", !/guarantee|assured results|risk-free/i.test(body));
