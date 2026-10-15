@@ -41,8 +41,11 @@
         .map(function (cb) { return cb.value; });
       var topic = interests.length ? interests.join(', ') : 'General enquiry';
       var message = (form.elements.message.value || '').trim();
-      var subject = 'Website enquiry: ' + topic + (name ? ' — ' + name : '');
-      var body = 'Name: ' + name + '\nEmail: ' + email + '\nTopic: ' + topic + '\n\n' + message + '\n';
+      var subject = 'Website enquiry' + (interests.length ? ': ' + interests.join(', ') : '') + (name ? ' — ' + name : '');
+      var body = 'Name: ' + name + '\n' +
+        'Email: ' + email + '\n' +
+        (interests.length ? 'Interested in:\n' + interests.map(function (i) { return '  • ' + i; }).join('\n') + '\n\n' : '') +
+        (message ? 'Message:\n' + message + '\n' : '');
       /* HubSpot records the enquiry; the mailto below always opens a prepared
          draft so it also reaches the inbox directly. */
       gaEvent('contact_form_submit', { topic: topic });
