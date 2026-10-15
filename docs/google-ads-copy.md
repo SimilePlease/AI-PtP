@@ -49,12 +49,13 @@ All lengths machine-verified. Paste directly into Google Ads (Responsive Search 
 
 | Text | URL | Description line 1 | Description line 2 |
 |---|---|---|---|
-| Book a Meeting | /#book (or Calendly) | 30 minutes, direct | Pick any slot |
-| How I Work | /#about | Use cases to production | Senior, hands-on |
-| FAQ | /#faq | What an AI practice does | 54 answers, no jargon |
-| Orbit — Ask AI | /#chat | Instant answers 24/7 | Ask about your use case |
+| Book a Meeting | `/#contact` | 30 minutes, direct | Pick any slot |
+| How I Work | `/#approach` | Use cases to production | Senior, hands-on |
+| Centre of Excellence | `/#coe` | Design & leadership | Build it right once |
+| Responsible AI | `/#responsible-ai` | Governance that works | Not a compliance afterthought |
 
-*(Check the actual section ids on the page before saving — anchors must exist.)*
+*(Verified against the page's real section ids: `#contact`, `#approach`, `#coe`,
+`#responsible-ai`. Calendly popup also opens from `#contact`.)*
 
 ## Keywords (start with phrase match, monitor search terms weekly)
 
