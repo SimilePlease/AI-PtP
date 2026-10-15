@@ -91,7 +91,10 @@ check("internal name AI-PtP never shown on the site (URLs excluded)", !body.repl
 check("internal name AI-PtP never used in the chat agent", !agentJs.includes("AI-PtP"));
 check("CSP meta tag present and allows the known-good hosts", /http-equiv="Content-Security-Policy"/.test(src) && /script-src[^"]*googletagmanager/.test(src));
 check("no phone numbers", !/\+65|9\d{3}\s?\d{4}|\(\d{3}\)\s?\d{3}-\d{4}/.test(body));
-check("no currency amounts", !/[$\u20B9\u20AC\u00A3]|\b(USD|SGD|INR|EUR)\s*\d/i.test(body));
+/* Currency guard: prices are intentional only in the Managed AI offer.
+   Strip the two approved amounts, then fail on any other currency figure. */
+const pricedBody = body.replace(/\$4,000( ?\/ ?month)?|(≈ ?)?£3,200|GBP 3,200/g, "");
+check("no currency amounts beyond the approved Managed AI price", !/[$\u20B9\u20AC\u00A3]|\b(USD|SGD|INR|EUR)\s*\d/i.test(pricedBody));
 check("no guarantee language", !/guarantee|assured results|risk-free/i.test(body));
 check("no employer/client names", !/\b(employer|employer-name|client-name)\b/i.test(body));
 check("contact email correct", (body.match(/parag@kudtarkar\.life/g) || []).length > 0);

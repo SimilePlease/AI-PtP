@@ -330,7 +330,7 @@ ul, ol { padding: 0; margin: 0; list-style: none; }
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
-@media (max-width: 1120px) {
+@media (max-width: 1240px) {
   .nav-toggle { display: inline-flex; }
 
   .site-nav {
@@ -1936,3 +1936,56 @@ html.js .reveal.in {
   .rai-pillars { grid-template-columns: 1fr; }
 }
 
+
+/* ---------- Managed AI Operations ---------- */
+.managed-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 8px;
+}
+
+.managed-card {
+  padding: 26px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.managed-card--core {
+  background: var(--forest);
+  border-color: var(--forest);
+  color: var(--cream);
+}
+
+.managed-card--core h3 { color: var(--cream); }
+
+.managed-step {
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--moss);
+  margin: 0 0 10px;
+  font-weight: 600;
+}
+
+.managed-card--core .managed-step { color: var(--lime); }
+
+.managed-card h3 { margin: 0 0 10px; font-size: 1.15rem; }
+.managed-card p { font-size: 0.95rem; margin: 0 0 4px; }
+
+.managed-price {
+  font-family: var(--font-display);
+  font-size: 1.7rem !important;
+  font-weight: 700;
+  color: var(--cream);
+  margin: 2px 0 10px !important;
+}
+
+.managed-price span { font-size: 0.9rem; font-weight: 500; opacity: 0.8; }
+
+.managed-cta-row { margin-top: 26px; display: flex; gap: 12px; flex-wrap: wrap; }
+
+@media (max-width: 920px) {
+  .managed-grid { grid-template-columns: 1fr; }
+}

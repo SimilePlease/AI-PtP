@@ -1,13 +1,16 @@
 # AI Pilot to Production — full content for LLMs
 
 Site: https://kudtarkar.life/
-Practice of Parag Kudtarkar (Singapore, global): AI use-case discovery, AI Centre of
-Excellence design and leadership, responsible AI governance, and taking AI pilots
-into production. 22+ years across healthcare, telecom and regulated sectors in APAC.
+Practice of Parag Kudtarkar (Singapore, serving the US and UK): AI use-case discovery,
+AI Centre of Excellence design and leadership, responsible AI governance, and taking
+AI pilots into production. 22+ years across healthcare, telecom and regulated sectors.
 
+Offer — Managed AI Operations: fixed monthly retainer (USD 4,000 / approx GBP 3,200)
+covering up to 10 active AI use cases per company: governance, vendor triage, delivery,
+monthly KPI report. Month-to-month. Entry: two-week AI Readiness Sprint.
 Booking: https://calendly.com/kudtarkar-parag/30min — Email: parag@kudtarkar.life
 
-## FAQ (54 questions with answers)
+## FAQ (questions with answers)
 
 **Q1: What does an AI consultancy do?**
 A: An AI consultancy helps organisations identify valuable AI opportunities, build the capability to deliver them, and put solutions into controlled production use.
@@ -180,3 +183,6 @@ A: Enquiries go to Parag directly and are used only to respond to you. No sellin
 
 **Q: Can Orbit book a meeting for me?**
 A: Orbit can't hold or confirm slots itself — but the "Book a meeting" button opens the real calendar, and the guided flow in chat pre-fills your details so booking takes seconds.
+
+**Q: Do you offer ongoing AI management — a retainer?**
+A: Yes — Managed AI Operations. For a fixed monthly fee ($4,000, about £3,200), Parag runs up to 10 active AI use cases per company end to end: governance, security guardrails, vendor triage, hands-on delivery and a monthly KPI report. Built for mid-size companies in the US and UK; month-to-month, and most clients start with a two-week AI Readiness Sprint.

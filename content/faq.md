@@ -189,3 +189,6 @@ A: Enquiries go to Parag directly and are used only to respond to you. No sellin
 
 **Q: Can Orbit book a meeting for me?**
 A: Orbit can't hold or confirm slots itself — but the "Book a meeting" button opens the real calendar, and the guided flow in chat pre-fills your details so booking takes seconds.
+
+**Q: Do you offer ongoing AI management — a retainer?**
+A: Yes — Managed AI Operations. For a fixed monthly fee ($4,000, about £3,200), Parag runs up to 10 active AI use cases per company end to end: governance, security guardrails, vendor triage, hands-on delivery and a monthly KPI report. Built for mid-size companies in the US and UK; month-to-month, and most clients start with a two-week AI Readiness Sprint.
