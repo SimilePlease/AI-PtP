@@ -15,11 +15,12 @@ AI writes, you review in Gmail, one tap sends.
 | `LLM_API_KEY` | Optional. One key, provider auto-detected from the prefix: `gsk_…` = Groq Cloud, `xai-…` = xAI Grok, `AIza…` = Gemini. Used for the AI-drafted reply emails. |
 | `LLM_MODEL` | Optional. Override the draft model (defaults: Groq `llama-3.3-70b-versatile`, xAI `grok-4-fast`, Gemini `gemini-2.0-flash`). |
 | `GROK_KEY` / `GEMINI_KEY` | Legacy alternatives, still honoured. Without any key, enquirers still get a fixed confirmation email and you still get the owner notification. |
-   | `GEMINI_KEY` | https://aistudio.google.com/apikey → *Get API key* (free) |
-   | `SENDER_NAME` | e.g. `Parag — AI Pilot to Production` |
-   | `PORTAL_ID` | HubSpot → Settings → *Account* → portal number (optional) |
-   | `FORM_GUID` | HubSpot → Marketing → Forms → the form's embed GUID (optional) |
-   | `AUTO_SEND` | leave unset = **drafts only** (recommended). `true` = send instantly |
+| `HUBSPOT_PRIVATE_TOKEN` | Optional but recommended — unlocks CRM enrichment. HubSpot → Settings → Integrations → Private Apps → Create ("Orbit enrichment") with scopes `crm.objects.contacts` + `crm.objects.companies` (write). With this, leads are created/updated via CRM v3 (contact id captured), the lead's **company website is auto-scraped** (title, description, LinkedIn links, tech hints), a HubSpot **Company record is upserted + associated**, and the scraped intel personalises the AI-drafted reply. |
+| `SENDER_NAME` | e.g. `Parag — AI Pilot to Production` |
+| `BUSINESS_ADDRESS` | Optional. Your trading address shown in the email footer (CAN-SPAM/CAN-SPAM-equivalent best practice for outreach). |
+| `LOGO_URL` | Optional. Overrides the branded-email logo (defaults to `https://kudtarkar.life/assets/wordmark-email.png`). |
+| `PORTAL_ID` | HubSpot → Settings → *Account* → portal number (legacy Forms fallback) |
+| `FORM_GUID` | HubSpot → Marketing → Forms → embed GUID (legacy fallback used only when no private token) |
 3. Run `testLead` once → approve the Gmail scopes. Check Gmail for the draft.
 4. **Deploy → New deployment → Web app** → Execute as *Me*, Access *Anyone* → copy the `/exec` URL.
 

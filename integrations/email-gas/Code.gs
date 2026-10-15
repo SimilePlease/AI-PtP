@@ -75,13 +75,20 @@ function handleLead(body) {
   };
   var hubResult = pushToHubSpot(hub);
 
+  // 1.5. Enrich: fetch the company website behind the email domain, upsert the
+  //      HubSpot company, personalise the drafted reply with what we found.
+  var enrichment = { domain: '', notes: '', company: '', linkedin: [] };
+  try { enrichment = enrichLead(email, hubResult.id || ''); }
+  catch (e) { enrichment.notes = '[enrichment unavailable: ' + e + ']'; }
+  if (enrichment.notes) hub.message = (hub.message ? hub.message + ' ' : '') + '[enriched] ' + enrichment.notes;
+
   // 1. Email to the requester — Gemini-drafted when a key is configured,
   //    otherwise a clean fixed confirmation so the reply always goes out.
   //    Both paths render through the branded HTML template with the CTA button.
   var subject = 'Your AI question' + (topic ? ' — ' + topic.slice(0, 60) : '') + ' (AI Pilot to Production)';
   var requester;
   try {
-    var prompt = leadPrompt(name || 'there', topic || 'exploring AI for their business', source);
+    var prompt = leadPrompt(name || 'there', topic || 'exploring AI for their business', source, enrichment.notes);
     requester = geminiToGmail(email, subject, prompt, name || 'there', { ctaUrl: 'https://calendly.com/kudtarkar-parag/30min' });
   } catch (err) {
     var fixed = 'Hi ' + (name || 'there') + ',' +
@@ -94,11 +101,12 @@ function handleLead(body) {
   }
 
   // 2. Email to the owner — full details of every lead, always sent.
-  var owner = notifyOwner({ name: name, email: email, phone: phone, topic: topic, source: source, hubspot: hubResult });
+  var owner = notifyOwner({ name: name, email: email, phone: phone, topic: topic, source: source, hubspot: hubResult.info, enrichment: enrichment });
 
   return {
     ok: true,
-    hubspot: hubResult,
+    hubspot: hubResult.info,
+    enrichment: { domain: enrichment.domain, company: enrichment.company, linkedin: enrichment.linkedin },
     email: requester,
     ownerNotified: owner,
     mode: cfg('AUTO_SEND') === 'true' ? 'sent' : 'drafted'
@@ -115,14 +123,21 @@ function notifyOwner(lead) {
     'Email: ' + (lead.email || '(not given)'),
     'Phone: ' + (lead.phone || '(not given)'),
     'Interest: ' + (lead.topic || '(not given)'),
-    'HubSpot: ' + String(lead.hubspot || 'n/a'),
-    '',
-    'Reply to the enquirer: ' + lead.email,
-    'Book them in: https://calendly.com/kudtarkar-parag/30min'
+    'HubSpot: ' + String(lead.hubspot || 'n/a')
   ];
+  var enr = lead.enrichment || {};
+  if (enr.company || enr.notes) {
+    lines.push('', '— Enrichment (auto) —');
+    if (enr.company) lines.push('Company: ' + enr.company + (enr.domain ? ' (' + enr.domain + ')' : ''));
+    if (enr.notes) lines.push('Website intel: ' + enr.notes);
+    if (enr.linkedin && enr.linkedin.length) lines.push('LinkedIn (from their site): ' + enr.linkedin.join(' | '));
+    if (enr.domain) lines.push('Find them on LinkedIn: ' + linkedinSearchUrl(lead.name || '', enr.company || enr.domain, enr.domain));
+  }
+  lines.push('', 'Reply to the enquirer: ' + lead.email,
+    'Book them in: https://calendly.com/kudtarkar-parag/30min');
   var body = lines.join('\n');
   var subject = 'New lead — ' + (lead.name || lead.email) + (lead.topic ? ' · ' + String(lead.topic).slice(0, 50) : '');
-  GmailApp.sendEmail(to, subject, body);
+  GmailApp.sendEmail(to, subject, body, { htmlBody: emailHtml(body, { ctaUrl: 'https://calendly.com/kudtarkar-parag/30min', ctaLabel: 'Open their detail in HubSpot' }) });
   return 'sent to ' + to;
 }
 
@@ -136,10 +151,16 @@ function handleCold(body) {
   var contactName = String(body.contactName || 'there').trim();
   var notes = String(body.notes || '').trim();
 
+  // Enrich from the prospect's own website so the LLM opens with their reality.
+  var enrichment = { domain: '', notes: '', company: '', linkedin: [] };
+  try { enrichment = enrichLead(email, ''); } catch (e) { enrichment.notes = ''; }
+  if (enrichment.company && !company) company = enrichment.company;
+  var allNotes = [notes, enrichment.notes].filter(Boolean).join(' ');
+
   var subject = industry + ' ' + (company || 'business') + ' — practical AI, first step';
-  var prompt = coldPrompt(contactName, company, industry, notes);
+  var prompt = coldPrompt(contactName, company, industry, allNotes);
   var res = geminiToGmail(email, subject, prompt, contactName);
-  return { ok: true, email: res, mode: cfg('AUTO_SEND') === 'true' ? 'sent' : 'drafted' };
+  return { ok: true, email: res, enrichment: { domain: enrichment.domain, company: enrichment.company, linkedin: enrichment.linkedin }, mode: cfg('AUTO_SEND') === 'true' ? 'sent' : 'drafted' };
 }
 
 /* ---------------- prompts ---------------- */
@@ -158,9 +179,10 @@ function persona() {
   ].join('\n');
 }
 
-function leadPrompt(name, topic, source) {
+function leadPrompt(name, topic, source, enrichNotes) {
   return persona() +
     '\n\nContext: ' + name + ' just ' + source + ' on the AI Pilot to Production website and is interested in: ' + topic + '.' +
+    (enrichNotes ? '\n\nAbout their company (auto-scraped from their own website — use to personalise the opening line, do not invent beyond it): ' + enrichNotes : '') +
     '\nWrite a same-day reply: acknowledge their interest specifically, add one useful, safe, general insight about the topic (no invented facts), then propose the 30-minute intro call.';
 }
 
@@ -336,7 +358,48 @@ function geminiToGmail(to, fallbackSubject, prompt, name, opts) {
 
 function pushToHubSpot(hub) {
   var portal = cfg('PORTAL_ID'), guid = cfg('FORM_GUID');
-  if (!portal || !guid) return 'skipped (HubSpot not configured)';
+  var token = cfg('HUBSPOT_PRIVATE_TOKEN');
+  /* Preferred path: CRM v3 (needs HUBSPOT_PRIVATE_TOKEN) — returns the contact id
+     so enrichment can attach the company record and associations. */
+  if (token) {
+    try {
+      var props = {
+        email: hub.email,
+        firstname: hub.firstname || '',
+        lastname: hub.lastname || '',
+        phone: hub.phone || '',
+        message: hub.message || ''
+      };
+      var search = UrlFetchApp.fetch('https://api.hubapi.com/crm/v3/objects/contacts/search?' + encodeURIComponent(
+        'filterGroups=[{"filters":[{"value":"' + hub.email + '","propertyName":"email","operator":"EQ"}]}]&limit=1'), {
+        headers: { Authorization: 'Bearer ' + token }, muteHttpExceptions: true
+      });
+      if (search.getResponseCode() === 200) {
+        var found = JSON.parse(search.getContentText() || '{}');
+        if (found.total && found.results && found.results[0]) {
+          var id = found.results[0].id;
+          var upd = UrlFetchApp.fetch('https://api.hubapi.com/crm/v3/objects/contacts/' + id, {
+            method: 'patch', headers: { Authorization: 'Bearer ' + token },
+            contentType: 'application/json', payload: JSON.stringify({ properties: props }), muteHttpExceptions: true
+          });
+          return { id: id, info: 'contact updated (' + upd.getResponseCode() + ')' };
+        }
+      }
+      var created = UrlFetchApp.fetch('https://api.hubapi.com/crm/v3/objects/contacts', {
+        method: 'post', headers: { Authorization: 'Bearer ' + token },
+        contentType: 'application/json', payload: JSON.stringify({ properties: props }), muteHttpExceptions: true
+      });
+      if (created.getResponseCode() >= 200 && created.getResponseCode() < 300) {
+        var cid = String(JSON.parse(created.getContentText() || '{}').id || '');
+        return { id: cid, info: 'contact created (' + created.getResponseCode() + ')' };
+      }
+      return { id: '', info: 'crm create failed HTTP ' + created.getResponseCode() + ' — falling back to forms api' };
+    } catch (e) {
+      return { id: '', info: 'crm error: ' + e + ' — falling back to forms api' };
+    }
+  }
+  /* Fallback: classic Forms API (no contact id available). */
+  if (!portal || !guid) return { id: '', info: 'skipped (HubSpot not configured)' };
   var fields = [
     { name: 'email', value: hub.email },
     { name: 'firstname', value: hub.firstname },
@@ -350,7 +413,139 @@ function pushToHubSpot(hub) {
     payload: JSON.stringify({ fields: fields, context: { pageName: 'Orbit chat assistant' } }),
     muteHttpExceptions: true
   });
-  return 'HTTP ' + res.getResponseCode();
+  return { id: '', info: 'HTTP ' + res.getResponseCode() + ' (forms api)' };
+}
+
+/* ---------------- lead enrichment (company website + LinkedIn pointers) ----------------
+   Given the lead's email domain, fetch their public website, extract identity,
+   description, social links and tech signals, upsert a HubSpot COMPANY, associate it
+   with the contact, and return a summary that (a) personalises the LLM-drafted email
+   and (b) lands in the owner notification.
+   LinkedIn policy note: LinkedIn blocks anonymous scraping (and it breaches their ToS).
+   We therefore only harvest LinkedIn URLs that the company publishes on its own site,
+   optionally read public og:* meta from a company page when LinkedIn serves it, and
+   otherwise hand the owner a click-ready people-search URL. No credential scraping. */
+
+var FREE_MAIL = { 'gmail.com': 1, 'googlemail.com': 1, 'yahoo.com': 1, 'ymail.com': 1, 'hotmail.com': 1, 'outlook.com': 1, 'live.com': 1, 'msn.com': 1, 'icloud.com': 1, 'me.com': 1, 'aol.com': 1, 'protonmail.com': 1, 'proton.me': 1, 'gmx.com': 1, 'gmx.net': 1, 'mail.com': 1, 'mail.ru': 1, 'yandex.com': 1, 'zoho.com': 1, 'hey.com': 1 };
+
+function fetchPage(url) {
+  var res = UrlFetchApp.fetch(url, {
+    muteHttpExceptions: true, followRedirects: true,
+    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; OrbitEnricher/1.0; +https://kudtarkar.life)' }
+  });
+  var code = res.getResponseCode();
+  if (code < 200 || code >= 400) return { code: code, html: '' };
+  return { code: code, html: String(res.getContentText() || '') };
+}
+
+function metaFromHtml(html) {
+  var out = { title: '', description: '', siteName: '', linkedin: [], twitter: '', emails: [], tech: [] };
+  if (!html) return out;
+  var m = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+  if (m) out.title = m[1].replace(/\s+/g, ' ').trim().slice(0, 150);
+  m = html.match(/<meta[^>]+name=["']description["'][^>]*content=["']([\s\S]*?)["']/i) ||
+      html.match(/<meta[^>]+content=["']([\s\S]*?)["'][^>]*name=["']description["']/i);
+  if (m) out.description = m[1].replace(/\s+/g, ' ').trim().slice(0, 300);
+  m = html.match(/<meta[^>]+property=["']og:site_name["'][^>]*content=["']([\s\S]*?)["']/i);
+  if (m) out.siteName = m[1].trim().slice(0, 100);
+  var re = /https?:\/\/(?:[a-z]{2,4}\.)?linkedin\.com\/(?:company|in)\/[A-Za-z0-9_%\-.\/]+/gi, hit, seen = {};
+  while ((hit = re.exec(html)) !== null) {
+    var u = hit[0].replace(/[\"'>].*$/, '');
+    if (!seen[u]) { seen[u] = 1; out.linkedin.push(u); }
+  }
+  m = html.match(/https?:\/\/(?:www\.)?twitter\.com\/[A-Za-z0-9_]{2,15}/i);
+  if (m) out.twitter = m[0];
+  var em = new RegExp('[A-Za-z0-9._%+-]+@' + '(?:[A-Za-z0-9.-]+)', 'gi'), eh = {}, emHit;
+  while ((emHit = em.exec(html)) !== null && out.emails.length < 3) {
+    var addr = emHit[0].toLowerCase();
+    if (!eh[addr]) { eh[addr] = 1; out.emails.push(addr); }
+  }
+  var techs = ['hubspot', 'wordpress', 'shopify', 'wix', 'squarespace', 'salesforce', 'intercom', 'drupal', 'webflow', 'marketo'];
+  for (var t = 0; t < techs.length; t++) if (html.toLowerCase().indexOf(techs[t]) !== -1) out.tech.push(techs[t]);
+  return out;
+}
+
+function enrichLead(email, contactId) {
+  var out = { domain: '', notes: '', company: '', linkedin: [] };
+  try {
+    var domain = String(email || '').split('@')[1] || '';
+    if (!domain || FREE_MAIL[domain.toLowerCase()]) { out.notes = 'free-mail domain — no company enrichment'; return out; }
+    out.domain = domain;
+    var root = fetchPage('https://' + domain + '/');
+    if (!root.html) root = fetchPage('https://www.' + domain + '/');
+    var meta = metaFromHtml(root.html);
+    if (!meta.description || meta.description.length < 40) {
+      var alts = ['/about', '/about-us', '/company'], i, alt;
+      for (i = 0; i < alts.length && (!meta.description || meta.description.length < 40); i++) {
+        alt = fetchPage('https://' + domain + alts[i]);
+        if (alt.html) { var am = metaFromHtml(alt.html); if (am.description && am.description.length > meta.description.length) meta.description = am.description; }
+      }
+    }
+    var companyName = meta.siteName || (meta.title ? meta.title.split(/[|\u2013\u2014\-·]/)[0].trim() : '');
+    out.company = companyName;
+    out.linkedin = meta.linkedin;
+    out.notes = (companyName ? 'Company: ' + companyName + '. ' : '') +
+      (meta.description ? 'Their site says: "' + meta.description + '". ' : '') +
+      (meta.tech.length ? 'Site tech hints: ' + meta.tech.join(', ') + '. ' : '') +
+      (meta.linkedin.length ? 'LinkedIn page(s) on their site: ' + meta.linkedin.join(' ') + '. ' : '') +
+      (meta.emails.length ? 'Public emails on site: ' + meta.emails.join(', ') + '.' : '');
+    if (!token_()) return out;
+    upsertCompany(out, contactId);
+  } catch (e) {
+    out.notes += ' [enrichment error: ' + e + ']';
+  }
+  return out;
+}
+
+function token_() { return cfg('HUBSPOT_PRIVATE_TOKEN'); }
+
+function upsertCompany(enr, contactId) {
+  var token = token_();
+  var props = { domain: enr.domain };
+  if (enr.company) props.name = enr.company;
+  var headers = { Authorization: 'Bearer ' + token }, companyId = '', code;
+  var search = UrlFetchApp.fetch('https://api.hubapi.com/crm/v3/objects/companies/search?' + encodeURIComponent(
+    'filterGroups=[{"filters":[{"value":"' + enr.domain + '","propertyName":"domain","operator":"EQ"}]}]&limit=1'), {
+    headers: headers, muteHttpExceptions: true
+  });
+  if (search.getResponseCode() === 200) {
+    var found = JSON.parse(search.getContentText() || '{}');
+    if (found.total && found.results && found.results[0]) companyId = String(found.results[0].id);
+  }
+  if (companyId) {
+    var upd = UrlFetchApp.fetch('https://api.hubapi.com/crm/v3/objects/companies/' + companyId, {
+      method: 'patch', headers: headers, contentType: 'application/json',
+      payload: JSON.stringify({ properties: props }), muteHttpExceptions: true
+    });
+    code = upd.getResponseCode();
+    if (code < 200 || code >= 300) return;
+  } else {
+    var cr = UrlFetchApp.fetch('https://api.hubapi.com/crm/v3/objects/companies', {
+      method: 'post', headers: headers, contentType: 'application/json',
+      payload: JSON.stringify({ properties: props }), muteHttpExceptions: true
+    });
+    code = cr.getResponseCode();
+    if (code < 200 || code >= 300) return;
+    companyId = String(JSON.parse(cr.getContentText() || '{}').id || '');
+  }
+  enr.notes += ' [HubSpot company ' + companyId + ' linked]';
+  if (contactId && companyId) {
+    try {
+      UrlFetchApp.fetch('https://api.hubapi.com/crm/v4/objects/companies/' + companyId + '/associations/contacts/' + contactId, {
+        method: 'put', headers: headers, contentType: 'application/json',
+        payload: JSON.stringify([{ associationCategory: 'HUBSPOT_DEFINED', associationTypeId: 1 }]),
+        muteHttpExceptions: true
+      });
+    } catch (e) { /* association is best-effort */ }
+  }
+}
+
+function linkedinSearchUrl(name, domain, company) {
+  var bits = [];
+  if (name) bits.push(name);
+  if (company) bits.push(company);
+  if (domain) bits.push(domain);
+  return 'https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(bits.join(' '));
 }
 
 /* ---------------- manual test harness (run from the editor) ---------------- */
