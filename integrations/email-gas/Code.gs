@@ -370,8 +370,8 @@ function pushToHubSpot(hub) {
         phone: hub.phone || '',
         message: hub.message || ''
       };
-      var search = UrlFetchApp.fetch('https://api.hubapi.com/crm/v3/objects/contacts/search?' + encodeURIComponent(
-        'filterGroups=[{"filters":[{"value":"' + hub.email + '","propertyName":"email","operator":"EQ"}]}]&limit=1'), {
+      var search = UrlFetchApp.fetch('https://api.hubapi.com/crm/v3/objects/contacts/search?filterGroups=' + encodeURIComponent(
+        '[{"filters":[{"value":"' + hub.email + '","propertyName":"email","operator":"EQ"}]}]') + '&limit=1', {
         headers: { Authorization: 'Bearer ' + token }, muteHttpExceptions: true
       });
       if (search.getResponseCode() === 200) {
@@ -504,8 +504,8 @@ function upsertCompany(enr, contactId) {
   var props = { domain: enr.domain };
   if (enr.company) props.name = enr.company;
   var headers = { Authorization: 'Bearer ' + token }, companyId = '', code;
-  var search = UrlFetchApp.fetch('https://api.hubapi.com/crm/v3/objects/companies/search?' + encodeURIComponent(
-    'filterGroups=[{"filters":[{"value":"' + enr.domain + '","propertyName":"domain","operator":"EQ"}]}]&limit=1'), {
+  var search = UrlFetchApp.fetch('https://api.hubapi.com/crm/v3/objects/companies/search?filterGroups=' + encodeURIComponent(
+    '[{"filters":[{"value":"' + enr.domain + '","propertyName":"domain","operator":"EQ"}]}]') + '&limit=1', {
     headers: headers, muteHttpExceptions: true
   });
   if (search.getResponseCode() === 200) {
