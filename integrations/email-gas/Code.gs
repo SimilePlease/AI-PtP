@@ -77,17 +77,18 @@ function handleLead(body) {
 
   // 1. Email to the requester — Gemini-drafted when a key is configured,
   //    otherwise a clean fixed confirmation so the reply always goes out.
+  //    Both paths render through the branded HTML template with the CTA button.
   var subject = 'Your AI question' + (topic ? ' — ' + topic.slice(0, 60) : '') + ' (AI Pilot to Production)';
   var requester;
   try {
     var prompt = leadPrompt(name || 'there', topic || 'exploring AI for their business', source);
-    requester = geminiToGmail(email, subject, prompt, name || 'there');
+    requester = geminiToGmail(email, subject, prompt, name || 'there', { ctaUrl: 'https://calendly.com/kudtarkar-parag/30min' });
   } catch (err) {
     var fixed = 'Hi ' + (name || 'there') + ',' +
       '\n\nThanks for reaching out via the website' + (topic ? ' about ' + topic : '') + '.' +
       '\n\nI will come back to you personally with a proper answer — usually the same day.' +
-      '\nIf it is easier, book a 30-minute intro call directly: https://calendly.com/kudtarkar-parag/30min' + signature();
-    var opts = { htmlBody: '<p>' + fixed.replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>') + '</p>' };
+      '\nIf it is easier, book a 30-minute intro call directly.';
+    var opts = { htmlBody: emailHtml(fixed, { ctaUrl: 'https://calendly.com/kudtarkar-parag/30min' }) };
     if (cfg('AUTO_SEND') === 'true') { GmailApp.sendEmail(email, subject, fixed, opts); requester = { to: email, action: 'sent', mode: 'fixed' }; }
     else { GmailApp.createDraft(email, subject, fixed, opts); requester = { to: email, action: 'drafted', mode: 'fixed' }; }
   }
@@ -267,19 +268,64 @@ function splitSubject(text, fallback) {
   return { subject: fallback, body: text };
 }
 
+/* ---------------- branded HTML email template ----------------
+   Wordmark PNG hosted on the site (email clients don't render SVG).
+   Override with the LOGO_URL script property if the path ever moves.  */
+function LOGO_URL() { return cfg('LOGO_URL') || 'https://kudtarkar.life/assets/wordmark-email.png'; }
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function emailHtml(bodyText, opts) {
+  opts = opts || {};
+  var paras = String(bodyText || '').split(/\n{2,}/).map(function (p) {
+    return '<p style="margin:0 0 14px;">' + esc(p).replace(/\n/g, '<br>') + '</p>';
+  }).join('');
+  var cta = opts.ctaUrl
+    ? '<table role="presentation" cellpadding="0" cellspacing="0" style="margin:20px 0 6px;"><tr><td style="background:#A9C23F;border-radius:999px;">' +
+      '<a href="' + esc(opts.ctaUrl) + '" style="display:inline-block;padding:12px 26px;font-family:Georgia,serif;font-size:15px;font-weight:bold;color:#0C3027;text-decoration:none;border-radius:999px;">' +
+      esc(opts.ctaLabel || 'Book a 30-minute intro call') + '</a></td></tr></table>'
+    : '';
+  var sender = cfg('SENDER_NAME') || 'Parag — AI Pilot to Production';
+  return '' +
+  '<div style="margin:0;padding:24px 12px;background:#F7F3EC;">' +
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#FFFFFF;border-radius:14px;border:1px solid #E3DCCB;border-collapse:separate;overflow:hidden;">' +
+      '<tr><td style="padding:26px 32px 14px 32px;background:#F7F3EC;">' +
+        '<a href="https://kudtarkar.life/" style="text-decoration:none;"><img src="' + LOGO_URL() + '" alt="AI Pilot to Production" width="300" style="display:block;width:300px;max-width:100%;height:auto;border:0;"></a>' +
+      '</td></tr>' +
+      '<tr><td style="padding:14px 32px 8px 32px;font-family:Georgia,serif;color:#0F2A20;font-size:17px;line-height:1.55;">' + paras + cta + '</td></tr>' +
+      '<tr><td style="padding:18px 32px 26px 32px;border-top:1px solid #E3DCCB;font-family:Arial,sans-serif;font-size:12px;line-height:1.6;color:#5C6B62;">' +
+        '<strong style="color:#0F2A20;">' + esc(sender) + '</strong><br>' +
+        'AI strategy &amp; delivery · Singapore · working globally (US &amp; UK)<br>' +
+        '<a href="https://kudtarkar.life/" style="color:#4F665A;">kudtarkar.life</a> · ' +
+        '<a href="https://calendly.com/kudtarkar-parag/30min" style="color:#4F665A;">Book a call</a> · ' +
+        '<a href="https://medium.com/@kudtarkar.parag" style="color:#4F665A;">Writing</a><br>' +
+        (cfg('BUSINESS_ADDRESS') ? esc(cfg('BUSINESS_ADDRESS')) + '<br>' : '') +
+        'Prefer not to hear from me? Reply "no thanks" and that\u2019s the last you will.' +
+      '</td></tr>' +
+    '</table>' +
+  '</div>';
+}
+
 function signature() {
   return '\n\n—\n' + (cfg('SENDER_NAME') || 'Parag — AI Pilot to Production') + '\nAI strategy & delivery · Singapore · global\nBook directly: https://calendly.com/kudtarkar-parag\nPrefer not to hear from me? Reply "no thanks" and that\u2019s the last you will.';
 }
 
-function geminiToGmail(to, fallbackSubject, prompt, name) {
+function geminiToGmail(to, fallbackSubject, prompt, name, opts) {
+  opts = opts || {};
   var drafted = splitSubject(draftText(prompt), fallbackSubject);
   var body = drafted.body + signature();
-  var opts = { htmlBody: '<p>' + body.replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>') + '</p>' };
+  var html = emailHtml(drafted.body, {
+    ctaUrl: opts.ctaUrl || 'https://calendly.com/kudtarkar-parag/30min',
+    ctaLabel: opts.ctaLabel || 'Book a 30-minute intro call'
+  });
+  var mailOpts = { htmlBody: html };
   if (cfg('AUTO_SEND') === 'true') {
-    GmailApp.sendEmail(to, drafted.subject, body, opts);
+    GmailApp.sendEmail(to, drafted.subject, body, mailOpts);
     return { to: to, subject: drafted.subject, action: 'sent' };
   }
-  GmailApp.createDraft(to, drafted.subject, body, opts);
+  GmailApp.createDraft(to, drafted.subject, body, mailOpts);
   return { to: to, subject: drafted.subject, action: 'drafted' };
 }
 
