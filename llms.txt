@@ -1,0 +1,24 @@
+# AI Pilot to Production
+
+> AI strategy and delivery practice of Parag Kudtarkar: AI use-case discovery, AI Centre of Excellence design and leadership, responsible AI governance, and taking AI pilots into production. 22+ years across healthcare, telecommunications and regulated sectors in APAC. Singapore-based, working globally.
+
+This site answers what an AI consultancy does, how AI Centres of Excellence are built and led, how AI pilots move to production, and how responsible AI (security, governance, ethics) is applied in delivery. The assistant "Orbit" answers from the same knowledge base.
+
+## Main pages
+
+- [Home](https://kudtarkar.life/): AI strategy, CoE leadership, production innovation — with a booking link and contact form
+- [Approach](https://kudtarkar.life/#approach): use-case discovery, CoE design, delivery method
+- [Centre of Excellence](https://kudtarkar.life/#coe): how an AI CoE is structured and led
+- [Responsible AI](https://kudtarkar.life/#responsible-ai): security, governance, ethics in the delivery lifecycle
+
+## Key facts
+
+- Practice: AI Pilot to Production (Parag Kudtarkar), Singapore, serving clients globally
+- Experience: 22+ years; led a multimillion-dollar enterprise transformation across four geographies; five production platforms delivered
+- Industries: healthcare, telecommunications, financial services, maritime, SMEs
+- Booking: https://calendly.com/kudtarkar-parag/30min
+- Contact: parag@kudtarkar.life
+
+## FAQ
+
+- [54-question AI consulting FAQ](https://kudtarkar.life/llms-full.txt): full answers — what an AI consultancy does, CoE design, pilot-to-production, governance, security
