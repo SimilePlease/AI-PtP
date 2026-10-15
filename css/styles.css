@@ -1664,6 +1664,12 @@ html.js .reveal.in {
 
 .msd-toggle[aria-expanded="true"] .msd-caret { transform: rotate(180deg); }
 
+.msd-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .msd-panel {
   position: absolute;
   z-index: 30;
