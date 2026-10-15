@@ -358,7 +358,7 @@ function geminiToGmail(to, fallbackSubject, prompt, name, opts) {
 
 function pushToHubSpot(hub) {
   var portal = cfg('PORTAL_ID'), guid = cfg('FORM_GUID');
-  var token = cfg('HUBSPOT_PRIVATE_TOKEN');
+  var token = hsToken();
   /* Preferred path: CRM v3 (needs HUBSPOT_PRIVATE_TOKEN) — returns the contact id
      so enrichment can attach the company record and associations. */
   if (token) {
@@ -497,7 +497,84 @@ function enrichLead(email, contactId) {
   return out;
 }
 
-function token_() { return cfg('HUBSPOT_PRIVATE_TOKEN'); }
+/* ---------------- HubSpot auth: modern OAuth (new dev platform) or legacy PAT ----------------
+   Preferred: OAuth app created on the new developer platform.
+     One-time setup:
+       1. Script properties: HUBSPOT_CLIENT_ID, HUBSPOT_CLIENT_SECRET,
+          HUBSPOT_REDIRECT_URI (must match the redirect URL registered on the app,
+          e.g. https://script.google.com)
+       2. Run oauthAuthorizeUrl() → open the printed URL → approve → the browser
+          lands on your redirect URI with ?code=… in the address bar → copy the code
+       3. Script property HUBSPOT_AUTH_CODE = that code → run oauthExchange() once
+          → a long-lived HUBSPOT_REFRESH_TOKEN is stored automatically.
+     After that hsToken() silently trades refresh→access tokens (30-min TTL, cached).
+   Still supported: a static private-app token in HUBSPOT_PRIVATE_TOKEN (legacy path). */
+function hsToken() {
+  var pat = cfg('HUBSPOT_PRIVATE_TOKEN');
+  if (pat) return pat;
+  var refresh = cfg('HUBSPOT_REFRESH_TOKEN');
+  if (!refresh) return '';
+  var props = PropertiesService.getScriptProperties();
+  var cached = props.getProperty('HS_ACCESS_TOKEN_CACHE');
+  var cachedAt = Number(props.getProperty('HS_ACCESS_TOKEN_AT') || 0);
+  if (cached && Date.now() - cachedAt < 25 * 60 * 1000) return cached;
+  var res = UrlFetchApp.fetch('https://api.hubapi.com/oauth/v1/token', {
+    method: 'post',
+    contentType: 'application/x-www-form-urlencoded',
+    payload: 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(refresh) +
+      '&client_id=' + encodeURIComponent(cfg('HUBSPOT_CLIENT_ID') || '') +
+      '&client_secret=' + encodeURIComponent(cfg('HUBSPOT_CLIENT_SECRET') || ''),
+    muteHttpExceptions: true
+  });
+  if (res.getResponseCode() < 200 || res.getResponseCode() >= 300) {
+    throw new Error('oauth refresh failed HTTP ' + res.getResponseCode());
+  }
+  var data = JSON.parse(res.getContentText());
+  props.setProperty('HS_ACCESS_TOKEN_CACHE', String(data.access_token || ''));
+  props.setProperty('HS_ACCESS_TOKEN_AT', String(Date.now()));
+  if (data.refresh_token && data.refresh_token !== refresh) props.setProperty('HUBSPOT_REFRESH_TOKEN', data.refresh_token);
+  return String(data.access_token || '');
+}
+
+function oauthAuthorizeUrl() {
+  var cid = cfg('HUBSPOT_CLIENT_ID');
+  if (!cid) return 'Set HUBSPOT_CLIENT_ID (and HUBSPOT_CLIENT_SECRET, HUBSPOT_REDIRECT_URI) first, then run this again.';
+  var uri = cfg('HUBSPOT_REDIRECT_URI') || 'https://script.google.com';
+  var scopes = ['crm.objects.contacts.read', 'crm.objects.contacts.write', 'crm.objects.companies.read', 'crm.objects.companies.write'].join(' ');
+  return 'https://app.hubspot.com/oauth/authorize?client_id=' + encodeURIComponent(cid) +
+    '&redirect_uri=' + encodeURIComponent(uri) +
+    '&scope=' + encodeURIComponent(scopes);
+}
+
+function oauthExchangeWithCode(code) {
+  var res = UrlFetchApp.fetch('https://api.hubapi.com/oauth/v1/token', {
+    method: 'post',
+    contentType: 'application/x-www-form-urlencoded',
+    payload: 'grant_type=authorization_code&code=' + encodeURIComponent(code) +
+      '&client_id=' + encodeURIComponent(cfg('HUBSPOT_CLIENT_ID') || '') +
+      '&client_secret=' + encodeURIComponent(cfg('HUBSPOT_CLIENT_SECRET') || '') +
+      '&redirect_uri=' + encodeURIComponent(cfg('HUBSPOT_REDIRECT_URI') || 'https://script.google.com'),
+    muteHttpExceptions: true
+  });
+  if (res.getResponseCode() < 200 || res.getResponseCode() >= 300) {
+    return 'exchange failed HTTP ' + res.getResponseCode() + ' — check CLIENT_ID/SECRET/REDIRECT_URI match the app settings';
+  }
+  var data = JSON.parse(res.getContentText());
+  PropertiesService.getScriptProperties().setProperty('HUBSPOT_REFRESH_TOKEN', String(data.refresh_token || ''));
+  return 'stored HUBSPOT_REFRESH_TOKEN — enrichment is now live';
+}
+
+function oauthExchange() {
+  var code = cfg('HUBSPOT_AUTH_CODE');
+  if (!code) return 'Open oauthAuthorizeUrl() output, approve access, copy the ?code= from the redirect URL into script property HUBSPOT_AUTH_CODE, then run this again.';
+  var out = oauthExchangeWithCode(code);
+  if (String(out).indexOf('stored') === 0) PropertiesService.getScriptProperties().deleteProperty('HUBSPOT_AUTH_CODE');
+  return out;
+}
+
+function token_() {
+  return hsToken();
+}
 
 function upsertCompany(enr, contactId) {
   var token = token_();
