@@ -675,7 +675,7 @@
       /* --- Lite mode: curated answer engine, no model needed --- */
       if (!engine) {
         var lite = agent.answer(text) || agent.answerSemantic(text);
-        var liteText = lite || 'Good question \u2014 I want to give it a proper answer rather than a rushed one. Email parag@kudtarkar.life or book a meeting and you\u2019ll get a real one.';
+        var liteText = lite || 'That one\u2019s a bit outside my brief \u2014 I\u2019m sharpest on AI strategy, AI Centres of Excellence, governance, and taking pilots to production. Ask me about any of those, or tap \u201cBook a meeting\u201d / email parag@kudtarkar.life and Parag will pick it up.';
         var liteBubble = addMsg('bot', liteText);
         history.push({ role: 'assistant', content: liteText });
         if (/book/i.test(liteText)) attachBookingCta(liteBubble);

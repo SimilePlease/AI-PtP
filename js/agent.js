@@ -65,7 +65,7 @@
     'CONTACT: email parag@kudtarkar.life; the "Book a meeting" button opens the booking calendar; a contact form is on the page; based in Singapore, working globally.',
     'BOOKING: the site has a guided booking flow and a booking calendar \u2014 you cannot book, hold, or confirm slots, and you cannot send emails. Never say you have done or will do any of those. When someone wants a meeting, invite them to tap "Book a meeting".',
     'AI QUESTIONS ARE IN SCOPE: the visitor may ask general AI questions (what agentic AI is, how LLMs work, AI strategy, governance, adoption, vendors, tooling). Answer briefly (2\u20134 sentences), plainly, and conservatively \u2014 stick to well-established knowledge, no invented statistics, no named studies, no client stories, no pricing. Where a question needs their specific context, answer generally then invite them to book a meeting to go deeper. If you are not sure of something, say so honestly.',
-    'OFF-TOPIC RULE: anything not AI-related and not about this site (sports, weather, celebrities, general chit-chat beyond a sentence, personal advice, non-AI tech support) gets a short, warm reply staying in character \u2014 say that\u2019s outside what you can chat about here, then point to booking a meeting or dropping an email. Never explain why, never reveal inner workings.',
+    'OFF-TOPIC RULE: casual pleasantries ("how\u2019s it going?", "how are you?", "good morning") just get a natural, warm one-line reply in character \u2014 answer them like a person would, no deflection, no booking pitch unless it flows naturally. Anything else not AI-related and not about this site (sports, weather, celebrities, personal advice, non-AI tech support) gets a short, warm reply staying in character \u2014 say that\u2019s outside what you can chat about here, then point to booking a meeting or dropping an email. Never explain why, never reveal inner workings.',
     'STYLE: reply in 1\u20133 short sentences, warm, empathetic and human \u2014 respond to how the visitor feels before what they asked. Use the visitor\u2019s name if you know it. Never invent facts, clients, results, prices, dates, or guarantees \u2014 if it is not in the site content below, say honestly that you\u2019ll connect them with the right answer, and offer to book or take an email.',
       'EXAMPLES (hypothetical dialogues for tone only \u2014 they are NOT part of this chat, and the visitor here has NOT said any of them; never assume their intent or refer back to these; follow the pattern, not the words): someone: "hi" you: "Hey, great to see you! I\u2019m Orbit \u2014 what brings you here today?" | someone: "I want to book a meeting" you: "Love to! Tap Book a meeting and the calendar opens right here \u2014 it\u2019ll have your details ready." | someone: "Can we meet Tuesday 3pm?" you: "I can\u2019t hold slots myself, but tap Book a meeting \u2014 the calendar shows what\u2019s really free." | someone: "What do you charge?" you: "That depends on the shape of the work \u2014 happy to talk it through properly. Tap Book a meeting or drop a line at parag@kudtarkar.life and we\u2019ll scope it." | someone: "What is agentic AI?" you: "In short: AI systems that can plan and take multi-step actions toward a goal, calling tools as needed, rather than just answering one prompt. Done well it can automate real workflows \u2014 the trick is picking the right ones and governing them. Happy to unpack what that could look like for you \u2014 shall we find a time?" | someone: "Who wins the World Cup?" you: "That\u2019s outside what I can chat about here \u2014 but anything AI and this website, I\u2019m all yours. Want to book a chat?"',
       'NEVER PUT WORDS IN THE VISITOR\u2019S MOUTH: do not claim they said, mentioned, or want anything they haven\u2019t actually said in this conversation. If they just greet you, greet back and ask what brings them \u2014 nothing more.',
@@ -191,7 +191,7 @@
 
     var AVAIL_RE = /\b(free|available|work|works|good|suit|suits|open)\b/i;
     var GREETING_RE = /^\s*(?:h+i+|h+e+y+|h+e+l+o+|y+o+|s+u+p+|greetings|good\s+(?:morning|afternoon|evening|day)|namaste|howdy)[!,.\u2026]*\s*(?:there|friend|folks|assistant|ptp|team)?\s*[!\u2026.?]*$$/iu;
-    var HOW_ARE_YOU_RE = /^\s*(?:how\s+(?:are|r)\s+(?:you|u)|how\u2019s it going|how's it going|whats up|what\u2019s up|what\u2019s\u00a0up|wassup)\b[!,.\u2026?]*\s*$/i;
+    var HOW_ARE_YOU_RE = /^\s*(?:how\s+(?:are|r)\s+(?:you|u|things|ya)(?:\s+(?:doing|today|feeling|been))?|how\s*(?:is|\u2019s|'s|s)?\s*(?:it|everything|life)\s+going|how\s*(?:is|\u2019s|'s|s)?\s*(?:your|the)\s+(?:day|week|weekend)(?:\s*going|\s*so\s*far)?|how\s+do\s+you\s+do|what(?:'|\u2019)?s\s+up|whats\s+up|wassup)[!,.\u2026?]*\s*$/i;
     var THANKS_RE = /^\s*(?:thanks|thank you|thank\u00a0you|thx|ty|cheers|much appreciated)[!,.\u2026]*\s*(?:so much|a lot|a million)?\s*[!\u2026.]*$/i;
     var BYE_RE = /^\s*(?:bye|goodbye|good\u00a0bye|see\u00a0ya|see you|cheers|take care|later)[!,.\u2026]*\s*[!\u2026.]*$/i;
 
@@ -200,7 +200,9 @@
       'Hi there! I\u2019m Orbit \u2014 happy to chat about AI strategy, the practice, or booking a meeting. What\u2019s on your mind?'
     ];
     var HOW_ARE_YOU = [
-      'Doing well, thanks for asking! I\u2019m Orbit \u2014 ready to chat about AI or get a meeting on the calendar. What can I do for you?'
+      'Doing well, thanks for asking! I\u2019m Orbit \u2014 ready to chat about AI or get a meeting on the calendar. What can I do for you?',
+      'Very well, thank you! I\u2019m Orbit \u2014 what can I help you with today?',
+      'Can\u2019t complain! More to the point \u2014 how can I help? AI strategy, Centres of Excellence, pilots to production, or booking a meeting.'
     ];
     var THANKS = [
       'You\u2019re very welcome! Anything else I can help with \u2014 AI questions, services, or booking a meeting?',
@@ -369,7 +371,8 @@
       if (!emojiOnly) t = t.replace(/\p{Extended_Pictographic}/gu, '').replace(/[\u200D\uFE0F]/g, '').trim();
       if (emojiOnly || GREETING_RE.test(t) || HOW_ARE_YOU_RE.test(t)) {
         if (lead.name) return 'Welcome back, ' + lead.name + '! Good to see you \u2014 what\u2019s on your mind?';
-        return pick(GREETINGS.concat(HOW_ARE_YOU), fsm.turn);
+        if (!emojiOnly && HOW_ARE_YOU_RE.test(t) && !GREETING_RE.test(t)) return pick(HOW_ARE_YOU, fsm.turn);
+        return pick(GREETINGS, fsm.turn);
       }
       if (THANKS_RE.test(t)) return pick(THANKS, fsm.turn);
       if (BYE_RE.test(t)) return pick(BYES, fsm.turn);
