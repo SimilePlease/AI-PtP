@@ -221,6 +221,35 @@
     if (a) gaEvent('book_click', { location: a.closest('.chat-panel') ? 'chat' : 'page' });
   });
 
+  /* ---------- Newsletter capture (footer) → HubSpot contact ---------- */
+  var newsForm = document.getElementById('news-form');
+  if (newsForm) {
+    newsForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var email = (document.getElementById('nl-email').value || '').trim();
+      var msg = document.getElementById('news-msg');
+      if (!email || email.indexOf('@') < 1) {
+        msg.textContent = 'Please enter a valid work email.';
+        msg.className = 'footer-news-msg err';
+        return;
+      }
+      var btn = newsForm.querySelector('button');
+      btn.disabled = true;
+      postHubSpot({ name: '', email: email, phone: '', topic: 'Newsletter — Pilot to Production' }, 'newsletter')
+        .then(function () {
+          msg.textContent = "You're in — first insight lands next month.";
+          msg.className = 'footer-news-msg ok';
+          newsForm.reset();
+        })
+        .catch(function () {
+          msg.textContent = "Couldn't subscribe just now — email parag@kudtarkar.life and I'll add you.";
+          msg.className = 'footer-news-msg err';
+        })
+        .finally(function () { btn.disabled = false; });
+      gaEvent('newsletter_signup');
+    });
+  }
+
   queueFlush(); /* deliver leads queued by earlier sessions even without email drafts */
 
   /* ---------- About photo carousel (auto-scrolls, pauses on hover/hidden tab) ---------- */
