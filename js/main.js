@@ -116,20 +116,20 @@
         fetch(CRM_ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ token: CRM_TOKEN, name: item.lead.name, email: item.lead.email, phone: item.lead.phone, topic: item.lead.topic, source: item.source })
+          body: JSON.stringify({ token: CRM_TOKEN, name: item.lead.name, email: item.lead.email, phone: item.lead.phone, topic: item.lead.topic, source: item.source, transcript: item.transcript || '' })
         }).catch(function () { /* CRM optional; contact already stored */ });
       }
     });
     try { localStorage.setItem('aiptp-lead-queue-v1', JSON.stringify(leadQueue)); } catch (e) { /* private mode */ }
   }
 
-  function submitLead(source) {
+  function submitLead(source, transcript) {
     if (!agent) return;
     var lead = agent.lead();
     if (!lead.email) return;                       // nothing to submit without an email
     var last = leadQueue.length && leadQueue[leadQueue.length - 1];
     if (last && last.lead.email === lead.email && last.lead.name === lead.name) return; // no duplicate spam
-    leadQueue.push({ lead: { name: lead.name, email: lead.email, phone: lead.phone, topic: lead.topic }, source: source });
+    leadQueue.push({ lead: { name: lead.name, email: lead.email, phone: lead.phone, topic: lead.topic }, source: source, transcript: String(transcript || '').slice(0, 4000) });
     try { localStorage.setItem('aiptp-lead-queue-v1', JSON.stringify(leadQueue)); } catch (e) { /* private mode */ }
     queueFlush();
   }
@@ -449,6 +449,20 @@
     var history = [];
     var webgpuOk = typeof navigator !== 'undefined' && !!navigator.gpu;
 
+    /* Compact transcript of this chat for CRM sentiment scoring (Kev, server
+       side): user + Orbit turns only, most recent context kept, ~2.5k chars. */
+    function transcriptText() {
+      var out = [];
+      for (var i = 0; i < history.length; i++) {
+        var m = history[i];
+        if (!m || m.role === 'system') continue;
+        var t = String(m.content || '').trim();
+        if (!t || t === '\u2026') continue;
+        out.push((m.role === 'user' ? 'Visitor: ' : 'Orbit: ') + t);
+      }
+      return out.join('\n').slice(-2500);
+    }
+
     function setStatus(text) { chatEls.status.textContent = text; }
 
     function setBusy(busy) {
@@ -657,7 +671,7 @@
         history.push({ role: 'assistant', content: fsmOut.say });
         if (fsmOut.cta) attachBookingCta(fsmBubble);
         if (fsmOut.openCal) { gaEvent('chat_booking_confirm'); autoOpenBooking(); }
-        submitLead('website chat');
+        submitLead('website chat', transcriptText());
         return;
       }
 

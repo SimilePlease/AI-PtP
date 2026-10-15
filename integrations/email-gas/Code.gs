@@ -2,10 +2,12 @@
  * Email automation — Google Apps Script (free with any Gmail account).
  *
  * What it does (all free):
- *   POST { token, name, email, phone, topic, source }   → chat/lead capture:
+ *   POST { token, name, email, phone, topic, source, transcript? }   → chat/lead capture:
  *     1. Creates/updates the contact in HubSpot (keyless forms API)
  *     2. Asks Gemini (free API tier) to draft a personalized first-touch email
  *     3. Files it as a Gmail DRAFT for one-tap review & send
+ *     4. Optional: scores the transcript with a self-hosted Kev decision
+ *        model (sentiment, frustration, urgency, lead heat) — see README
  *
  *   POST { token, action:'cold', company, industry, contactName, notes }
  *                                                        → SME cold outreach:
@@ -18,6 +20,11 @@
  *   GEMINI_KEY   — Google AI Studio API key (free tier)
  *   AUTO_SEND    — 'true' → send immediately; omit → drafts only (default, recommended)
  *   SENDER_NAME  — signature name, e.g. 'Parag — AI Pilot to Production'
+ *   KEV_ENDPOINT — optional HTTPS base URL of your Kev decision-model
+ *                  deployment (https://github.com/jaredpalmer/kev); enables
+ *                  sentiment scoring of every chat lead
+ *   KEV_MODEL    — optional model name, default 'kev-latest'
+ *   KEV_API_KEY  — optional Bearer token if your Kev deployment enforces one
  *
  * Deploy: Deploy → New deployment → Web app → Execute as: Me → Access: Anyone.
  * Put the /exec URL + token into the site config (see README).
@@ -54,6 +61,62 @@ function json(obj) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
+/* ---------------- lead sentiment (Kev decision model, optional) ---------------- */
+
+/* Ask a self-hosted Kev endpoint (https://github.com/jaredpalmer/kev) to score
+   the conversation: overall sentiment, frustration, urgency and lead heat —
+   all as calibrated probabilities, System One API. Returns null whenever
+   KEV_ENDPOINT is unset or anything fails: sentiment must never break a lead. */
+function kevSentiment(text) {
+  var endpoint = cfg('KEV_ENDPOINT');
+  var body = String(text || '').trim();
+  if (!endpoint || !body) return null;
+  try {
+    var payload = {
+      model: cfg('KEV_MODEL') || 'kev-latest',
+      state: body.slice(-6000),
+      questions: {
+        sentiment:  { type: 'choice',
+                      instructions: 'Overall sentiment of the prospective client across this conversation with the assistant of an AI consultancy.',
+                      criteria: { positive: 'Engaged, hopeful, wants to move forward',
+                                  neutral:  'Factual, curious, no strong emotion',
+                                  negative: 'Skeptical, annoyed, unhappy or dismissive' } },
+        frustrated: { type: 'noul', instructions: 'Is the visitor frustrated, upset or impatient at any point?' },
+        urgent:     { type: 'noul', instructions: 'Does the visitor express urgency, a deadline or time pressure?' },
+        heat:       { type: 'score',
+                      instructions: 'How warm is this lead — how likely to book a call and become a client?',
+                      criteria: ['cold', 'warm', 'hot'] }
+      }
+    };
+    var headers = { 'Authorization': 'Bearer ' + cfg('KEV_API_KEY') };
+    if (!cfg('KEV_API_KEY')) delete headers['Authorization'];
+    var resp = UrlFetchApp.fetch(endpoint.replace(/\/+$/, '') + '/v1/systemone', {
+      method: 'post',
+      contentType: 'application/json',
+      headers: headers,
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
+    if (resp.getResponseCode() >= 300) return null;
+    var data = JSON.parse(resp.getContentText());
+    var a = (data && data.answers) || {};
+    var s = a.sentiment || {}, f = a.frustrated || {}, u = a.urgent || {}, h = a.heat || {};
+    var parts = [];
+    if (s.choice) parts.push('sentiment: ' + s.choice + (typeof s.confidence === 'number' ? ' (' + Math.round(s.confidence * 100) + '%)' : ''));
+    if (typeof f.noul === 'number') parts.push('frustrated: ' + (f.noul >= 0.5 ? 'yes' : 'no') + ' (' + f.noul.toFixed(2) + ')');
+    if (typeof u.noul === 'number') parts.push('urgent: ' + (u.noul >= 0.5 ? 'yes' : 'no') + ' (' + u.noul.toFixed(2) + ')');
+    if (typeof h.score === 'number' && h.legend) {
+      var keys = Object.keys(h.legend).sort(function (x, y) { return Number(x) - Number(y); });
+      var level = h.legend[String(Math.round(h.score))] || h.legend[keys[keys.length - 1]];
+      parts.push('lead heat: ' + level + ' (' + h.score.toFixed(2) + ')');
+    }
+    if (!parts.length) return null;
+    return { summary: parts.join(' \u00b7 '), answers: a };
+  } catch (e) {
+    return null;
+  }
+}
+
 /* ---------------- lead from the site chat/form ---------------- */
 
 function handleLead(body) {
@@ -65,13 +128,18 @@ function handleLead(body) {
 
   if (!email || email.indexOf('@') < 0) return { ok: false, error: 'valid email required' };
 
+  // 0. Sentiment: score the conversation transcript (or the topic line) with a
+  //    self-hosted Kev decision model when KEV_ENDPOINT is configured. Runs
+  //    before the HubSpot push so the tag lands on the contact record.
+  var mood = kevSentiment(String(body.transcript || '').trim() || topic);
+
   var parts = name.split(/\s+/);
   var hub = {
     email: email,
     firstname: parts[0] || '',
     lastname: parts.slice(1).join(' ') || '',
     phone: phone,
-    message: topic + (phone ? '' : ' [phone: not provided]')
+    message: topic + (mood ? ' [Kev] ' + mood.summary : '') + (phone ? '' : ' [phone: not provided]')
   };
   var hubResult = pushToHubSpot(hub);
 
@@ -101,11 +169,12 @@ function handleLead(body) {
   }
 
   // 2. Email to the owner — full details of every lead, always sent.
-  var owner = notifyOwner({ name: name, email: email, phone: phone, topic: topic, source: source, hubspot: hubResult.info, enrichment: enrichment });
+  var owner = notifyOwner({ name: name, email: email, phone: phone, topic: topic, source: source, hubspot: hubResult.info, enrichment: enrichment, mood: mood });
 
   return {
     ok: true,
     hubspot: hubResult.info,
+    mood: mood ? mood.summary : null,
     enrichment: { domain: enrichment.domain, company: enrichment.company, linkedin: enrichment.linkedin },
     email: requester,
     ownerNotified: owner,
@@ -132,6 +201,9 @@ function notifyOwner(lead) {
     if (enr.notes) lines.push('Website intel: ' + enr.notes);
     if (enr.linkedin && enr.linkedin.length) lines.push('LinkedIn (from their site): ' + enr.linkedin.join(' | '));
     if (enr.domain) lines.push('Find them on LinkedIn: ' + linkedinSearchUrl(lead.name || '', enr.company || enr.domain, enr.domain));
+  }
+  if (lead.mood && lead.mood.summary) {
+    lines.push('', '— Sentiment (Kev) —', lead.mood.summary);
   }
   lines.push('', 'Reply to the enquirer: ' + lead.email,
     'Book them in: https://calendly.com/kudtarkar-parag/30min');

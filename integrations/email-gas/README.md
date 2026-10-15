@@ -51,6 +51,42 @@ with Access: *Anyone* (it still needs your TOKEN to do anything).
   `handleCold` manually per prospect) → drafted emails with industry-specific
   use cases, your signature, and an opt-out line, every time.
 
+## 4. Lead sentiment with Kev (optional, self-hosted)
+
+Every chat lead can be scored by [Kev](https://github.com/jaredpalmer/kev) — a small,
+self-hosted decision model (Jev / TypeSafe System One-compatible) that returns
+**calibrated probabilities**, not vibes. For each lead, Apps Script sends the chat
+transcript and asks four questions:
+
+| Question | Type | Returns |
+|---|---|---|
+| Overall sentiment | `choice` | positive / neutral / negative + confidence |
+| Is the visitor frustrated? | `noul` | probability |
+| Any urgency / deadline? | `noul` | probability |
+| Lead heat | `score` | cold / warm / hot |
+
+Results land in three places: a compact `[Kev] …` tag on the HubSpot contact's
+message field, a **"— Sentiment (Kev) —"** block in the owner alert email, and a
+`mood` field in the endpoint's JSON response.
+
+Setup:
+
+1. Deploy a Kev endpoint (their README's one-command deploy; it scales to zero).
+   A local `python -m kev.serve` on your Mac is **not** reachable from Apps
+   Script — you need the public HTTPS URL. `kev-0.8b` or `kev-4b` is plenty for
+   four questions on a 2.5k-char transcript.
+2. Apps Script → Script Properties:
+   - `KEV_ENDPOINT` — e.g. `https://your-kev.modal.run` (trailing slash fine)
+   - `KEV_MODEL` — optional, default `kev-latest`
+   - `KEV_API_KEY` — optional; sent as `Authorization: Bearer …` if your
+     deployment enforces one
+3. That's it. Unset or unreachable endpoint → sentiment is silently skipped and
+   leads flow exactly as before; a slow Kev never blocks lead capture (the
+   scoring runs server-side on the lead POST, not in the visitor's browser).
+
+Privacy note: the transcript (last ~2.5k chars of the visitor's chat) is sent to
+*your own* Kev deployment and nowhere else.
+
 ## Compliance notes (baked in)
 
 - Draft-first: nothing leaves without a human press of Send.
