@@ -92,7 +92,13 @@
     if (!leadQueue.length) return;
     var batch = leadQueue.splice(0, leadQueue.length);
     batch.forEach(function (item) {
-      postHubSpot(item.lead, item.source).catch(function () { leadQueue.push(item); });
+      /* Re-persist on failure: the localStorage save below runs before this
+         catch can fire, so a failed lead would otherwise survive only in
+         memory and be lost if the visitor closes the tab. */
+      postHubSpot(item.lead, item.source).catch(function () {
+        leadQueue.push(item);
+        try { localStorage.setItem('aiptp-lead-queue-v1', JSON.stringify(leadQueue)); } catch (e) { /* private mode */ }
+      });
       if (CRM_ENDPOINT) {
         fetch(CRM_ENDPOINT, {
           method: 'POST',
@@ -202,7 +208,7 @@
     });
   });
 
-  if (CRM_ENDPOINT) queueFlush();
+  queueFlush(); /* deliver leads queued by earlier sessions even without email drafts */
 
   /* ---------- About photo carousel (auto-scrolls, pauses on hover/hidden tab) ---------- */
 
