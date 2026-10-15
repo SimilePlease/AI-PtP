@@ -23,6 +23,19 @@ All lengths machine-verified. Paste directly into Google Ads (Responsive Search 
 | 14 | Book a 30-Minute Intro Call | 27 |
 | 15 | Parag Kudtarkar, AI Strategy | 28 |
 
+## Long headlines — Performance Max asset group (max 90 chars — at least 1 required)
+
+| # | Long headline | Len |
+|---|---|---|
+| 1 | From first use case to deployed, governed AI — strategy, CoE and delivery leadership. | 85 |
+| 2 | Most AI dies between demo and deployment. I work that gap until it runs in production. | 86 |
+| 3 | 22 years of enterprise delivery, now focused on taking your AI pilots to production. | 84 |
+| 4 | AI strategy, Centre of Excellence leadership and production delivery — Singapore, global. | 89 |
+
+*(If you're in Standard RSA instead, this error doesn't apply — RSAs need 15 headlines,
+not long ones. The prompt above means you're creating a Performance Max campaign;
+fill 3–5 short headlines from the table above plus 1+ long headline from here.)*
+
 ## Descriptions (max 90 chars — use 3–4)
 
 | # | Description | Len |
