@@ -1470,21 +1470,25 @@
           </div>
           <div class="form-field form-field--topics">
             <label for="cf-topic">What do you need help with? <span class="form-optional">Select all that apply</span></label>
-            <div class="topic-chips" id="cf-topic-chips" role="group" aria-label="What do you need help with? Select all that apply.">
-              <label class="chip"><input type="checkbox" name="interest" value="AI Consultancy"><span>AI Consultancy</span></label>
-              <label class="chip"><input type="checkbox" name="interest" value="Managed AI Operations"><span>Managed AI Operations</span></label>
-              <label class="chip"><input type="checkbox" name="interest" value="Building an AI Strategy"><span>Building an AI Strategy</span></label>
-              <label class="chip"><input type="checkbox" name="interest" value="Building an AI Centre of Excellence"><span>Building an AI Centre of Excellence</span></label>
-              <label class="chip"><input type="checkbox" name="interest" value="Taking AI Pilots to Production"><span>Taking AI Pilots to Production</span></label>
-              <label class="chip"><input type="checkbox" name="interest" value="AI Use-Case Discovery"><span>AI Use-Case Discovery</span></label>
-              <label class="chip"><input type="checkbox" name="interest" value="AI Security"><span>AI Security</span></label>
-              <label class="chip"><input type="checkbox" name="interest" value="AI Governance &amp; Compliance"><span>AI Governance &amp; Compliance</span></label>
-              <label class="chip"><input type="checkbox" name="interest" value="AI Vendor / Tool Selection"><span>AI Vendor / Tool Selection</span></label>
-              <label class="chip"><input type="checkbox" name="interest" value="Just a Coffee"><span>Just a Coffee ☕</span></label>
+            <div class="msd" id="cf-topic-msd">
+              <button type="button" class="msd-toggle" id="cf-topic-toggle" aria-haspopup="true" aria-expanded="false">
+                <span class="msd-value" id="cf-topic-value">Select all that apply…</span>
+                <span class="msd-caret" aria-hidden="true">▾</span>
+              </button>
+              <div class="msd-panel" id="cf-topic-panel" role="group" aria-label="Options" hidden>
+                <label class="msd-opt"><input type="checkbox" name="interest" value="AI Consultancy"><span>AI Consultancy</span></label>
+                <label class="msd-opt"><input type="checkbox" name="interest" value="Managed AI Operations"><span>Managed AI Operations</span></label>
+                <label class="msd-opt"><input type="checkbox" name="interest" value="Building an AI Strategy"><span>Building an AI Strategy</span></label>
+                <label class="msd-opt"><input type="checkbox" name="interest" value="Building an AI Centre of Excellence"><span>Building an AI Centre of Excellence</span></label>
+                <label class="msd-opt"><input type="checkbox" name="interest" value="Taking AI Pilots to Production"><span>Taking AI Pilots to Production</span></label>
+                <label class="msd-opt"><input type="checkbox" name="interest" value="AI Use-Case Discovery"><span>AI Use-Case Discovery</span></label>
+                <label class="msd-opt"><input type="checkbox" name="interest" value="AI Security"><span>AI Security</span></label>
+                <label class="msd-opt"><input type="checkbox" name="interest" value="AI Governance &amp; Compliance"><span>AI Governance &amp; Compliance</span></label>
+                <label class="msd-opt"><input type="checkbox" name="interest" value="AI Vendor / Tool Selection"><span>AI Vendor / Tool Selection</span></label>
+                <label class="msd-opt"><input type="checkbox" name="interest" value="Just a Coffee"><span>Just a Coffee ☕</span></label>
+              </div>
             </div>
-            <select id="cf-topic" name="topic" required hidden aria-hidden="true" tabindex="-1">
-              <option value="General enquiry" selected>General enquiry</option>
-            </select>
+            <p class="multi-hint" id="cf-topic-hint" role="status">Nothing selected yet</p>
           </div>
           <div class="form-field">
             <label for="cf-message">Message</label>

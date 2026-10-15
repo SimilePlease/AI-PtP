@@ -40,6 +40,8 @@
       var interests = Array.prototype.slice.call(form.querySelectorAll('input[name="interest"]:checked'))
         .map(function (cb) { return cb.value; });
       var topic = interests.length ? interests.join(', ') : 'General enquiry';
+      var hint = document.getElementById('cf-topic-hint');
+      if (hint) hint.textContent = interests.length ? interests.length + ' selected: ' + interests.join(', ') : 'Nothing selected yet';
       var message = (form.elements.message.value || '').trim();
       var subject = 'Website enquiry' + (interests.length ? ': ' + interests.join(', ') : '') + (name ? ' — ' + name : '');
       var body = 'Name: ' + name + '\n' +
@@ -225,6 +227,41 @@
     var a = e.target && e.target.closest ? e.target.closest('a[href*="calendly.com"]') : null;
     if (a) gaEvent('book_click', { location: a.closest('.chat-panel') ? 'chat' : 'page' });
   });
+
+  /* ---------- Multi-select dropdown (contact form interests) ---------- */
+  (function () {
+    var msd = document.getElementById('cf-topic-msd');
+    if (!msd) return;
+    var toggle = document.getElementById('cf-topic-toggle');
+    var panel = document.getElementById('cf-topic-panel');
+    var value = document.getElementById('cf-topic-value');
+    var hint = document.getElementById('cf-topic-hint');
+
+    function sync() {
+      var picked = msd.querySelectorAll('input[name="interest"]:checked');
+      value.textContent = picked.length
+        ? picked.length + (picked.length === 1 ? ' area selected' : ' areas selected')
+        : 'Select all that apply…';
+      if (hint) hint.textContent = picked.length
+        ? 'Selected: ' + Array.prototype.map.call(picked, function (cb) { return cb.value; }).join(', ')
+        : 'Nothing selected yet';
+    }
+
+    function setOpen(open) {
+      panel.hidden = !open;
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+
+    toggle.addEventListener('click', function () { setOpen(panel.hidden); });
+    panel.addEventListener('change', sync);
+    document.addEventListener('click', function (e) {
+      if (!msd.contains(e.target)) setOpen(false);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !panel.hidden) { setOpen(false); toggle.focus(); }
+    });
+    sync();
+  })();
 
   /* ---------- Newsletter capture (footer) → HubSpot contact ---------- */
   var newsForm = document.getElementById('news-form');
