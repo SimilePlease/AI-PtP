@@ -178,8 +178,8 @@
 
     var AVAIL_RE = /\b(free|available|work|works|good|suit|suits|open)\b/i;
     var GREETING_RE = /^\s*(?:h+i+|h+e+y+|h+e+l+o+|y+o+|s+u+p+|greetings|good\s+(?:morning|afternoon|evening|day)|namaste|howdy)[!,.\u2026]*\s*(?:there|friend|folks|assistant|ptp|team)?\s*[!\u2026.?]*$$/iu;
-    var HOW_ARE_YOU_RE = /^\s*(?:how\s+(?:are|r)\s+(?:you|u|things|ya)(?:\s+(?:doing|today|feeling|been))?|how\s*(?:is|\u2019s|'s|s)?\s*(?:it|everything|life)\s+going|how\s*(?:is|\u2019s|'s|s)?\s*(?:your|the)\s+(?:day|week|weekend)(?:\s*going|\s*so\s*far)?|how\s+do\s+you\s+do|what(?:'|\u2019)?s\s+up|whats\s+up|wassup)[!,.\u2026?]*\s*$/i;
-    var THANKS_RE = /^\s*(?:thanks|thank you|thank\u00a0you|thx|ty|cheers|much appreciated)[!,.\u2026]*\s*(?:so much|a lot|a million)?\s*[!\u2026.]*$/i;
+    var HOW_ARE_YOU_RE = /^\s*(?:how\s+(?:are|r)\s+(?:you|u|things|ya)(?:\s+(?:doing|feeling|been))?(?:\s+(?:today|lately|this\s+(?:morning|afternoon|evening)|these\s+days))?|how\s*(?:is|\u2019s|'s|s)?\s*(?:it|everything|life)\s+going|how\s*(?:is|\u2019s|'s|s)?\s*(?:your|the)\s+(?:day|week|weekend)(?:\s*going|\s*so\s*far)?|how\s+do\s+you\s+do|what(?:'|\u2019)?s\s+up|whats\s+up|wassup)[!,.\u2026?]*\s*$/i;
+    var THANKS_RE = /^\s*(?:thanks|thank you|thank\u00a0you|thx|ty|cheers|much appreciated)[^!.\u2026]{0,30}[!,.\u2026]*\s*$/i;
     var BYE_RE = /^\s*(?:bye|goodbye|good\u00a0bye|see\u00a0ya|see you|cheers|take care|later)[!,.\u2026]*\s*[!\u2026.]*$/i;
 
     var GREETINGS = [
@@ -458,6 +458,12 @@
       answer: answer,
       answerSemantic: function (text) {
         if (!faqMatcher) return null;
+        /* Domain gate: a semantic hit is only trusted when the query is
+           site- or AI-directed. Off-domain chatter ("who won the 1998 world
+           cup?" scored 3.5 against the pricing FAQ) has neither an AI token
+           nor a site-directed token, so it returns null \u2192 honest fallback. */
+        var SITE_SIGNAL_RE = /\b(?:ai|a\.i\.|llm|llms|agent|agentic|gpt|model|models|machine\s+learning|ml|neural|chatbot|automation|governance|compliance|security|coe|centre|center|excellence|pilot|pilots|production|strategy|strategic|vendor|vendors|tool|tools|use\s+cases?|data|adoption|roi|audit|readiness|transformation|generative|regulated|industr\w*|you|your|yours|we|our|us|parag|orbit|services?|price[ds]?|pricing|costs?|fees?|charge[ds]?|rates?|engagements?|hire|hiring|start(?:ing)?|steps?|process|approach|teams?|compan\w+|business(?:es)?|train(?:ing)?|take\s+over|begin\w*)\b/i;
+        if (!SITE_SIGNAL_RE.test(text || '')) return null;
         var hit = faqMatcher.best(text, 3.5);
         return hit ? hit.entry.a : null;
       },
