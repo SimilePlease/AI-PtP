@@ -1499,15 +1499,22 @@
               <input id="cf-email" name="email" type="email" autocomplete="email" required placeholder="you@company.com">
             </div>
           </div>
-          <div class="form-field">
-            <label for="cf-topic">Topic</label>
-            <select id="cf-topic" name="topic" required>
-              <option value="AI strategy">AI strategy</option>
-              <option value="AI CoE design and leadership">AI CoE design and leadership</option>
-              <option value="Innovation and product projects">Innovation and product projects</option>
-              <option value="SME engagement">SME engagement</option>
-              <option value="Speaking or advisory">Speaking or advisory</option>
-              <option value="Other">Other</option>
+          <div class="form-field form-field--topics">
+            <label for="cf-topic">What do you need help with? <span class="form-optional">Select all that apply</span></label>
+            <div class="topic-chips" id="cf-topic-chips" role="group" aria-label="What do you need help with? Select all that apply.">
+              <label class="chip"><input type="checkbox" name="interest" value="AI Consultancy"><span>AI Consultancy</span></label>
+              <label class="chip"><input type="checkbox" name="interest" value="Managed AI Operations"><span>Managed AI Operations</span></label>
+              <label class="chip"><input type="checkbox" name="interest" value="Building an AI Strategy"><span>Building an AI Strategy</span></label>
+              <label class="chip"><input type="checkbox" name="interest" value="Building an AI Centre of Excellence"><span>Building an AI Centre of Excellence</span></label>
+              <label class="chip"><input type="checkbox" name="interest" value="Taking AI Pilots to Production"><span>Taking AI Pilots to Production</span></label>
+              <label class="chip"><input type="checkbox" name="interest" value="AI Use-Case Discovery"><span>AI Use-Case Discovery</span></label>
+              <label class="chip"><input type="checkbox" name="interest" value="AI Security"><span>AI Security</span></label>
+              <label class="chip"><input type="checkbox" name="interest" value="AI Governance &amp; Compliance"><span>AI Governance &amp; Compliance</span></label>
+              <label class="chip"><input type="checkbox" name="interest" value="AI Vendor / Tool Selection"><span>AI Vendor / Tool Selection</span></label>
+              <label class="chip"><input type="checkbox" name="interest" value="Just a Coffee"><span>Just a Coffee ☕</span></label>
+            </div>
+            <select id="cf-topic" name="topic" required hidden aria-hidden="true" tabindex="-1">
+              <option value="General enquiry" selected>General enquiry</option>
             </select>
           </div>
           <div class="form-field">

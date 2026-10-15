@@ -37,7 +37,9 @@
       e.preventDefault();
       var name = (form.elements.name.value || '').trim();
       var email = (form.elements.email.value || '').trim();
-      var topic = form.elements.topic.value || '';
+      var interests = Array.prototype.slice.call(form.querySelectorAll('input[name="interest"]:checked'))
+        .map(function (cb) { return cb.value; });
+      var topic = interests.length ? interests.join(', ') : 'General enquiry';
       var message = (form.elements.message.value || '').trim();
       var subject = 'Website enquiry: ' + topic + (name ? ' — ' + name : '');
       var body = 'Name: ' + name + '\nEmail: ' + email + '\nTopic: ' + topic + '\n\n' + message + '\n';
