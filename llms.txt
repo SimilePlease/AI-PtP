@@ -19,15 +19,6 @@ This site answers what an AI consultancy does, how AI Centres of Excellence are 
 - Booking: https://calendly.com/kudtarkar-parag/30min
 - Contact: parag@kudtarkar.life
 
-## Offer — Managed AI Operations
-
-- Managed AI Operations: for mid-size companies (US & UK), a fixed monthly retainer
-  (USD 4,000 / approx GBP 3,200) covering up to 10 active AI use cases per company —
-  governance, security guardrails, vendor triage, hands-on delivery, monthly KPI report.
-  Month-to-month. Entry point: two-week AI Readiness Sprint (audit, 10-use-case
-  portfolio, 90-day roadmap).
-- Booking: https://calendly.com/kudtarkar-parag/30min
-
 ## Blog / writing
 
 - [Medium — @kudtarkar.parag](https://medium.com/@kudtarkar.parag): articles on AI
