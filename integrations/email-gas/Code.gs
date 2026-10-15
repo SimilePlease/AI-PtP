@@ -182,17 +182,22 @@ function coldPrompt(contactName, company, industry, notes) {
    Legacy properties GROK_KEY / GEMINI_KEY still work. If nothing is set,
    callers fall back to a fixed-text email — the pipeline never breaks. */
 function draftText(prompt) {
+  var chain = [];
   var key = cfg('LLM_API_KEY');
   if (key) {
-    if (key.indexOf('gsk_') === 0) return groqCloudDraft(prompt, key);
-    if (key.indexOf('xai-') === 0) return grokDraft(prompt, key);
-    if (key.indexOf('AIza') === 0) return geminiDraft(prompt, key);
+    if (key.indexOf('gsk_') === 0) chain.push([groqCloudDraft, key]);
+    else if (key.indexOf('xai-') === 0) chain.push([grokDraft, key]);
+    else if (key.indexOf('AIza') === 0) chain.push([geminiDraft, key]);
   }
-  var grok = cfg('GROK_KEY');
-  if (grok) return grokDraft(prompt, grok);
-  var gem = cfg('GEMINI_KEY');
-  if (gem) return geminiDraft(prompt, gem);
-  throw new Error('no LLM key configured (LLM_API_KEY)');
+  var grok = cfg('GROK_KEY'); if (grok) chain.push([grokDraft, grok]);
+  var gem = cfg('GEMINI_KEY'); if (gem) chain.push([geminiDraft, gem]);
+
+  var errors = [];
+  for (var i = 0; i < chain.length; i++) {
+    try { return chain[i][0](prompt, chain[i][1]); }
+    catch (err) { errors.push('provider ' + (i + 1) + ': ' + err); }
+  }
+  throw new Error('all LLM providers failed' + (errors.length ? ' — ' + errors.join('; ') : ' (no LLM_API_KEY configured)'));
 }
 
 function groqCloudDraft(prompt, key) {
