@@ -43,6 +43,7 @@
       var body = 'Name: ' + name + '\nEmail: ' + email + '\nTopic: ' + topic + '\n\n' + message + '\n';
       /* HubSpot records the enquiry; the mailto below always opens a prepared
          draft so it also reaches the inbox directly. */
+      gaEvent('contact_form_submit', { topic: topic });
       postHubSpot({ name: name, email: email, phone: '', topic: topic }, 'contact form')
         .catch(function () { /* HubSpot unreachable — the mailto below still carries the enquiry */ });
       window.location.href = 'mailto:parag@kudtarkar.life' +
@@ -56,6 +57,11 @@
   var agent = window.AIAgent ? window.AIAgent.createAgent() : null;
 
   var calHost = window.location.hostname || 'localhost';
+
+  /* ---------- GA4 conversion events ---------- */
+  function gaEvent(name, params) {
+    if (typeof gtag === 'function') gtag('event', name, params || {});
+  }
 
   /* ---------- HubSpot CRM (live) + optional Apps Script email drafts ---------- */
   var HS_PORTAL = '247689473';
@@ -206,6 +212,13 @@
       a.setAttribute('href', calendlyUrl(a.getAttribute('data-event') || '30min', true));
       if (openCalendlyPopup(a.href)) e.preventDefault();
     });
+  });
+
+  /* Measure what converts: any calendly link click (page or chat bubble) is
+     a booking intent. */
+  document.addEventListener('click', function (e) {
+    var a = e.target && e.target.closest ? e.target.closest('a[href*="calendly.com"]') : null;
+    if (a) gaEvent('book_click', { location: a.closest('.chat-panel') ? 'chat' : 'page' });
   });
 
   queueFlush(); /* deliver leads queued by earlier sessions even without email drafts */
@@ -508,8 +521,8 @@
         }
       }, 3000);
       try {
-        var webllm = await withTimeout(import('https://esm.run/@mlc-ai/web-llm'), 30000, 'Assistant download');
-        try { caches.open('aiptp-webllm-v1').then(function (c) { c.add('https://esm.run/@mlc-ai/web-llm'); }); } catch (e) { /* best effort */ }
+        var webllm = await withTimeout(import('https://esm.run/@mlc-ai/web-llm@0.2.86'), 30000, 'Assistant download');
+        try { caches.open('aiptp-webllm-v1').then(function (c) { c.add('https://esm.run/@mlc-ai/web-llm@0.2.86'); }); } catch (e) { /* best effort */ }
         engine = await webllm.CreateMLCEngine(MODEL_ID, {
           appConfig: webllm.prebuiltAppConfig,
           initProgressCallback: function (r) {
@@ -572,7 +585,7 @@
         var fsmBubble = addMsg('bot', fsmOut.say);
         history.push({ role: 'assistant', content: fsmOut.say });
         if (fsmOut.cta) attachBookingCta(fsmBubble);
-        if (fsmOut.openCal) autoOpenBooking();
+        if (fsmOut.openCal) { gaEvent('chat_booking_confirm'); autoOpenBooking(); }
         submitLead('website chat');
         return;
       }

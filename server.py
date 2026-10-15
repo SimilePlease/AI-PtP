@@ -1,4 +1,5 @@
 import argparse
+from urllib.parse import unquote
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -8,6 +9,22 @@ ROOT = Path(__file__).resolve().parent
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT), **kwargs)
+
+    def _is_git_path(self):
+        path = unquote(self.path.split("?", 1)[0].split("#", 1)[0])
+        return path.lstrip("/").startswith(".git") or "/.git" in path
+
+    def do_GET(self):
+        if self._is_git_path():
+            self.send_error(404, "Not found")
+            return
+        super().do_GET()
+
+    def do_HEAD(self):
+        if self._is_git_path():
+            self.send_error(404, "Not found")
+            return
+        super().do_HEAD()
 
     def end_headers(self):
         self.send_header("Cache-Control", "no-store")
