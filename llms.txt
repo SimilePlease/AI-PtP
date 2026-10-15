@@ -19,6 +19,12 @@ This site answers what an AI consultancy does, how AI Centres of Excellence are 
 - Booking: https://calendly.com/kudtarkar-parag/30min
 - Contact: parag@kudtarkar.life
 
+## Blog / writing
+
+- [Medium — @kudtarkar.parag](https://medium.com/@kudtarkar.parag): articles on AI
+  strategy, AI Centres of Excellence, responsible AI and pilot-to-production delivery
+  by Parag Kudtarkar.
+
 ## FAQ
 
 - [54-question AI consulting FAQ](https://kudtarkar.life/llms-full.txt): full answers — what an AI consultancy does, CoE design, pilot-to-production, governance, security
