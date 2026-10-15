@@ -460,7 +460,7 @@
         if (!t || t === '\u2026') continue;
         out.push((m.role === 'user' ? 'Visitor: ' : 'Orbit: ') + t);
       }
-      return out.join('\n').slice(-2500);
+      return out.join('\n').slice(-12000);
     }
 
     function setStatus(text) { chatEls.status.textContent = text; }

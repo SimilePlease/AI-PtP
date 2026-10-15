@@ -157,6 +157,12 @@ function handleLead(body) {
   catch (e) { enrichment.notes = '[enrichment unavailable: ' + e + ']'; }
   if (enrichment.notes) hub.message = (hub.message ? hub.message + ' ' : '') + '[enriched] ' + enrichment.notes;
 
+  // 1.25. Whole conversation → timeline note on the contact, so the full
+  //       chat context is in the CRM, not just the topic line. Best-effort.
+  var transcriptStatus = '';
+  try { transcriptStatus = pushTranscriptNote(hubResult.id, String(body.transcript || '').trim(), mood ? mood.summary : ''); }
+  catch (e) { transcriptStatus = 'transcript note error: ' + e; }
+
   // 1. Email to the requester — Gemini-drafted when a key is configured,
   //    otherwise a clean fixed confirmation so the reply always goes out.
   //    Both paths render through the branded HTML template with the CTA button.
@@ -177,11 +183,12 @@ function handleLead(body) {
 
   // 2. Email to the owner — full details of every lead, always sent; subject
   //    escalates when Kev read urgency or frustration in the conversation.
-  var owner = notifyOwner({ name: name, email: email, phone: phone, topic: topic, source: source, hubspot: hubResult.info, enrichment: enrichment, mood: mood, urgent: urgent });
+  var owner = notifyOwner({ name: name, email: email, phone: phone, topic: topic, source: source, hubspot: hubResult.info, enrichment: enrichment, mood: mood, urgent: urgent, transcriptStatus: transcriptStatus });
 
   return {
     ok: true,
     hubspot: hubResult.info,
+    transcript: transcriptStatus,
     mood: mood ? mood.summary : null,
     urgent: urgent,
     enrichment: { domain: enrichment.domain, company: enrichment.company, linkedin: enrichment.linkedin },
@@ -216,7 +223,8 @@ function notifyOwner(lead) {
     if (lead.urgent) lines.push('Kev reads this conversation as URGENT/FRUSTRATED \u2014 reply today.');
   }
   lines.push('', 'Reply to the enquirer: ' + lead.email,
-    'Book them in: https://calendly.com/kudtarkar-parag/30min');
+    'Book them in: https://calendly.com/kudtarkar-parag/30min',
+    'Chat transcript: ' + (lead.transcriptStatus || 'not stored'));
   var body = lines.join('\n');
   var urgent = !!(lead.urgent);
   var subject = (urgent ? '\u26A0\uFE0F URGENT \u2014 ' : '') + 'New lead — ' + (lead.name || lead.email) + (lead.topic ? ' · ' + String(lead.topic).slice(0, 50) : '');
@@ -497,6 +505,38 @@ function pushToHubSpot(hub) {
     muteHttpExceptions: true
   });
   return { id: '', info: 'HTTP ' + res.getResponseCode() + ' (forms api)' };
+}
+
+/* ---------------- chat transcript → HubSpot timeline note ----------------
+   Stores the whole conversation as a note on the contact's timeline so the
+   full context is visible and searchable in the CRM. Uses the same bearer
+   token as the contact upsert; never fails the lead — any error is logged
+   into the returned status only. */
+
+function pushTranscriptNote(contactId, transcript, moodSummary) {
+  try {
+    var body = String(transcript || '').trim();
+    if (!contactId || !body) return '';
+    var note = 'Orbit chat transcript \u2014 ' + Utilities.formatDate(new Date(), Session.getScriptTimeZone() || 'UTC', 'd MMM yyyy HH:mm') +
+      (moodSummary ? '\nKev: ' + moodSummary : '') + '\n\n' + body;
+    if (note.length > 60000) note = '\u2026' + note.slice(-60000);
+    var token = hsToken();
+    if (!token) return '';
+    var res = UrlFetchApp.fetch('https://api.hubapi.com/crm/v3/objects/notes', {
+      method: 'post',
+      headers: { Authorization: 'Bearer ' + token },
+      contentType: 'application/json',
+      payload: JSON.stringify({
+        properties: { hs_timestamp: new Date().toISOString(), hs_note_body: note },
+        associations: [{ to: { id: contactId }, types: [{ associationCategory: 'HUBSPOT_DEFINED', associationTypeId: 202 }] }]
+      }),
+      muteHttpExceptions: true
+    });
+    var code = res.getResponseCode();
+    return (code >= 200 && code < 300) ? 'transcript note stored' : 'transcript note failed HTTP ' + code;
+  } catch (e) {
+    return 'transcript note error: ' + e;
+  }
 }
 
 /* ---------------- lead enrichment (company website + LinkedIn pointers) ----------------
