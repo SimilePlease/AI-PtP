@@ -130,8 +130,15 @@ function handleLead(body) {
 
   // 0. Sentiment: score the conversation transcript (or the topic line) with a
   //    self-hosted Kev decision model when KEV_ENDPOINT is configured. Runs
-  //    before the HubSpot push so the tag lands on the contact record.
+  //    before the HubSpot push so the tag lands on the contact record. When
+  //    Kev reads urgency or frustration in the tone of the conversation, the
+  //    owner alert escalates (subject prefix + explicit reply-today line).
   var mood = kevSentiment(String(body.transcript || '').trim() || topic);
+  var urgent = false;
+  if (mood && mood.answers) {
+    var ua = mood.answers.urgent || {}, fa = mood.answers.frustrated || {};
+    urgent = (typeof ua.noul === 'number' && ua.noul >= 0.7) || (typeof fa.noul === 'number' && fa.noul >= 0.7);
+  }
 
   var parts = name.split(/\s+/);
   var hub = {
@@ -168,13 +175,15 @@ function handleLead(body) {
     else { GmailApp.createDraft(email, subject, fixed, opts); requester = { to: email, action: 'drafted', mode: 'fixed' }; }
   }
 
-  // 2. Email to the owner — full details of every lead, always sent.
-  var owner = notifyOwner({ name: name, email: email, phone: phone, topic: topic, source: source, hubspot: hubResult.info, enrichment: enrichment, mood: mood });
+  // 2. Email to the owner — full details of every lead, always sent; subject
+  //    escalates when Kev read urgency or frustration in the conversation.
+  var owner = notifyOwner({ name: name, email: email, phone: phone, topic: topic, source: source, hubspot: hubResult.info, enrichment: enrichment, mood: mood, urgent: urgent });
 
   return {
     ok: true,
     hubspot: hubResult.info,
     mood: mood ? mood.summary : null,
+    urgent: urgent,
     enrichment: { domain: enrichment.domain, company: enrichment.company, linkedin: enrichment.linkedin },
     email: requester,
     ownerNotified: owner,
@@ -203,12 +212,14 @@ function notifyOwner(lead) {
     if (enr.domain) lines.push('Find them on LinkedIn: ' + linkedinSearchUrl(lead.name || '', enr.company || enr.domain, enr.domain));
   }
   if (lead.mood && lead.mood.summary) {
-    lines.push('', '— Sentiment (Kev) —', lead.mood.summary);
+    lines.push('', '\u2014 Sentiment (Kev) \u2014', lead.mood.summary);
+    if (lead.urgent) lines.push('Kev reads this conversation as URGENT/FRUSTRATED \u2014 reply today.');
   }
   lines.push('', 'Reply to the enquirer: ' + lead.email,
     'Book them in: https://calendly.com/kudtarkar-parag/30min');
   var body = lines.join('\n');
-  var subject = 'New lead — ' + (lead.name || lead.email) + (lead.topic ? ' · ' + String(lead.topic).slice(0, 50) : '');
+  var urgent = !!(lead.urgent);
+  var subject = (urgent ? '\u26A0\uFE0F URGENT \u2014 ' : '') + 'New lead — ' + (lead.name || lead.email) + (lead.topic ? ' · ' + String(lead.topic).slice(0, 50) : '');
   GmailApp.sendEmail(to, subject, body, { htmlBody: emailHtml(body, { ctaUrl: 'https://calendly.com/kudtarkar-parag/30min', ctaLabel: 'Open their detail in HubSpot' }) });
   return 'sent to ' + to;
 }
