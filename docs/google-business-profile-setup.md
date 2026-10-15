@@ -54,10 +54,9 @@ don't match the real-world name.
 ## 6. Contact & hours
 
 - Phone: skip (a listed number invites spam calls; booking link is the CTA)
-- Website: your custom domain once live (see below)
+- Website: `https://kudtarkar.life` (now live — add once HTTPS is enforced)
 - Hours: service businesses with no walk-in — set "No hours" / by appointment
-- Appointment links section: `https://calendly.com/kudtarkar-parag/30min` (once the
-  custom domain is live, keep Calendly — it takes bookings from any referrer)
+- Appointment links section: `https://calendly.com/kudtarkar-parag/30min`
 
 ## 7. Photos (upload on day one)
 
@@ -82,5 +81,5 @@ don't match the real-world name.
 ## 10. Site-side alignment (already in place or pending)
 
 - [x] `ProfessionalService` JSON-LD on the site (name, areaServed, address country SG)
-- [ ] Custom domain → then update canonical/sitemap/og URLs (I'll do this when you have it)
+- [x] Custom domain `kudtarkar.life` live (canonical/sitemap/og URLs all point to it)
 - [ ] GBP link on the site footer once verified (I'll add the link)
