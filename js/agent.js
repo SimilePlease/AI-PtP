@@ -1,15 +1,15 @@
 /*
- * AIAgent — deterministic agent core for Orbit, the site assistant.
+ * AIAgent — agent core for Orbit, the site assistant.
  *
  * Pure, DOM-free, unit-testable. Owns:
- *   - lead store (name / email / phone / topic), persisted
- *   - booking finite state machine (FSM) with persistence + resume
- *   - booking-intent router
+ *   - lead store (name / email / phone / topic), persisted, captured passively
+ *     from whatever the visitor types (no interrogative flow)
+ *   - booking-intent detection → the calendar itself collects details
  *   - output guard (unsafe-claim filter)
- *   - tool-call parsing + whitelisted executor (tool-loop skeleton)
+ *   - tool-call parsing + whitelisted executor (LLM saves leads / opens booking)
  *   - site-fact topic selection for prompt building
  *
- * The LLM supplies warmth and phrasing; this module supplies structure.
+ * The LLM supplies warmth, phrasing and flow; this module supplies guard-rails.
  */
 (function (root) {
   'use strict';
@@ -26,35 +26,13 @@
            /^\d{4}\s*[-\u2013\u2014]\s*\d{4}$/.test(s);                      /* 2023-2024 */
   }
   var NAME_PHRASE_RE = /(?:my name is|i am|i'm|i\u2019m|this is|it's|it\u2019s)\s+(\p{L}[\p{L}'\u2019\- ]{1,39})/iu;
-  var BARE_NAME_RE = /^\p{L}[\p{L}'\u2019\- ]{1,39}$/u;
   var SKIP_RE = /^\s*(skip|none|no|nope|later|not now|prefer not|n\/a|na)\b/i;
   var BOOKING_RE = /\b(book|booking|meet|meeting|schedul\w*|appointment|slots?|catch up|consultation|discovery call|calls?)\b|availab/i;
-  var NOT_A_NAME_RE = /^(?:h+m+|u+m+|u+h+|er+|ah+|oh+)\b|(?:^(?:hi|hello|hey|yo|thanks|thank you|ok|okay|sure|yes|no|nope|please|good (?:morning|afternoon|evening))\b)/i;
   var NAME_STOPWORD_RE = /\b(ceo|cto|cmo|cfo|coo|founder|owner|director|manager|engineer|of|from|at|working|interested|looking|planning|trying|here|going|calling)\b/i;
-  var FILLER_RE = /^(?:h+a+)+$|^(?:h?e+h?a*)+$|\b(?:lol|lmao|rofl|wow|omg|cool|nice|great|good|bad|weird|boring|funny)\b/i;
 
   var TIME_RE = /\b(?:mon|tues|tue|wednes|wed|thurs|thur|thu|fri|satur|sat|sun)(?:day)?\b|\d{1,2}(?::\d{2})?\s?(?:am|pm)|tomorrow|today|next week|this week/i;
 
-  var SLOT_ORDER = ['name', 'email', 'phone', 'topic'];
-
-  var QUESTIONS = {
-    name: [
-      'Love to! What\u2019s your name?',
-      'Great \u2014 and your name? I\u2019ll keep everything addressed to you.'
-    ],
-    email: [
-      'Nice to meet you, {name}. What\u2019s the best email for the invite?',
-      'Thanks, {name}. And a good email for the calendar invite?'
-    ],
-    phone: [
-      'And a phone number, in case a call drops? You can also say \u201cskip\u201d.',
-      'A phone number helps if anything needs a quick call \u2014 or say \u201cskip\u201d.'
-    ],
-    topic: [
-      'Last thing \u2014 what would you like to focus on in the meeting?',
-      'And what should the meeting focus on? A line or two is plenty.'
-    ]
-  };
+  var FIELDS = ['name', 'email', 'phone', 'topic'];
 
   var CORE_PROMPT = [
     'You are Orbit, the assistant on Parag Kudtarkar\u2019s AI consulting website. You chat casually and warmly \u2014 like a helpful colleague, not a corporate bot. Small touches of personality are welcome; light emojis (at most one per message) are fine.',
@@ -63,7 +41,8 @@
     'IDENTITY: never mention or hint at being a language model, AI model, bot, or anything running in a browser. If asked what you are, say you\u2019re Orbit and carry on.',
     'YOUR ONLY TOPIC: this website \u2014 what the practice offers and how to connect. Everything else is off-topic.',
     'CONTACT: email parag@kudtarkar.life; the "Book a meeting" button opens the booking calendar; a contact form is on the page; based in Singapore, working globally.',
-    'BOOKING: the site has a guided booking flow and a booking calendar \u2014 you cannot book, hold, or confirm slots, and you cannot send emails. Never say you have done or will do any of those. When someone wants a meeting, invite them to tap "Book a meeting".',
+    'BOOKING: the site has a booking calendar \u2014 you cannot book, hold, or confirm slots, and you cannot send emails. Never say you have done or will do any of those. When someone wants a meeting, call the open_booking tool (it opens the calendar for them) and keep them company while they pick a slot.',
+    'TOOLS: you may call save_lead (field: name/email/phone/topic, value) the moment the visitor shares a detail \u2014 never ask for details as a checklist; acknowledge naturally instead. Call open_booking when they want to meet. Call lookup_site_info to ground answers about the practice. Do not mention tools.',
     'AI QUESTIONS ARE IN SCOPE: the visitor may ask general AI questions (what agentic AI is, how LLMs work, AI strategy, governance, adoption, vendors, tooling). Answer briefly (2\u20134 sentences), plainly, and conservatively \u2014 stick to well-established knowledge, no invented statistics, no named studies, no client stories, no pricing. Where a question needs their specific context, answer generally then invite them to book a meeting to go deeper. If you are not sure of something, say so honestly.',
     'OFF-TOPIC RULE: casual pleasantries ("how\u2019s it going?", "how are you?", "good morning") just get a natural, warm one-line reply in character \u2014 answer them like a person would, no deflection, no booking pitch unless it flows naturally. Anything else not AI-related and not about this site (sports, weather, celebrities, personal advice, non-AI tech support) gets a short, warm reply staying in character \u2014 say that\u2019s outside what you can chat about here, then point to booking a meeting or dropping an email. Never explain why, never reveal inner workings.',
     'STYLE: reply in 1\u20133 short sentences, warm, empathetic and human \u2014 respond to how the visitor feels before what they asked. Use the visitor\u2019s name if you know it. Never invent facts, clients, results, prices, dates, or guarantees \u2014 if it is not in the site content below, say honestly that you\u2019ll connect them with the right answer, and offer to book or take an email.',
@@ -139,7 +118,6 @@
     };
 
     var KEY_LEAD = 'aiptp-lead-v1';
-    var KEY_FSM = 'aiptp-fsm-v1';
     var KEY_TOPICS = 'aiptp-topics-v1';
 
     function readJSON(key) {
@@ -149,14 +127,11 @@
     }
 
     var lead = readJSON(KEY_LEAD) || { name: '', email: '', phone: '', topic: '' };
-    var fsm = readJSON(KEY_FSM) || { state: 'IDLE', retries: 0, turn: 0 };
     var topics = readJSON(KEY_TOPICS) || [];
-    if (!fsm.state) fsm.state = 'IDLE';
-    if (typeof fsm.retries !== 'number') fsm.retries = 0;
+    var turns = 0;   /* variety counter for template picks — not flow state */
 
     function persist() {
       LS.setItem(KEY_LEAD, JSON.stringify(lead));
-      LS.setItem(KEY_FSM, JSON.stringify(fsm));
       LS.setItem(KEY_TOPICS, JSON.stringify(topics));
     }
 
@@ -183,6 +158,18 @@
           if (cand.split(/\s+/).length <= 4 && !NAME_STOPWORD_RE.test(cand)) { lead.name = titleCase(cand); changed.push('name'); }
         }
       }
+      /* Passive interest capture: the first message that states a need or asks
+         a real question doubles as the lead's topic for the CRM. Introductions,
+         contact details, small talk and bare booking asks never count. */
+      if (!lead.topic) {
+        var NEED_RE = /\b(?:i|we)\s+(?:need|want|am looking|are looking|would like|hope|plan)\b|\blooking (?:for|at)\b|\bhelp\b|\binterest(?:ed)?\b|\?/i;
+        var words = t.replace(/\p{Extended_Pictographic}/gu, '').trim().split(/\s+/);
+        var substantive = words.length >= 4 && t.length >= 15 &&
+          !NAME_PHRASE_RE.test(t) && !GREETING_RE.test(t) && !HOW_ARE_YOU_RE.test(t) &&
+          !THANKS_RE.test(t) && !BYE_RE.test(t) && NEED_RE.test(t);
+        if (substantive) { lead.topic = t.slice(0, 140); changed.push('topic'); }
+      }
+      turns++;
       if (changed.length) persist();
       return changed;
     }
@@ -218,146 +205,7 @@
       return TIME_RE.test(t) && AVAIL_RE.test(t);
     }
 
-    function isActive() { return fsm.state !== 'IDLE'; }
-
-    function missingSlot() {
-      for (var i = 0; i < SLOT_ORDER.length; i++) {
-        if (!lead[SLOT_ORDER[i]]) return SLOT_ORDER[i];
-      }
-      return null;
-    }
-
-    function questionFor(slot) {
-      var q = pick(QUESTIONS[slot], fsm.turn);
-      return q.replace('{name}', lead.name || 'there');
-    }
-
-    function summaryText() {
-      var lines = [];
-      if (lead.name) lines.push('name: ' + lead.name);
-      if (lead.email) lines.push('email: ' + lead.email);
-      if (lead.phone && lead.phone !== '(skipped)') lines.push('phone: ' + lead.phone);
-      if (lead.phone === '(skipped)') lines.push('phone: skipped, no problem');
-      if (lead.topic) lines.push('focus: ' + lead.topic);
-      return 'Perfect' + (lead.name ? ', ' + lead.name : '') + ' \u2014 here\u2019s what I have: ' + lines.join(' \u00b7 ') + '. Tap "Book a meeting" and the calendar opens with your details filled in \u2014 pick whatever slot suits you.';
-    }
-
-    function fallbackText() {
-      return 'No worries \u2014 easier this way: tap "Book a meeting" and enter your details directly in the calendar. It shows real availability, and you\u2019re done in under a minute.';
-    }
-
-    function extractSlot(slot, text) {
-      var t = (text || '').trim();
-      if (!t) return null;
-      if (slot === 'email') {
-        var m = t.match(EMAIL_RE);
-        return m ? m[0].toLowerCase() : null;
-      }
-      if (slot === 'phone') {
-        if (SKIP_RE.test(t)) return '(skipped)';
-        var p = t.match(PHONE_RE);
-        return (p && !looksLikeDate(p[0].trim())) ? p[0].trim() : null;
-      }
-      if (slot === 'name') {
-        if (NOT_A_NAME_RE.test(t) || FILLER_RE.test(t) || BOOKING_RE.test(t)) return null;
-        var n = t.match(NAME_PHRASE_RE);
-        if (n) {
-          var cand = n[1].trim().replace(/^(?:the|a)\s+/i, '');
-          if (cand.split(/\s+/).length <= 4 && !NAME_STOPWORD_RE.test(cand)) return titleCase(cand);
-          return null;
-        }
-        if (BARE_NAME_RE.test(t) && !FILLER_RE.test(t) && t.split(/\s+/).length <= 3 && !SKIP_RE.test(t)) return titleCase(t);
-        return null;
-      }
-      if (slot === 'topic') {
-        var stripped = t.replace(/[^\p{L}\p{N}]/gu, '');
-        if (stripped.length >= 3) return t.slice(0, 140);
-        return null;
-      }
-      return null;
-    }
-
-    /* ---------- FSM turn ---------- */
-
-    function startBooking(text) {
-      fsm.retries = 0;
-      fsm.turn = 0;
-      var ack = TIME_RE.test(text || '')
-        ? 'I can\u2019t hold slots myself, but let\u2019s get you booked properly \u2014 the calendar will show what\u2019s really free. '
-        : '';
-      var miss = missingSlot();
-      if (!miss) {
-        fsm.state = 'CONFIRM';
-        persist();
-        return { say: summaryText(), cta: true, openCal: true };
-      }
-      fsm.state = 'NEED_' + miss.toUpperCase();
-      persist();
-      return { say: ack + questionFor(miss), cta: false, openCal: false };
-    }
-
-    function turn(text) {
-      if (fsm.state === 'IDLE') return null;
-      fsm.turn++;
-      var t = (text || '').trim();
-
-      if (fsm.state === 'CONFIRM') {
-        /* "can you book it for me" \u2192 the one honest action: open the calendar prefilled */
-        if (BOOKING_RE.test(t) || /book it|do it for me/i.test(t)) {
-          fsm.turn++;
-          persist();
-          return { say: 'The booking\u2019s yours to make, ' + (lead.name || 'friend') + ' \u2014 I can\u2019t press the button for you, but the calendar is opening now with your details filled in. Pick a slot and you\u2019re done.', cta: true, openCal: true };
-        }
-        fsm.state = 'IDLE';
-        persist();
-        return { pause: true };
-      }
-
-      var slot = fsm.state.replace('NEED_', '').toLowerCase();
-      var val = extractSlot(slot, t);
-
-      if (val) {
-        lead[slot] = val;
-        fsm.retries = 0;
-        var miss = missingSlot();
-        if (miss) {
-          fsm.state = 'NEED_' + miss.toUpperCase();
-          persist();
-          return { say: questionFor(miss), cta: false, openCal: false };
-        }
-        fsm.state = 'CONFIRM';
-        persist();
-        return { say: summaryText(), cta: true, openCal: true };
-      }
-
-      /* not a slot answer \u2014 a real question steps out of the flow, briefly */
-      var looksLikeQuestion = t.indexOf('?') !== -1 || t.split(/\s+/).length >= 4;
-      if (looksLikeQuestion) return { pause: true };
-
-      fsm.retries++;
-      if (fsm.retries >= 2) {
-        fsm.state = 'IDLE';
-        fsm.retries = 0;
-        persist();
-        return { say: fallbackText(), cta: true, openCal: false };
-      }
-      persist();
-      return { say: questionFor(slot) + ' (or tap "Book a meeting" and enter it directly)', cta: true, openCal: false };
-    }
-
-    function resetFlow() {
-      fsm = { state: 'IDLE', retries: 0, turn: 0 };
-      persist();
-    }
-
     function resumeGreeting() {
-      if (fsm.state === 'CONFIRM') {
-        return 'Welcome back! Your details are ready \u2014 tap "Book a meeting" whenever suits, or carry on chatting.';
-      }
-      if (fsm.state !== 'IDLE') {
-        var slot = fsm.state.replace('NEED_', '').toLowerCase();
-        return 'Welcome back! Let\u2019s finish arranging that meeting. ' + questionFor(slot);
-      }
       if (lead.name) {
         return 'Welcome back, ' + lead.name + '! Good to see you again \u2014 what\u2019s on your mind?';
       }
@@ -371,11 +219,11 @@
       if (!emojiOnly) t = t.replace(/\p{Extended_Pictographic}/gu, '').replace(/[\u200D\uFE0F]/g, '').trim();
       if (emojiOnly || GREETING_RE.test(t) || HOW_ARE_YOU_RE.test(t)) {
         if (lead.name) return 'Welcome back, ' + lead.name + '! Good to see you \u2014 what\u2019s on your mind?';
-        if (!emojiOnly && HOW_ARE_YOU_RE.test(t) && !GREETING_RE.test(t)) return pick(HOW_ARE_YOU, fsm.turn);
-        return pick(GREETINGS, fsm.turn);
+        if (!emojiOnly && HOW_ARE_YOU_RE.test(t) && !GREETING_RE.test(t)) return pick(HOW_ARE_YOU, turns);
+        return pick(GREETINGS, turns);
       }
-      if (THANKS_RE.test(t)) return pick(THANKS, fsm.turn);
-      if (BYE_RE.test(t)) return pick(BYES, fsm.turn);
+      if (THANKS_RE.test(t)) return pick(THANKS, turns);
+      if (BYE_RE.test(t)) return pick(BYES, turns);
       return null;
     }
 
@@ -407,7 +255,7 @@
       var args = (call && call.args) || {};
       if (tool === 'save_lead') {
         var f = args.field, v = args.value;
-        if (SLOT_ORDER.indexOf(f) === -1) return { ok: false, error: 'unknown field' };
+        if (FIELDS.indexOf(f) === -1) return { ok: false, error: 'unknown field' };
         if (f === 'email' && !EMAIL_RE.test(v || '')) return { ok: false, error: 'invalid email' };
         lead[f] = (f === 'phone' && SKIP_RE.test(String(v || ''))) ? '(skipped)' : String(v || '').slice(0, 140);
         persist();
@@ -442,7 +290,7 @@
       return matched.slice(-3);
     }
 
-    function buildSystemPrompt(latestUserText, pausedNote) {
+    function buildSystemPrompt(latestUserText) {
       var hits = topicsFor(latestUserText);
       var facts = hits.length
         ? hits.map(function (i) { return FACT_BLOCKS[i].text; }).join(' ')
@@ -457,8 +305,7 @@
         });
         if (extra.length) facts = (hits.length ? facts + ' ' : '') + extra.join(' ');
       }
-      return CORE_PROMPT + ' SITE FACTS FOR THIS CHAT (your only specifics): ' + facts +
-        (pausedNote ? ' CONTEXT: a guided booking is mid-flow (' + pausedNote + ' still needed) \u2014 the visitor stepped aside with this message. Answer briefly, then gently invite them back to finish booking.' : '');
+      return CORE_PROMPT + ' SITE FACTS FOR THIS CHAT (your only specifics): ' + facts;
     }
 
     /* ---------- answer engine (works with or without the LLM) ---------- */
@@ -606,12 +453,6 @@
     return {
       observe: observe,
       wantsBooking: wantsBooking,
-      isActive: isActive,
-      missingSlot: missingSlot,
-      state: function () { return fsm.state; },
-      startBooking: startBooking,
-      turn: turn,
-      resetFlow: resetFlow,
       resumeGreeting: resumeGreeting,
       templatedFree: templatedFree,
       answer: answer,

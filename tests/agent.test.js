@@ -25,7 +25,7 @@ function check(name, fn) {
   catch (e) { failures++; console.log('FAIL  ' + name + ' \u2014 ' + e.message); }
 }
 
-/* ---------- router + FSM happy path ---------- */
+/* ---------- router + passive capture ---------- */
 
 check('booking intent detected', function () {
   var a = fresh();
@@ -34,107 +34,44 @@ check('booking intent detected', function () {
   assert.ok(!a.wantsBooking('what is a CoE?'));
 });
 
-check('full FSM happy path: name \u2192 email \u2192 skip phone \u2192 topic \u2192 confirm + openCal', function () {
+check('passive capture: phrase name, email, phone and topic from free text', function () {
   var a = fresh();
-  assert.strictEqual(a.state(), 'IDLE');
-  var s = a.startBooking();
-  assert.strictEqual(a.state(), 'NEED_NAME');
-  assert.ok(/name/i.test(s.say));
-
-  s = a.turn('My name is Priya');
-  assert.strictEqual(a.state(), 'NEED_EMAIL', s.say);
-  assert.ok(a.lead().name === 'Priya', JSON.stringify(a.lead()));
-
-  s = a.turn('priya@example.com');
-  assert.strictEqual(a.state(), 'NEED_PHONE', s.say);
-
-  s = a.turn('skip');
-  assert.strictEqual(a.state(), 'NEED_TOPIC', s.say);
-  assert.strictEqual(a.lead().phone, '(skipped)');
-
-  s = a.turn('AI CoE for a regulated bank');
-  assert.strictEqual(a.state(), 'CONFIRM', s.say);
-  assert.ok(s.cta && s.openCal);
-  assert.ok(s.say.indexOf('Priya') !== -1 && s.say.indexOf('priya@example.com') !== -1);
+  a.observe('My name is Priya');
+  assert.strictEqual(a.lead().name, 'Priya');
+  var changed = a.observe('my email is priya@example.com and my number is +65 9123 4567');
+  assert.strictEqual(a.lead().email, 'priya@example.com', JSON.stringify(a.lead()));
+  assert.strictEqual(a.lead().phone, '+65 9123 4567');
+  a.observe('I need help taking our AI pilots to production in a regulated bank');
+  assert.strictEqual(a.lead().topic, 'I need help taking our AI pilots to production in a regulated bank');
+  assert.ok(changed.indexOf('topic') !== -1 || a.lead().topic.length > 0);
 });
 
-check('bare name accepted; phrase name title-cased', function () {
+check('passive capture: bare names and small talk are never stored as data', function () {
   var a = fresh();
-  a.startBooking();
-  a.turn('Sam Ostagawa');
-  assert.strictEqual(a.lead().name, 'Sam Ostagawa');
+  ['hello', 'Sam Ostagawa', 'yes', 'thanks'].forEach(function (t) { a.observe(t); });
+  assert.strictEqual(a.lead().name, '', 'bare/greeting text must not become a name');
   var b = fresh();
-  b.startBooking();
-  b.turn("i'm wei-ling");
+  b.observe("i'm wei-ling");
   assert.strictEqual(b.lead().name, 'Wei-ling');
 });
 
-check('greeting words are not captured as names', function () {
+check('save_lead tool stores bare details the LLM captured in conversation', function () {
   var a = fresh();
-  a.startBooking();
-  a.turn('hello');
-  assert.strictEqual(a.state(), 'NEED_NAME');
-  assert.strictEqual(a.lead().name, '');
+  assert.ok(a.executeTool({ tool: 'save_lead', args: { field: 'name', value: 'Sam Ostagawa' } }).ok);
+  assert.strictEqual(a.lead().name, 'Sam Ostagawa');
+  assert.ok(a.executeTool({ tool: 'save_lead', args: { field: 'phone', value: 'skip' } }).ok);
+  assert.strictEqual(a.lead().phone, '(skipped)');
 });
 
-check('invalid input twice falls back gracefully with CTA and exits flow', function () {
-  var a = fresh();
-  a.startBooking();
-  a.turn('hello');          // not a name \u2192 re-ask
-  assert.strictEqual(a.state(), 'NEED_NAME');
-  var out = a.turn('hmm');  // second failure \u2192 fallback
-  assert.strictEqual(a.state(), 'IDLE');
-  assert.ok(out.cta);
-  assert.strictEqual(a.lead().name, ''); // nothing wrong saved
-});
-
-check('real question mid-flow pauses FSM and keeps state', function () {
-  var a = fresh();
-  a.startBooking();
-  var out = a.turn('Actually, what does an AI CoE include?');
-  assert.ok(out && out.pause);
-  assert.strictEqual(a.state(), 'NEED_NAME');
-});
-
-check('CONFIRM turns into free chat afterwards', function () {
-  var a = fresh();
-  a.startBooking();
-  ['Ada Lovelace', 'ada@example.com', '+65 9000 0001', 'AI strategy'].forEach(function (t) { a.turn(t); });
-  assert.strictEqual(a.state(), 'CONFIRM');
-  var out = a.turn('thanks!');
-  assert.ok(out && out.pause);
-  assert.strictEqual(a.state(), 'IDLE');
-  assert.strictEqual(a.lead().email, 'ada@example.com'); // lead kept
-});
-
-check('FSM persists across agent instances (same store) and resumes', function () {
+check('lead persists across agent instances (same store); fresh store greets nobody', function () {
   var store = memoryStore();
   var a1 = AIAgent.createAgent(store);
-  a1.startBooking();
-  a1.turn('my name is Arjun');
-  a1.turn('arjun@corp.example');
+  a1.observe('my name is Arjun, email arjun@corp.example');
   var a2 = AIAgent.createAgent(store);
-  assert.strictEqual(a2.state(), 'NEED_PHONE');
+  assert.strictEqual(a2.lead().name, 'Arjun');
   assert.strictEqual(a2.lead().email, 'arjun@corp.example');
-  var out = a2.turn('+65 9123 4567');
-  assert.strictEqual(a2.state(), 'NEED_TOPIC');
-  assert.strictEqual(a2.lead().phone, '+65 9123 4567');
-});
-
-check('resumeGreeting welcomes back mid-flow and after lead captured', function () {
-  var store = memoryStore();
-  var a1 = AIAgent.createAgent(store);
-  a1.startBooking();
-  a1.turn('my name is Mei');
-  var a2 = AIAgent.createAgent(store);
-  assert.ok(/finish/i.test(a2.resumeGreeting()));
-  var store2 = memoryStore();
-  var c1 = AIAgent.createAgent(store2);
-  c1.observe('I am Tobias, tobias@example.com');
-  var c2 = AIAgent.createAgent(store2);
-  assert.ok(/Welcome back, Tobias/.test(c2.resumeGreeting()));
-  var d = fresh();
-  assert.strictEqual(d.resumeGreeting(), null); // nothing to resume
+  assert.ok(/Welcome back, Arjun/.test(a2.resumeGreeting()));
+  assert.strictEqual(fresh().resumeGreeting(), null); // nothing to resume
 });
 
 /* ---------- observe (free-text capture) ---------- */

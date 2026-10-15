@@ -655,22 +655,24 @@
       chatEls.input.value = '';
 
       addMsg('user', text);
-      agent.observe(text);
+      var changed = agent.observe(text);
       history.push({ role: 'user', content: text });
 
-      /* --- Router: deterministic booking FSM first --- */
-      var fsmOut = null;
-      if (!agent.isActive() && agent.wantsBooking(text)) {
-        fsmOut = agent.startBooking(text);
-      } else if (agent.isActive()) {
-        fsmOut = agent.turn(text);
-      }
+      /* Lead capture is passive: the moment we learn an email, the lead ships
+         (deduped downstream). No interrogative flow stands in the way. */
+      if (changed.indexOf('email') !== -1) submitLead('website chat', transcriptText());
 
-      if (fsmOut && !fsmOut.pause) {
-        var fsmBubble = addMsg('bot', fsmOut.say);
-        history.push({ role: 'assistant', content: fsmOut.say });
-        if (fsmOut.cta) attachBookingCta(fsmBubble);
-        if (fsmOut.openCal) { gaEvent('chat_booking_confirm'); autoOpenBooking(); }
+      /* --- Booking, lite mode only: without a model there is nobody to
+         converse, so hand off to the calendar honestly and instantly. With
+         the model loaded Orbit handles it and opens the calendar via its
+         open_booking tool. --- */
+      if (!engine && agent.wantsBooking(text)) {
+        var liteBook = 'Love to! I can\u2019t hold slots myself, but tap \u201cBook a meeting\u201d and the calendar opens right here with whatever details I have \u2014 real availability, under a minute.';
+        var bookBubble = addMsg('bot', liteBook);
+        history.push({ role: 'assistant', content: liteBook });
+        attachBookingCta(bookBubble);
+        gaEvent('chat_booking_confirm');
+        autoOpenBooking();
         submitLead('website chat', transcriptText());
         return;
       }
@@ -699,8 +701,7 @@
       /* --- LLM path --- */
       generating = true;
       setBusy(true);
-      var pausedNote = (fsmOut && fsmOut.pause && agent.missingSlot()) ? agent.missingSlot() : '';
-      history[0] = { role: 'system', content: agent.buildSystemPrompt(text, pausedNote) };
+      history[0] = { role: 'system', content: agent.buildSystemPrompt(text) };
       history = [history[0]].concat(history.slice(1).slice(-6));
 
       var bubble = addMsg('bot', '\u2026');
@@ -726,6 +727,8 @@
           var result = agent.executeTool(call);
           if (result && result.action === 'open_booking') {
             autoOpenBooking();
+            gaEvent('chat_booking_confirm');
+            submitLead('website chat', transcriptText());
             reply = result.message || 'The calendar is open \u2014 pick whatever suits you.';
             bubble.textContent = reply;
             break;
