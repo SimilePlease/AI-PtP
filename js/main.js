@@ -236,6 +236,26 @@
     if (a) gaEvent('book_click', { location: a.closest('.chat-panel') ? 'chat' : 'page' });
   });
 
+  /* ---------- CoE capability map (tap-to-expand for touch; hover handled in CSS) ---------- */
+  (function () {
+    var map = document.querySelector('.coe-map');
+    if (!map) return;
+    map.querySelectorAll('.coe-map-pillar').forEach(function (pillar) {
+      var head = pillar.querySelector('.coe-map-head');
+      if (!head) return;
+      head.addEventListener('click', function () {
+        var open = pillar.classList.toggle('is-open');
+        head.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+    });
+    document.querySelectorAll('.coe-map-more[data-open-topic]').forEach(function (link) {
+      link.addEventListener('click', function () {
+        var panel = document.getElementById(link.getAttribute('data-open-topic'));
+        if (panel) panel.open = true;
+      });
+    });
+  })();
+
   /* ---------- Multi-select dropdown (contact form interests) ---------- */
   (function () {
     var msd = document.getElementById('cf-topic-msd');
