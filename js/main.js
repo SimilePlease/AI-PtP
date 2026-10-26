@@ -53,6 +53,7 @@
       gaEvent('contact_form_submit', { topic: topic });
       postHubSpot({ name: name, email: email, phone: '', topic: topic }, 'contact form')
         .catch(function () { /* HubSpot unreachable — the mailto below still carries the enquiry */ });
+      postCRM({ name: name, email: email, phone: '', topic: topic }, 'contact form');
       window.location.href = 'mailto:parag@kudtarkar.life' +
         '?subject=' + encodeURIComponent(subject) +
         '&body=' + encodeURIComponent(body);
@@ -101,6 +102,19 @@
     });
   }
 
+  /* Optional Apps Script layer (integrations/email-gas): CRM-v3 upsert, chat
+     transcript timeline note, company enrichment, AI-drafted replies, owner
+     alerts. A no-op until CRM_ENDPOINT is set. text/plain content type keeps
+     the cross-site POST a simple request (no CORS preflight). */
+  function postCRM(lead, source, transcript) {
+    if (!CRM_ENDPOINT) return Promise.resolve(false);
+    return fetch(CRM_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ token: CRM_TOKEN, name: lead.name, email: lead.email, phone: lead.phone, topic: lead.topic, source: source, transcript: String(transcript || '').slice(0, 4000) })
+    }).catch(function () { /* CRM optional; HubSpot already has the contact */ });
+  }
+
   function queueFlush() {
     if (!leadQueue.length) return;
     var batch = leadQueue.splice(0, leadQueue.length);
@@ -112,13 +126,7 @@
         leadQueue.push(item);
         try { localStorage.setItem('aiptp-lead-queue-v1', JSON.stringify(leadQueue)); } catch (e) { /* private mode */ }
       });
-      if (CRM_ENDPOINT) {
-        fetch(CRM_ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ token: CRM_TOKEN, name: item.lead.name, email: item.lead.email, phone: item.lead.phone, topic: item.lead.topic, source: item.source, transcript: item.transcript || '' })
-        }).catch(function () { /* CRM optional; contact already stored */ });
-      }
+      postCRM(item.lead, item.source, item.transcript);
     });
     try { localStorage.setItem('aiptp-lead-queue-v1', JSON.stringify(leadQueue)); } catch (e) { /* private mode */ }
   }

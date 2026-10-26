@@ -29,15 +29,18 @@ Quotas (consumer Gmail): ~100 email recipients/day — plenty for 10–20 person
 
 ## 2. Site side (5 min)
 
-In `index.html`, the chat panel and contact form POST to the Apps Script URL.
-Set in `js/main.js`:
+In `js/main.js`, set:
 
 ```js
 var CRM_ENDPOINT = 'https://script.google.com/mac/s/XXXX/exec';
 var CRM_TOKEN = 'the-TOKEN-from-step-1';
 ```
 
-(uncomment the provided block in `wireEmailAutomation()` — see below)
+Chat leads and contact-form submissions then POST to the Apps Script (the
+newsletter stays on the direct HubSpot forms path — subscribers get no
+sales-draft email). Until `CRM_ENDPOINT` is set the site still records every
+lead in HubSpot via the keyless forms API; the Apps Script layer adds the
+CRM-v3 upsert, transcript timeline note, enrichment, AI drafts and owner alerts.
 
 Because the browser does a cross-site POST, the Apps Script must be deployed
 with Access: *Anyone* (it still needs your TOKEN to do anything).
