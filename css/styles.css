@@ -326,11 +326,20 @@ ul, ol { padding: 0; margin: 0; list-style: none; }
     right: 20px;
     transform: none;
   }
-  .coe-topic:not([open]) summary .coe-topic-tag { display: none; }
-  .coe-topic-icon { display: none; }
+  .coe-topic:not([open]) summary {
+    flex: 1;
+    padding-top: 24px;
+  }
+  .coe-topic:not([open]) summary h3 { font-size: 1.15rem; }
+  .coe-topic:not([open]) summary .coe-topic-tag {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: #B8C6B8;
+  }
   .coe-topic:not([open]) .coe-topic-icon {
     display: block;
-    margin-top: 18px;
+    margin-top: auto;
+    padding-bottom: 6px;
     color: var(--lime);
   }
   .coe-topic:not([open]) .coe-topic-icon svg {
