@@ -236,6 +236,18 @@
     if (a) gaEvent('book_click', { location: a.closest('.chat-panel') ? 'chat' : 'page' });
   });
 
+  /* ---------- CoE capability cards: one open at a time ---------- */
+  (function () {
+    var panels = document.querySelectorAll('.coe-topics .coe-topic');
+    if (!panels.length) return;
+    panels.forEach(function (panel) {
+      panel.addEventListener('toggle', function () {
+        if (!panel.open) return;
+        panels.forEach(function (other) { if (other !== panel) other.open = false; });
+      });
+    });
+  })();
+
   /* ---------- Multi-select dropdown (contact form interests) ---------- */
   (function () {
     var msd = document.getElementById('cf-topic-msd');
