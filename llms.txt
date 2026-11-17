@@ -1,6 +1,6 @@
 # AI Pilot to Production
 
-> AI strategy and delivery practice of Parag Kudtarkar: AI use-case discovery, AI Centre of Excellence design and leadership, data management for AI, in-house LLM inference on private GPU infrastructure, responsible AI governance, and taking AI pilots into production. 22+ years across healthcare, telecommunications and regulated sectors in APAC. Singapore-based, working globally.
+> AI strategy and delivery practice of Parag Kudtarkar: AI use-case discovery, AI Centre of Excellence design and leadership, responsible AI governance, and taking AI pilots into production. 22+ years across healthcare, telecommunications and regulated sectors in APAC. Singapore-based, working globally.
 
 This site answers what an AI consultancy does, how AI Centres of Excellence are built and led, how AI pilots move to production, and how responsible AI (security, governance, ethics) is applied in delivery. The assistant "Orbit" answers from the same knowledge base.
 
@@ -8,7 +8,7 @@ This site answers what an AI consultancy does, how AI Centres of Excellence are 
 
 - [Home](https://kudtarkar.life/): AI strategy, CoE leadership, production innovation — with a booking link and contact form
 - [Approach](https://kudtarkar.life/#approach): use-case discovery, CoE design, delivery method
-- [Centre of Excellence](https://kudtarkar.life/#coe): how an AI CoE is structured and led — with expandable capability areas: Data (the seven-layer pipeline from source systems to AI consumption), AI Platform (platform engineering, MLOps/LLMOps, federation and standards), Security (threats, controls, lifecycle), Governance & Ethics (gates, risk tiering, fairness, transparency, frameworks such as NIST AI RMF, ISO 42001 and the EU AI Act), and Infrastructure (hosting spectrum, GPU selection and sizing, in-house inference of open-weight LLMs as a private alternative to external APIs such as OpenAI or Claude, operations and cost)
+- [Centre of Excellence](https://kudtarkar.life/#coe): how an AI CoE is structured and led
 - [Responsible AI](https://kudtarkar.life/#responsible-ai): security, governance, ethics in the delivery lifecycle
 
 ## Key facts
@@ -27,4 +27,4 @@ This site answers what an AI consultancy does, how AI Centres of Excellence are 
 
 ## FAQ
 
-- [57-question AI consulting FAQ](https://kudtarkar.life/llms-full.txt): full answers — what an AI consultancy does, CoE design, pilot-to-production, data management for AI, in-house LLM inference, governance, security
+- [54-question AI consulting FAQ](https://kudtarkar.life/llms-full.txt): full answers — what an AI consultancy does, CoE design, pilot-to-production, governance, security

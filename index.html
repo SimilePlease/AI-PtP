@@ -321,23 +321,7 @@
         "name": "What should we prepare before an initial conversation?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "A clear problem statement is useful, but not required. It helps to know the strategic objective, major workflow or customer challenge, relevant stakeholders, available data, constraints and decision timeline."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Can you help get our data ready for AI?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes. That means the pipeline end to end — source systems, ingestion, processing (bronze to gold), storage, semantic layer, and on to BI and AI consumption — with governance (access, lineage, cataloguing, certification) and operations (monitoring, incidents, cost, DR) applied across every layer. Tools change — Fabric, Databricks, Snowflake, AWS — the layers stay the same."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Can we run open LLMs in-house instead of external APIs?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes. That is in-house inference: GPU server selection and sizing, open LLM model selection, and serving open-weight models on your own infrastructure — a private alternative to external APIs such as OpenAI or Claude, with evaluation, operations and cost modelling. ## Practice specifics (identity, contact, booking)"
+          "text": "A clear problem statement is useful, but not required. It helps to know the strategic objective, major workflow or customer challenge, relevant stakeholders, available data, constraints and decision timeline. ## Practice specifics (identity, contact, booking)"
         }
       },
       {
@@ -385,7 +369,7 @@
         "name": "Which industries do you work with?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Healthcare & MedTech, financial services & wealth management, telecommunications, maritime & shipping, and growth businesses/SMEs. The same practical treatment, scaled to fit."
+          "text": "Healthcare &amp; MedTech, financial services &amp; wealth management, telecommunications, maritime &amp; shipping, and growth businesses/SMEs. The same practical treatment, scaled to fit."
         }
       },
       {
@@ -772,205 +756,28 @@
           </div>
         </div>
 
-        <div class="coe-topics">
-          <p class="coe-topics-lede">What the CoE builds, capability by capability — expand each area:</p>
-
-          <details class="coe-topic" id="coe-data">
-            <summary>
-              <h3>Data</h3>
-              <span class="coe-topic-tag">Pipelines, quality and the layers beneath AI</span>
-            </summary>
-            <div class="coe-topic-body">
-              <p class="rai-strap">Tools change — Fabric, Databricks, Snowflake, AWS — the layers stay the same.</p>
-              <div class="flow-band flow-band--governance" role="note" aria-label="Governance applies across every layer">
-                <strong class="flow-band-title">Governance</strong>
-                <span>Cross-cutting — access, lineage, cataloguing, certification, audit and compliance, applied to every layer below. Not one box at the bottom.</span>
-              </div>
-              <ol class="steps steps--flow" aria-label="The seven layers of an AI-ready data pipeline">
-                <li class="step">
-                  <span class="step-num" aria-hidden="true">1</span>
-                  <h3>Source systems</h3>
-                  <p>SAP, CRM, on-prem databases, files, APIs, logs and IoT — structured or unstructured, reached by CDC, API or batch.</p>
-                </li>
-                <li class="step">
-                  <span class="step-num" aria-hidden="true">2</span>
-                  <h3>Ingestion</h3>
-                  <p>Batch or incremental loads; CDC or streaming; API or file-based — the pattern matched to the need.</p>
-                </li>
-                <li class="step">
-                  <span class="step-num" aria-hidden="true">3</span>
-                  <h3>Processing</h3>
-                  <p>Bronze → silver → gold: cleansing, conformance, joins, rules and quality checks — feature engineering for AI.</p>
-                </li>
-                <li class="step">
-                  <span class="step-num" aria-hidden="true">4</span>
-                  <h3>Storage</h3>
-                  <p>Lake, lakehouse or warehouse, with data marts for domains — on Fabric, Databricks, Snowflake, S3 or Redshift.</p>
-                </li>
-                <li class="step">
-                  <span class="step-num" aria-hidden="true">5</span>
-                  <h3>Semantic layer</h3>
-                  <p>KPIs, hierarchies and security — certified metrics in Power BI, Tableau or LookML; centralised or domain-owned.</p>
-                </li>
-                <li class="step">
-                  <span class="step-num" aria-hidden="true">6</span>
-                  <h3>BI consumption</h3>
-                  <p>Reports, dashboards, scorecards and embedded BI — decision support designed around the person using it.</p>
-                </li>
-                <li class="step">
-                  <span class="step-num" aria-hidden="true">7</span>
-                  <h3>AI consumption</h3>
-                  <p>Copilots, chat-with-data, forecasting, agents and anomaly detection — only as good as the data beneath.</p>
-                </li>
-              </ol>
-              <div class="flow-band flow-band--ops" role="note" aria-label="Operations applies across every layer">
-                <strong class="flow-band-title">Operations</strong>
-                <span>Cross-cutting — monitoring, incidents, releases, cost, backup &amp; DR, support. Architecture must think beyond build, into run.</span>
-              </div>
-              <div class="rai-pillars flow-trio" aria-label="Lakehouse, warehouse or semantic layer — how they work together">
-                <div class="rai-pillar">
-                  <h3 class="subhead">Lakehouse</h3>
-                  <p class="flow-trio-tag">Flexible data foundation</p>
-                  <p>Stores raw, curated data at scale — bronze, silver, gold. Structured, semi-structured or unstructured. Use when: high volume, mixed types, streaming, data-science access.</p>
-                  <p class="flow-cue">Decision cue: <em>store flexibly</em></p>
-                </div>
-                <div class="rai-pillar">
-                  <h3 class="subhead">Warehouse / data mart</h3>
-                  <p class="flow-trio-tag">Structured analytics layer</p>
-                  <p>Curated, dimensional models — facts, dimensions, aggregates. Optimised for SQL performance and repeatable reporting. Use when: financial, sales, ops or regulatory reporting.</p>
-                  <p class="flow-cue">Decision cue: <em>structure carefully</em></p>
-                </div>
-                <div class="rai-pillar">
-                  <h3 class="subhead">Semantic layer</h3>
-                  <p class="flow-trio-tag">Business meaning layer</p>
-                  <p>KPIs, hierarchies, definitions, row-level security, certification. What keeps every report calculating revenue the same way. Use when: self-service, Excel access, or AI needs trusted context.</p>
-                  <p class="flow-cue">Decision cue: <em>define meaning centrally</em></p>
-                </div>
-              </div>
-            </div>
-          </details>
-
-          <details class="coe-topic" id="coe-platform">
-            <summary>
-              <h3>AI Platform</h3>
-              <span class="coe-topic-tag">Reusable foundations teams build on</span>
-            </summary>
-            <div class="coe-topic-body">
-              <p>
-                A shared AI platform turns scattered projects into a portfolio: instead of every team rebuilding
-                plumbing, they build on golden paths — paved roads from idea to production that have security,
-                evaluation and monitoring built in.
-              </p>
-              <div class="rai-pillars coe-trio">
-                <div class="rai-pillar">
-                  <h3 class="subhead">Platform engineering</h3>
-                  <p>Common serving patterns for models and agents, integration and retrieval services, prompt and configuration management, and guardrails — built once, reused by every team.</p>
-                </div>
-                <div class="rai-pillar">
-                  <h3 class="subhead">MLOps / LLMOps</h3>
-                  <p>CI/CD for models and prompts, model and prompt registries, evaluation harnesses that gate every release, and monitoring for drift, quality, cost and latency once live.</p>
-                </div>
-                <div class="rai-pillar">
-                  <h3 class="subhead">Federation &amp; standards</h3>
-                  <p>Standards and templates the CoE maintains; business-unit teams own their solutions. Self-service within guardrails, not central bottlenecks.</p>
-                </div>
-              </div>
-              <p>
-                Build vs buy is weighed per layer and sized to the organisation's maturity rather than the vendor
-                demo — the platform grows as the portfolio grows.
-              </p>
-            </div>
-          </details>
-
-          <details class="coe-topic" id="coe-security">
-            <summary>
-              <h3>Security</h3>
-              <span class="coe-topic-tag">Protecting AI systems and the data they touch</span>
-            </summary>
-            <div class="coe-topic-body">
-              <p>
-                AI security is broader than IT security: the model, the prompts and the data around it are all part
-                of the attack surface. The CoE sets the standards and checkpoints; delivery teams apply them in
-                every project.
-              </p>
-              <div class="rai-pillars coe-trio">
-                <div class="rai-pillar">
-                  <h3 class="subhead">Threats in scope</h3>
-                  <p>Prompt injection and jailbreaks, data exfiltration through context and tools, model and prompt abuse, insecure agent tool-calls, and supply-chain risk in models and dependencies.</p>
-                </div>
-                <div class="rai-pillar">
-                  <h3 class="subhead">Controls</h3>
-                  <p>Data classification, access controls, secure model and prompt handling, input and output filtering, agent permission scoping, and red-team testing before release.</p>
-                </div>
-                <div class="rai-pillar">
-                  <h3 class="subhead">In the lifecycle</h3>
-                  <p>Security review built into evaluation and deployment gates — not bolted on after release — plus monitoring for new abuse patterns once systems are live.</p>
-                </div>
-              </div>
-            </div>
-          </details>
-
-          <details class="coe-topic" id="coe-governance">
-            <summary>
-              <h3>Governance &amp; Ethics</h3>
-              <span class="coe-topic-tag">Intake to audit — with fairness and transparency built in</span>
-            </summary>
-            <div class="coe-topic-body">
-              <div class="rai-pillars coe-trio">
-                <div class="rai-pillar">
-                  <h3 class="subhead">Governance</h3>
-                  <p>Intake and prioritisation gates, risk tiering proportionate to impact, clear ownership and escalation paths, human oversight where it matters, audit trails, and model/prompt evaluation governed through the lifecycle.</p>
-                </div>
-                <div class="rai-pillar">
-                  <h3 class="subhead">Ethics</h3>
-                  <p>Fairness and bias awareness, transparency and explainability, privacy by design, and honest communication about what a system can and cannot do — applied from use-case selection, not retrofitted.</p>
-                </div>
-                <div class="rai-pillar">
-                  <h3 class="subhead">Frameworks</h3>
-                  <p>Grounded in recognised frameworks — NIST AI RMF, ISO 42001, the EU AI Act — plus sector guidance: GDPR/PDPA, HIPAA, FDA SaMD, MAS TRM and FEAT. Familiarity, applied pragmatically.</p>
-                </div>
-              </div>
-              <p>
-                The full responsible-AI view — frameworks, regulatory domains and ethics in the delivery lifecycle —
-                is in <a href="#responsible-ai">Responsible AI</a> below.
-              </p>
-            </div>
-          </details>
-
-          <details class="coe-topic" id="coe-infrastructure">
-            <summary>
-              <h3>Infrastructure</h3>
-              <span class="coe-topic-tag">GPU capacity — including in-house open-LLM inference</span>
-            </summary>
-            <div class="coe-topic-body">
-              <p>
-                Where workloads should run is a portfolio decision, made per workload — not one answer for everything.
-              </p>
-              <div class="rai-pillars coe-trio">
-                <div class="rai-pillar">
-                  <h3 class="subhead">Hosting spectrum</h3>
-                  <p>External APIs, cloud-managed endpoints, or open-weight LLMs on your own GPU infrastructure — a private alternative to OpenAI or Claude when data cannot leave the tenancy, or sovereignty and residency apply.</p>
-                </div>
-                <div class="rai-pillar">
-                  <h3 class="subhead">GPU selection &amp; sizing</h3>
-                  <p>Hardware and serving stack matched to the models, latency targets and volume — sized from measured workload, not guesswork, with the model families assessed for task fit, licence and footprint.</p>
-                </div>
-                <div class="rai-pillar">
-                  <h3 class="subhead">Operations &amp; cost</h3>
-                  <p>Serving, monitoring, capacity and DR in your own environment — with total cost of ownership compared honestly against per-token API pricing over time.</p>
-                </div>
-              </div>
-              <p>
-                The honest counterpoint: spiky or early-stage workloads often belong on external APIs first — the
-                assessment weighs both against your volumes, risks and roadmap. Candidate model families include
-                Qwen, Llama, Mistral, DeepSeek, Gemma and Phi — representative, not a fixed menu: selection is
-                driven by the workload's task fit, language coverage, licence, footprint and evaluation results.
-              </p>
-            </div>
-          </details>
+        <div class="credentials">
+          <h3 class="subhead">Track record behind the CoE practice</h3>
+          <div class="credential-grid">
+            <article class="credential">
+              <p>Built an AI CoE from greenfield — operating model, team structure, competency frameworks, MLOps standards, and AI intake governance.</p>
+            </article>
+            <article class="credential">
+              <p class="credential-figure">70 people · four geographies</p>
+              <p>Scaled an AI engineering organisation across four geographies.</p>
+            </article>
+            <article class="credential">
+              <p class="credential-figure">five clinical AI platforms</p>
+              <p>Governed from ideation to regulatory-approved production deployment.</p>
+            </article>
+            <article class="credential">
+              <p>Designed an AI strategy and CoE operating-model blueprint for a regulated banking environment.</p>
+            </article>
+          </div>
         </div>
       </div>
     </section>
+  
 
     <!-- ============================== INNOVATION ============================== -->
     <section class="section" id="innovation" aria-labelledby="innovation-title">
@@ -1678,8 +1485,6 @@
                 <label class="msd-opt"><input type="checkbox" name="interest" value="AI Use-Case Discovery"><span>AI Use-Case Discovery</span></label>
                 <label class="msd-opt"><input type="checkbox" name="interest" value="AI Security"><span>AI Security</span></label>
                 <label class="msd-opt"><input type="checkbox" name="interest" value="AI Governance &amp; Compliance"><span>AI Governance &amp; Compliance</span></label>
-                <label class="msd-opt"><input type="checkbox" name="interest" value="Data Management for AI"><span>Data Management for AI</span></label>
-                <label class="msd-opt"><input type="checkbox" name="interest" value="In-house LLM Inference"><span>In-house LLM Inference (GPU, open models)</span></label>
                 <label class="msd-opt"><input type="checkbox" name="interest" value="AI Vendor / Tool Selection"><span>AI Vendor / Tool Selection</span></label>
                 <label class="msd-opt"><input type="checkbox" name="interest" value="Just a Coffee"><span>Just a Coffee ☕</span></label>
               </div>
