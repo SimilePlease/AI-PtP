@@ -247,7 +247,7 @@
       var gap = 14; /* keep in sync with .coe-topics gap */
       var unit = (w - (n - 1) * gap) / n;
       var idx = Array.prototype.indexOf.call(panels, panel);
-      var target = Math.min(Math.max(w * 0.56, 420), 640);
+      var target = Math.min(Math.max(w * 0.68, 480), 760);
       /* Anchor to the card's slot in the original grid, overlay centred on
          the card so it spreads across the closed cards either side;
          clamped to stay inside the row. Live flex measurements are useless
