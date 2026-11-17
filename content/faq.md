@@ -108,6 +108,12 @@ A: Start with a short discussion about your priorities, current capability, cons
 **Q30: What should we prepare before an initial conversation?**
 A: A clear problem statement is useful, but not required. It helps to know the strategic objective, major workflow or customer challenge, relevant stakeholders, available data, constraints and decision timeline.
 
+**Q31: Can you help get our data ready for AI?**
+A: Yes. That means the pipeline end to end — source systems, ingestion, processing (bronze to gold), storage, semantic layer, and on to BI and AI consumption — with governance (access, lineage, cataloguing, certification) and operations (monitoring, incidents, cost, DR) applied across every layer. Tools change — Fabric, Databricks, Snowflake, AWS — the layers stay the same.
+
+**Q32: Can we run open LLMs in-house instead of external APIs?**
+A: Yes. That is in-house inference: GPU server selection and sizing, open LLM model selection, and serving open-weight models on your own infrastructure — a private alternative to external APIs such as OpenAI or Claude, with evaluation, operations and cost modelling.
+
 ## Practice specifics (identity, contact, booking)
 
 **Q: What services does Orbit offer?**

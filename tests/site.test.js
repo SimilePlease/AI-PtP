@@ -109,6 +109,14 @@ check("assistant named Orbit in prompt", agentJs.includes("Orbit") && agentJs.in
 check("AI questions in scope (anti-deflection rule)", agentJs.includes("AI QUESTIONS ARE IN SCOPE"));
 check("anti-hallucination rule present", agentJs.includes("no invented statistics") && agentJs.includes("say so honestly"));
 
+/* ---------- structured data ---------- */
+
+const ldBlocks = [...src.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m => m[1]);
+check("JSON-LD blocks present", ldBlocks.length >= 3, ldBlocks.length + " found");
+const ldParsed = ldBlocks.map(b => { try { return JSON.parse(b); } catch { return null; } });
+check("every JSON-LD block parses", ldParsed.every(Boolean));
+check("FAQPage schema present and current", ldParsed.some(b => b && b["@type"] === "FAQPage" && (b.mainEntity || []).length >= 56));
+
 /* ---------- design tokens ---------- */
 
 for (const tok of ["--bg","--surface","--ink","--heading","--forest","--forest-deep","--moss","--lime","--lime-deep","--lime-soft","--line","--muted","--font-display","--font-body","--radius","--shadow-lift","--cream"]) {
