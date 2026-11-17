@@ -494,16 +494,46 @@
       return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
-    function addMsg(role, text) {
+    function renderBotHtml(text) {
+      return escapeHtml(text).replace(
+        /([\w.+-]+@[\w.-]+\.[a-z]{2,})/gi,
+        '<a href="mailto:$1" style="color:var(--lime)">$1</a>'
+      );
+    }
+
+    /* Progressive reveal for messages that arrive whole (lite answers,
+       greetings, tool follow-ups) so nothing pops in as a solid block.
+       The streamed LLM path types itself; this only covers the rest. */
+    function typeInto(bubble, text, done) {
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) {
+        bubble.innerHTML = renderBotHtml(text);
+        chatEls.msgs.scrollTop = chatEls.msgs.scrollHeight;
+        if (done) done();
+        return;
+      }
+      var i = 0;
+      var step = Math.max(2, Math.round(text.length / 120));
+      var timer = setInterval(function () {
+        i += step;
+        bubble.textContent = text.slice(0, i);
+        chatEls.msgs.scrollTop = chatEls.msgs.scrollHeight;
+        if (i >= text.length) {
+          clearInterval(timer);
+          bubble.innerHTML = renderBotHtml(text);
+          if (done) done();
+        }
+      }, 14);
+    }
+
+    function addMsg(role, text, opts) {
       var b = document.createElement('div');
       b.className = 'chat-msg chat-msg--' + (role === 'user' ? 'user' : 'bot');
       if (role === 'user') {
         b.textContent = text;
       } else {
-        b.innerHTML = escapeHtml(text).replace(
-          /([\w.+-]+@[\w.-]+\.[a-z]{2,})/gi,
-          '<a href="mailto:$1" style="color:var(--lime)">$1</a>'
-        );
+        b.innerHTML = renderBotHtml(text);
+        if (opts && opts.reveal) typeInto(b, text, opts.onDone);
       }
       chatEls.msgs.appendChild(b);
       chatEls.msgs.scrollTop = chatEls.msgs.scrollHeight;
@@ -552,7 +582,7 @@
         if (!chatEls.msgs.children.length) {
           history = [{ role: 'system', content: agent.buildSystemPrompt('') }];
           var liteGreeting = 'Hi! \uD83D\uDC4B I\u2019m Orbit \u2014 let\u2019s start your AI journey. Ask me about the AI CoE: operating model, governance, platforms, delivery. Or book a 1-hour strategic discussion. What\u2019s on your mind?';
-          addMsg('bot', liteGreeting);
+          addMsg('bot', liteGreeting, { reveal: true });
           history.push({ role: 'assistant', content: liteGreeting });
         }
         return;
@@ -596,7 +626,7 @@
         if (!panel.hidden) chatEls.input.focus();
         var g2 = agent.resumeGreeting() ||
           'Hi there! \uD83D\uDC4B I\u2019m Orbit \u2014 let\u2019s start your AI journey. Ask me about the AI CoE: operating model, governance, platforms, delivery. Or book a 1-hour strategic discussion. What\u2019s on your mind?';
-        addMsg('bot', g2);
+        addMsg('bot', g2, { reveal: true });
         history.push({ role: 'assistant', content: g2 });
       }
       loadingStarted = !!pending;
@@ -647,7 +677,7 @@
           if (!chatEls.msgs.children.length) {
             var greeting = agent.resumeGreeting() ||
               'Hi there! \uD83D\uDC4B I\u2019m Orbit \u2014 let\u2019s start your AI journey. Ask me about the AI CoE: operating model, governance, platforms, delivery. Or book a 1-hour strategic discussion. What\u2019s on your mind?';
-            addMsg('bot', greeting);
+            addMsg('bot', greeting, { reveal: true });
             history.push({ role: 'assistant', content: greeting });
           }
         }
@@ -688,7 +718,7 @@
          open_booking tool. --- */
       if (!engine && agent.wantsBooking(text)) {
         var liteBook = 'Love to! I can\u2019t hold slots myself, but tap \u201cBook a meeting\u201d and the calendar opens right here with whatever details I have \u2014 real availability, under a minute.';
-        var bookBubble = addMsg('bot', liteBook);
+        var bookBubble = addMsg('bot', liteBook, { reveal: true, onDone: function () { attachBookingCta(bookBubble); } });
         history.push({ role: 'assistant', content: liteBook });
         attachBookingCta(bookBubble);
         gaEvent('chat_booking_confirm');
@@ -702,7 +732,9 @@
          lite-mode fallback, where no model exists to ask. --- */
       var canned = liteMode ? agent.templatedFree(text) : null;
       if (canned) {
-        var cannedBubble = addMsg('bot', canned);
+        var cannedBubble = addMsg('bot', canned, { reveal: true, onDone: function () {
+          if (/book/i.test(canned)) attachBookingCta(cannedBubble);
+        } });
         history.push({ role: 'assistant', content: canned });
         if (/book/i.test(canned)) attachBookingCta(cannedBubble);
         return;
@@ -712,7 +744,9 @@
       if (!engine) {
         var lite = agent.answer(text) || agent.answerSemantic(text);
         var liteText = lite || 'That one\u2019s a bit outside my brief \u2014 I\u2019m sharpest on AI strategy, AI Centres of Excellence, governance, and taking pilots to production. Ask me about any of those, or tap \u201cBook a meeting\u201d / email parag@kudtarkar.life and Parag will pick it up.';
-        var liteBubble = addMsg('bot', liteText);
+        var liteBubble = addMsg('bot', liteText, { reveal: true, onDone: function () {
+          if (/book/i.test(liteText)) attachBookingCta(liteBubble);
+        } });
         history.push({ role: 'assistant', content: liteText });
         if (/book/i.test(liteText)) attachBookingCta(liteBubble);
         return;
@@ -738,6 +772,7 @@
           bubble.textContent = reply;
           chatEls.msgs.scrollTop = chatEls.msgs.scrollHeight;
         }
+        var streamed = reply;
 
         /* --- Tool loop skeleton (max 3 iterations) --- */
         var iterations = 0;
@@ -750,7 +785,6 @@
             gaEvent('chat_booking_confirm');
             submitLead('website chat', transcriptText());
             reply = result.message || 'The calendar is open \u2014 pick whatever suits you.';
-            bubble.textContent = reply;
             break;
           }
           history.push({ role: 'assistant', content: reply });
@@ -760,18 +794,20 @@
               ' Now reply to the visitor in plain text only \u2014 1\u20133 short sentences, no JSON.'
           });
           reply = await generateOnce();
-          bubble.textContent = reply;
           iterations++;
         }
 
         /* --- Guard: final output filter --- */
-        if (!agent.guardReply(reply)) {
-          reply = agent.safeReply;
-          bubble.textContent = reply;
-        }
-        history.push({ role: 'assistant', content: reply });
+        if (!agent.guardReply(reply)) reply = agent.safeReply;
 
-        if (/book|booking|calendar|slot|schedul/i.test(reply)) attachBookingCta(bubble);
+        /* Anything rewritten after the stream (tool message, guard swap)
+           reveals progressively; an untouched reply is already on screen. */
+        var finalize = function () {
+          history.push({ role: 'assistant', content: reply });
+          if (/book|booking|calendar|slot|schedul/i.test(reply)) attachBookingCta(bubble);
+        };
+        if (reply !== streamed) typeInto(bubble, reply, finalize);
+        else finalize();
       } catch (err) {
         bubble.textContent = 'Ah, something glitched on my end just now. Mind trying again \u2014 or easier, book a meeting / drop an email and we\u2019ll talk properly?';
       }
