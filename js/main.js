@@ -158,7 +158,7 @@
     }
     if (lead.email) params.push('email=' + encodeURIComponent(lead.email));
     if (lead.name) params.push('name=' + encodeURIComponent(lead.name));
-    return 'https://calendly.com/kudtarkar-parag/' + (eventSlug || '30min') + '?' + params.join('&');
+    return 'https://calendly.com/kudtarkar-parag/' + (eventSlug || '1-hour-meeting') + '?' + params.join('&');
   }
 
   var calendlyState = '';
@@ -198,12 +198,12 @@
 
   var calFrame = document.getElementById('calendly-frame');
   if (calFrame && !calFrame.getAttribute('src')) {
-    calFrame.src = calendlyUrl('30min', false);
+    calFrame.src = calendlyUrl('1-hour-meeting', false);
   }
 
   /* Auto-open (no click gesture): wait for the script, then popup. */
   function autoOpenBooking() {
-    var url = calendlyUrl('30min', true);
+    var url = calendlyUrl('1-hour-meeting', true);
     ensureCalendlyScript();
     if (openCalendlyPopup(url)) return;
     var tries = 0;
@@ -220,11 +220,11 @@
 
   /* Contact-section booking buttons: real links first, popup nicety second. */
   document.querySelectorAll('a.book-option').forEach(function (a) {
-    a.setAttribute('href', calendlyUrl(a.getAttribute('data-event') || '30min'));
+    a.setAttribute('href', calendlyUrl(a.getAttribute('data-event') || '1-hour-meeting'));
     a.setAttribute('target', '_blank');
     a.setAttribute('rel', 'noopener');
     a.addEventListener('click', function (e) {
-      a.setAttribute('href', calendlyUrl(a.getAttribute('data-event') || '30min', true));
+      a.setAttribute('href', calendlyUrl(a.getAttribute('data-event') || '1-hour-meeting', true));
       if (openCalendlyPopup(a.href)) e.preventDefault();
     });
   });
@@ -524,14 +524,14 @@
       if (!bubble || bubble.querySelector('.chat-cta')) return;
       var cta = document.createElement('a');
       cta.className = 'chat-cta';
-      cta.href = calendlyUrl('30min');
+      cta.href = calendlyUrl('1-hour-meeting');
       cta.target = '_blank';
       cta.rel = 'noopener';
       cta.textContent = 'Book a meeting';
       /* Native navigation only: the in-page popup could init but fail to render,
          and preventDefault on that path made the click feel dead. A real new tab
          always works and carries the prefilled name/email. */
-      cta.setAttribute('href', calendlyUrl('30min'));
+      cta.setAttribute('href', calendlyUrl('1-hour-meeting'));
       bubble.appendChild(cta);
       chatEls.msgs.scrollTop = chatEls.msgs.scrollHeight;
     }

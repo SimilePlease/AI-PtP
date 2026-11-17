@@ -98,7 +98,7 @@ check("contact email correct", (body.match(/parag@kudtarkar\.life/g) || []).leng
 const emails = [...body.matchAll(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi)].map(m => m[0]).filter(e => !/you@|name@|email@|company\.com|example\./i.test(e));
 check("no other real email addresses", emails.every(e => e.toLowerCase() === "parag@kudtarkar.life"), emails.join(", "));
 check("no generic 'welcome to the website' phrasing", !/welcome to the (website|site)/i.test(body));
-check("popup URLs are clean (no embed_type=Inline — silent no-op bug)", mainJs.includes("calendlyUrl('30min', true)") && mainJs.includes("if (!forPopup)") && mainJs.includes("verrified") === false);
+check("popup URLs are clean (no embed_type=Inline — silent no-op bug)", mainJs.includes("calendlyUrl('1-hour-meeting', true)") && mainJs.includes("if (!forPopup)") && mainJs.includes("verrified") === false);
 check("popup failure verifies overlay and never dead-ends", mainJs.includes("calendly-overlay") && mainJs.includes("calendlyState = 'failed'"));
 check("chat booking CTA is a real link (not a JS-only button)", mainJs.includes("createElement('a')") && mainJs.includes("cta.target = '_blank'"));
 check("chat CTA falls back to native navigation", mainJs.includes("cta.target = '_blank'") && mainJs.includes("openCalendlyPopup"));

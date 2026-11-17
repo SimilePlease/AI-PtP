@@ -36,7 +36,7 @@ function makeChat(store, engineReplies) {
   function openCal(url) { openedUrls.push(url); }
   function prefill() {
     var l = agent.lead();
-    return 'https://calendly.com/kudtarkar-parag/30min?email=' + encodeURIComponent(l.email) + '&name=' + encodeURIComponent(l.name);
+    return 'https://calendly.com/kudtarkar-parag/1-hour-meeting?email=' + encodeURIComponent(l.email) + '&name=' + encodeURIComponent(l.name);
   }
 
   function send(text) {
@@ -73,7 +73,7 @@ check('E2E lite mode: "I want to book a meeting" \u2192 hand-off, calendar auto-
   var r = chat.send("hi, I'd like to book a meeting");
   assert.ok(r.lite && r.cta, 'deterministic hand-off with CTA');
   assert.strictEqual(chat.openedUrls.length, 1, 'calendar auto-opens exactly once');
-  assert.ok(chat.openedUrls[0].includes('calendly.com/kudtarkar-parag/30min'), 'correct event path');
+  assert.ok(chat.openedUrls[0].includes('calendly.com/kudtarkar-parag/1-hour-meeting'), 'correct event path');
   assert.strictEqual(chat.submittedLeads.length, 1, 'lead submitted on booking');
 });
 
@@ -125,7 +125,7 @@ check('E2E: Calendly popup URL the chat opens is well-formed', function () {
   var chat = makeChat(memoryStore(), []);
   chat.send('book a meeting');
   var url = chat.openedUrls[0];
-  assert.ok(url.startsWith('https://calendly.com/kudtarkar-parag/30min?'));
+  assert.ok(url.startsWith('https://calendly.com/kudtarkar-parag/1-hour-meeting?'));
   ['email=', 'name='].forEach(function (p) { assert.ok(url.includes(p)); });
 });
 
