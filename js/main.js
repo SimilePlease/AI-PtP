@@ -243,10 +243,17 @@
     function fitOverlay(panel) {
       var row = panel.parentElement;
       var w = row.clientWidth;
+      var n = panels.length;
+      var gap = 14; /* keep in sync with .coe-topics gap */
+      var unit = (w - (n - 1) * gap) / n;
+      var idx = Array.prototype.indexOf.call(panels, panel);
       var target = Math.min(Math.max(w * 0.56, 420), 640);
-      var left = 0, sib = panel;
-      while ((sib = sib.previousElementSibling)) left += sib.offsetWidth + 14;
-      left = Math.max(0, Math.min(left, w - target));
+      /* Anchor to the card's slot in the original grid, overlay centred on
+         the card so it spreads across the closed cards either side;
+         clamped to stay inside the row. Live flex measurements are useless
+         here — an open panel leaves the flow and reflows the rest. */
+      var center = idx * (unit + gap) + unit / 2;
+      var left = Math.max(0, Math.min(center - target / 2, w - target));
       panel.style.left = left + 'px';
       panel.style.width = target + 'px';
       /* <details> wraps non-summary children in a UA box that flex/grid can't
@@ -280,6 +287,8 @@
         panels.forEach(function (p) { if (p.open) fitOverlay(p); });
       }, 120);
     });
+    /* A panel can be open from the markup (Data by default) — size it now. */
+    panels.forEach(function (p) { if (p.open) fitOverlay(p); });
   })();
 
   /* ---------- Multi-select dropdown (contact form interests) ---------- */

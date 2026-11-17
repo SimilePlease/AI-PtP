@@ -241,7 +241,7 @@ ul, ol { padding: 0; margin: 0; list-style: none; }
 
 .coe-topic h3 { margin: 0; font-size: 1.2rem; }
 
-.coe-topic-tag { font-size: 0.9rem; color: #B8C6B8; }
+.coe-topic-tag { font-size: 1rem; color: #B8C6B8; }
 
 .coe-topic-body {
   padding: 0 24px 24px;
@@ -332,9 +332,10 @@ ul, ol { padding: 0; margin: 0; list-style: none; }
   }
   .coe-topic:not([open]) summary h3 { font-size: 1.15rem; }
   .coe-topic:not([open]) summary .coe-topic-tag {
-    font-size: 0.8rem;
-    line-height: 1.5;
-    color: #B8C6B8;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: #C8D4C6;
+    padding-right: 26px;
   }
   .coe-topic:not([open]) .coe-topic-icon {
     display: block;
