@@ -6,7 +6,7 @@ AI Centre of Excellence design and leadership, data management for AI, in-house 
 inference on private GPU infrastructure, responsible AI governance, and taking
 AI pilots into production. 22+ years across healthcare, telecom and regulated sectors.
 
-Engagements are scoped in a first 30-minute conversation.
+Engagements are scoped in a first 1-hour conversation.
 Booking: https://calendly.com/kudtarkar-parag/1-hour-meeting — Email: parag@kudtarkar.life
 
 ## FAQ (questions with answers)
@@ -138,10 +138,10 @@ A: Yes. Delivery experience spans APAC, Europe and North America; engagements ru
 ## Working together
 
 **Q: How do we start working together?**
-A: Book a 30-minute strategic discussion from the Contact section, or use the contact form (or email parag@kudtarkar.life). The first conversation is confidential and there's no obligation.
+A: Book a 1-hour strategic discussion from the Contact section, or use the contact form (or email parag@kudtarkar.life). The first conversation is confidential and there's no obligation.
 
 **Q: What happens in the first conversation?**
-A: A 30-minute discussion of your goals, context and timelines — enough to see whether AI is the right lever and what a sensible first step would look like. No sales script, no obligation.
+A: A 1-hour discussion of your goals, context and timelines — enough to see whether AI is the right lever and what a sensible first step would look like. No sales script, no obligation.
 
 **Q: How long does an engagement last?**
 A: It depends on the shape of the work. A strategy review can be a few weeks; a CoE build or a production programme runs longer. You'll get a scoped, specific answer after the first conversation.
@@ -190,4 +190,4 @@ A: Enquiries go to Parag directly and are used only to respond to you. No sellin
 A: Orbit can't hold or confirm slots itself — but the "Book a meeting" button opens the real calendar, and the guided flow in chat pre-fills your details so booking takes seconds.
 
 **Q: Do you offer ongoing AI management — a retainer?**
-A: Yes — for a fixed monthly fee, Parag can run your AI portfolio end to end: governance, security guardrails, vendor triage, hands-on delivery and a monthly KPI report, built for mid-size companies in the US and UK. Most clients start with a two-week AI Readiness Sprint, and the exact shape is set in a first 30-minute conversation.
+A: Yes — for a fixed monthly fee, Parag can run your AI portfolio end to end: governance, security guardrails, vendor triage, hands-on delivery and a monthly KPI report, built for mid-size companies in the US and UK. Most clients start with a two-week AI Readiness Sprint, and the exact shape is set in a first 1-hour conversation.

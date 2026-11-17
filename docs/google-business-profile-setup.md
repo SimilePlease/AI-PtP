@@ -61,7 +61,7 @@ don't match the real-world name.
 - Phone: skip (a listed number invites spam calls; booking link is the CTA)
 - Website: `https://kudtarkar.life` (now live — add once HTTPS is enforced)
 - Hours: service businesses with no walk-in — set "No hours" / by appointment
-- Appointment links section: `https://calendly.com/kudtarkar-parag/30min`
+- Appointment links section: `https://calendly.com/kudtarkar-parag/1-hour-meeting`
 
 ## 7. Photos (upload on day one)
 

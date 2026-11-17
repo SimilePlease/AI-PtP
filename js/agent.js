@@ -86,12 +86,12 @@
     { keys: ['replace internal teams', 'replace our team'], text: 'The practice does not replace internal teams — it strengthens internal capability, establishes clear ownership and helps teams sustain outcomes after the engagement.' },
     { keys: ['prepare before', 'what to prepare', 'before the first conversation'], text: 'A clear problem statement helps but is not required — strategic objective, major workflow or customer challenge, stakeholders, available data, constraints and decision timeline are enough to begin.' },
     { keys: ['nda', 'confidential', 'data safe', 'privacy policy'], text: 'Initial discussions are confidential by default; NDAs welcome. Enquiries are used only to respond to the enquirer — no data selling, no marketing lists.' },
-    { keys: ['managed', 'manage our ai', 'manage our', 'retainer', 'ongoing', '10 use cases', 'ten use cases'], text: 'Yes — ongoing AI management is available: Parag runs your AI portfolio end to end (governance, vendor triage, delivery, a monthly KPI report), typically up to 10 active use cases per company. Shape and fee are set in a first 30-minute conversation; most clients start with a two-week AI Readiness Sprint.' },
-    { keys: ['how long', 'duration', 'timeline', 'cost', 'price', 'pricing', 'fee'], text: 'Engagement length and fees depend on the shape of the work — scoped after a first 30-minute conversation. Strategy reviews can be weeks; CoE builds and production programmes run longer.' },
+    { keys: ['managed', 'manage our ai', 'manage our', 'retainer', 'ongoing', '10 use cases', 'ten use cases'], text: 'Yes — ongoing AI management is available: Parag runs your AI portfolio end to end (governance, vendor triage, delivery, a monthly KPI report), typically up to 10 active use cases per company. Shape and fee are set in a first 1-hour conversation; most clients start with a two-week AI Readiness Sprint.' },
+    { keys: ['how long', 'duration', 'timeline', 'cost', 'price', 'pricing', 'fee'], text: 'Engagement length and fees depend on the shape of the work — scoped after a first 1-hour conversation. Strategy reviews can be weeks; CoE builds and production programmes run longer.' },
     { keys: ['training', 'literacy', 'workshop', 'enablement'], text: 'AI literacy and team enablement are part of CoE work: roles, skills frameworks, literacy programmes, focused team workshops.' },
     { keys: ['speaking', 'speaker', 'keynote', 'advisory', 'board'], text: 'Speaking, advisory and board-level AI guidance are available — choose "Speaking or advisory" in the contact form.' },
     { keys: ['remote', 'on site', 'onsite', 'travel', 'time zone'], text: 'Engagements run remotely and on site where required, across APAC, Europe and North America time zones.' },
-    { keys: ['start', 'get started', 'first step', 'engage', 'hire'], text: 'Starting is a confidential 30-minute discussion — book a meeting or email parag@kudtarkar.life. No sales script, no obligation.' },
+    { keys: ['start', 'get started', 'first step', 'engage', 'hire'], text: 'Starting is a confidential 1-hour discussion — book a meeting or email parag@kudtarkar.life. No sales script, no obligation.' },
     { keys: ['ethic', 'bias', 'fairness', 'transparen', 'explainab', 'privacy'], text: 'AI ethics: fairness and bias awareness, transparency, explainability, privacy by design, and honest communication about what a system can and cannot do.' }
   ];
 
@@ -366,7 +366,7 @@
       { keys: ['how long', 'duration', 'timeline', 'how fast', 'how quickly', 'weeks', 'months'],
         a: 'It depends on the shape of the work — a strategy review can be a few weeks; a CoE build or production programme runs longer. Book a meeting and you\u2019ll get a scoped, specific answer.' },
       { keys: ['first conversation', 'first meeting', 'what happens', 'intro call', 'first call', 'initial discussion'],
-        a: 'A 30-minute discussion of your goals, context and timelines — enough to see whether AI is the right lever and what a sensible first step looks like. No sales script, no obligation.' },
+        a: 'A 1-hour discussion of your goals, context and timelines — enough to see whether AI is the right lever and what a sensible first step looks like. No sales script, no obligation.' },
       { keys: ['training', 'literacy', 'workshop', 'enablement', 'upskill'],
         a: 'AI literacy and team enablement are part of the CoE work — roles, skills frameworks and literacy programmes. For a focused team workshop, raise it in the first conversation.' },
       { keys: ['data safe', 'my data', 'privacy policy', 'use my', 'share my'],
@@ -374,7 +374,7 @@
       { keys: ['speaking', 'speaker', 'keynote', 'advisory', 'board', 'event'],
         a: 'Yes — speaking, advisory and board-level AI guidance are all options. Choose \u201cSpeaking or advisory\u201d in the contact form, or mention it in your email to parag@kudtarkar.life.' },
       { keys: ['start', 'get started', 'getting started', 'first step', 'begin', 'engage', 'hire', 'work with you', 'work together'],
-        a: 'Starting is simple: a confidential 30-minute discussion — tap "Book a meeting" or email parag@kudtarkar.life. No sales script, no obligation, and NDAs are welcome before anything sensitive is shared.' },
+        a: 'Starting is simple: a confidential 1-hour discussion — tap "Book a meeting" or email parag@kudtarkar.life. No sales script, no obligation, and NDAs are welcome before anything sensitive is shared.' },
       { keys: ['remote', 'on site', 'onsite', 'in person', 'time zone', 'time zones', 'travel'],
         a: 'Both. Engagements run across regions and time zones — remotely, and on site where it matters. Delivery experience spans APAC, Europe and North America.' },
       { keys: ['build', 'implement', 'hands-on', 'handson', 'only advise', 'deliver the solution', 'who builds'],

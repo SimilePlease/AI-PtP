@@ -225,7 +225,7 @@ check('guard: 20 hallucinated/unsafe engine outputs all blocked', function () {
     'The slot has been reserved under your name.',
     'Your call was scheduled successfully.',
     "You're booked for Tuesday.",
-    'You\u2019re confirmed for the 30-minute session.',
+    'You\u2019re confirmed for the 1-hour session.',
     'I guarantee results beyond expectations.',
     'That approach is guaranteed to work.',
     'The price is $2,500 per month.',

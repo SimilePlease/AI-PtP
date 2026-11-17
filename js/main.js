@@ -559,7 +559,7 @@
            bubble and wipe an ongoing lite-mode conversation's history. */
         if (!chatEls.msgs.children.length) {
           history = [{ role: 'system', content: agent.buildSystemPrompt('') }];
-          var liteGreeting = 'Hi! \uD83D\uDC4B I\u2019m Orbit \u2014 let\u2019s start your AI journey. Ask me about the AI CoE: operating model, governance, platforms, delivery. Or book a 30-minute strategic discussion. What\u2019s on your mind?';
+          var liteGreeting = 'Hi! \uD83D\uDC4B I\u2019m Orbit \u2014 let\u2019s start your AI journey. Ask me about the AI CoE: operating model, governance, platforms, delivery. Or book a 1-hour strategic discussion. What\u2019s on your mind?';
           addMsg('bot', liteGreeting);
           history.push({ role: 'assistant', content: liteGreeting });
         }
@@ -603,7 +603,7 @@
       if (!chatEls.msgs.children.length) {
         if (!panel.hidden) chatEls.input.focus();
         var g2 = agent.resumeGreeting() ||
-          'Hi there! \uD83D\uDC4B I\u2019m Orbit \u2014 let\u2019s start your AI journey. Ask me about the AI CoE: operating model, governance, platforms, delivery. Or book a 30-minute strategic discussion. What\u2019s on your mind?';
+          'Hi there! \uD83D\uDC4B I\u2019m Orbit \u2014 let\u2019s start your AI journey. Ask me about the AI CoE: operating model, governance, platforms, delivery. Or book a 1-hour strategic discussion. What\u2019s on your mind?';
         addMsg('bot', g2);
         history.push({ role: 'assistant', content: g2 });
       }
@@ -654,7 +654,7 @@
           /* Don't re-greet if a lite-mode fallback already greeted mid-load. */
           if (!chatEls.msgs.children.length) {
             var greeting = agent.resumeGreeting() ||
-              'Hi there! \uD83D\uDC4B I\u2019m Orbit \u2014 let\u2019s start your AI journey. Ask me about the AI CoE: operating model, governance, platforms, delivery. Or book a 30-minute strategic discussion. What\u2019s on your mind?';
+              'Hi there! \uD83D\uDC4B I\u2019m Orbit \u2014 let\u2019s start your AI journey. Ask me about the AI CoE: operating model, governance, platforms, delivery. Or book a 1-hour strategic discussion. What\u2019s on your mind?';
             addMsg('bot', greeting);
             history.push({ role: 'assistant', content: greeting });
           }

@@ -62,7 +62,7 @@ fill 3–5 short headlines from the table above plus 1+ long headline from here.
 
 | Text | URL | Description line 1 | Description line 2 |
 |---|---|---|---|
-| Book a Meeting | `/#contact` | 30 minutes, direct | Pick any slot |
+| Book a Meeting | `/#contact` | 1 hour, direct | Pick any slot |
 | How I Work | `/#approach` | Use cases to production | Senior, hands-on |
 | Centre of Excellence | `/#coe` | Design & leadership | Build it right once |
 | Responsible AI | `/#responsible-ai` | Governance that works | Not a compliance afterthought |
