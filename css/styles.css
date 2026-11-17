@@ -284,11 +284,13 @@ ul, ol { padding: 0; margin: 0; list-style: none; }
 .coe-topic .rai-pillar p { color: #DCE5DA; }
 .coe-topic .flow-cue { color: var(--cream); }
 
-/* Vertical capability cards (desktop): upright columns side by side; the open
-   card widens in place instead of pushing the page down. Narrow screens keep
-   the stacked rows above. */
+/* Vertical capability cards (desktop): upright columns side by side. The open
+   card overlays the row (anchored at its own column, clamped to fit) instead
+   of squeezing neighbours; its body scrolls. Narrow screens keep the stacked
+   rows above. */
 @media (min-width: 981px) {
   .coe-topics {
+    position: relative;
     display: flex;
     gap: 14px;
     align-items: stretch;
@@ -301,14 +303,22 @@ ul, ol { padding: 0; margin: 0; list-style: none; }
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    transition: flex-grow 0.4s ease, border-color 0.2s ease;
+    transition: border-color 0.2s ease;
   }
   .coe-topic:hover { border-color: rgba(169, 194, 63, 0.45); }
-  .coe-topic[open] { flex-grow: 3.6; }
+  .coe-topic[open] {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 5;
+    background: #0E241C;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+    animation: coe-overlay 0.28s ease;
+  }
   .coe-topic summary {
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
+    gap: 10px;
     padding: 22px 24px 18px;
   }
   .coe-topic summary::after {
@@ -316,14 +326,19 @@ ul, ol { padding: 0; margin: 0; list-style: none; }
     right: 20px;
     transform: none;
   }
-  /* Closed card: title runs down the card so it never clips, + sits top-right */
-  .coe-topic:not([open]) summary { padding-top: 56px; }
-  .coe-topic:not([open]) summary h3 {
-    writing-mode: vertical-rl;
-    margin: 0;
-    white-space: nowrap;
+  .coe-topic:not([open]) summary .coe-topic-tag { display: none; }
+  .coe-topic-icon { display: none; }
+  .coe-topic:not([open]) .coe-topic-icon {
+    display: block;
+    margin-top: 18px;
+    color: var(--lime);
   }
-  .coe-topic:not([open]) summary .coe-topic-tag { visibility: hidden; }
+  .coe-topic:not([open]) .coe-topic-icon svg {
+    width: 30px;
+    height: 30px;
+    display: block;
+  }
+  .coe-topic[open] .coe-topic-icon { display: none; }
   .coe-topic-body {
     flex: 1 1 auto;
     min-height: 0;
@@ -334,6 +349,11 @@ ul, ol { padding: 0; margin: 0; list-style: none; }
   }
   .coe-topic[open] .steps--flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .coe-topic .rai-pillars.coe-trio { grid-template-columns: 1fr; }
+}
+
+@keyframes coe-overlay {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
 }
 
 /* ---------- Buttons ---------- */

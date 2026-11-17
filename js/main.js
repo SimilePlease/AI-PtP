@@ -236,15 +236,49 @@
     if (a) gaEvent('book_click', { location: a.closest('.chat-panel') ? 'chat' : 'page' });
   });
 
-  /* ---------- CoE capability cards: one open at a time ---------- */
+  /* ---------- CoE capability cards: one open at a time, open card overlays ---------- */
   (function () {
     var panels = document.querySelectorAll('.coe-topics .coe-topic');
     if (!panels.length) return;
+    function fitOverlay(panel) {
+      var row = panel.parentElement;
+      var w = row.clientWidth;
+      var target = Math.min(Math.max(w * 0.56, 420), 640);
+      var left = 0, sib = panel;
+      while ((sib = sib.previousElementSibling)) left += sib.offsetWidth + 14;
+      left = Math.max(0, Math.min(left, w - target));
+      panel.style.left = left + 'px';
+      panel.style.width = target + 'px';
+      /* <details> wraps non-summary children in a UA box that flex/grid can't
+         constrain, so the scroll area is sized explicitly. */
+      var body = panel.querySelector('.coe-topic-body');
+      var head = panel.querySelector('summary');
+      if (body && head) body.style.maxHeight = Math.max(0, panel.clientHeight - head.offsetHeight) + 'px';
+    }
+    function releaseOverlay(panel) {
+      panel.style.left = '';
+      panel.style.width = '';
+      var body = panel.querySelector('.coe-topic-body');
+      if (body) body.style.maxHeight = '';
+    }
     panels.forEach(function (panel) {
       panel.addEventListener('toggle', function () {
-        if (!panel.open) return;
-        panels.forEach(function (other) { if (other !== panel) other.open = false; });
+        if (panel.open) {
+          fitOverlay(panel);
+          panels.forEach(function (other) {
+            if (other !== panel && other.open) { other.open = false; releaseOverlay(other); }
+          });
+        } else {
+          releaseOverlay(panel);
+        }
       });
+    });
+    var resizeTimer;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () {
+        panels.forEach(function (p) { if (p.open) fitOverlay(p); });
+      }, 120);
     });
   })();
 
